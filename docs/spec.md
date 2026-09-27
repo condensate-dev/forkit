@@ -76,3 +76,40 @@ forkit's position: real anvil, your production TS code, any runner, Foundry ergo
 5. Gas snapshots and a shared fork across files.
 6. The 4337 bundler add-on.
 7. Docs, README and landscape comparison; npm publish only when the maintainers say so.
+
+## Cross-chain flows: simulated providers (2026-09-27)
+
+Goal: test a cross-chain route end to end across two or more forks, with no live relayer and no live quote API, so the tests are deterministic.
+
+### 1. The relayer simulator, `@condensate/forkit/bridges`
+
+This runs on a multi-fork handle, e.g. `fork([base, arbitrum])`.
+
+- `bridge.across(f)`: watch the origin fork for the SpokePool deposit event (V3 funds-deposited). Decode it, then on the destination fork impersonate a funded relayer and call the destination SpokePool's fill function with the deposit's params. The recipient's output-token balance and any message or handler call then land for real.
+- `bridge.relay(f)`: watch for the deposit into Relay's receiver/depository on the origin. On the destination, a simulated solver (impersonated and funded) executes the solver's fill: a transfer plus the calldata, if any.
+- `bridge.custom({ originEvent, onDeposit })` for any other bridge, e.g. CCTP mint or native bridges via L2 messenger impersonation.
+- `await bridge.settle()` processes every pending deposit, and `bridge.fills` gives what was filled. Fees and slippage are configurable, e.g. `outputAmount = inputAmount - fee`, so tests can assert on economics.
+- Addresses and ABIs come only from each protocol's public docs and verified contracts, never from private code.
+
+### 2. Quote API mocking, record and replay
+
+Providers like 0x, Relay and Across have HTTP quote APIs.
+
+- `forkit.http.record()` saves real responses to fixtures, together with the fork block they were taken at.
+- `forkit.http.replay()` serves those fixtures in CI, so no API key is needed and results are deterministic.
+- Implement it on undici/fetch interception (msw-style) so production code's own fetch calls are intercepted unchanged.
+- Rules:
+  - a fixture is pinned to its fork block, and replaying against a different block warns;
+  - secrets are redacted from recorded headers and URLs;
+  - there is a "fail on unmatched request" mode.
+
+### 3. Same-chain aggregators (0x-style)
+
+Replay a recorded quote whose calldata targets the pinned fork block, then execute it on the fork. A stale quote fails loudly with the block mismatch, not as an opaque revert.
+
+### Milestone
+
+This slots in as **milestone 5b**, after assertions and traces:
+1. HTTP record and replay.
+2. Across and Relay simulators.
+3. An e2e test: Base USDC → Arbitrum via simulated Across, asserting that the recipient's balance changed on the destination fork and that the fee accounting is right.
