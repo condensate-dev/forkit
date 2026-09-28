@@ -8,7 +8,8 @@
     "./vitest": "./src/vitest.ts",
     "./bun": "./src/bun.ts",
     "./jest": "./src/jest.ts",
-    "./node": "./src/node.ts"
+    "./node": "./src/node.ts",
+    "./http": "./src/http/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
