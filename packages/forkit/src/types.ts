@@ -2,6 +2,7 @@ import type { Address, Chain, Hex } from "viem";
 import type { NATIVE } from "./assertions.ts";
 import type { ForkClient, PrankClient } from "./client.ts";
 import type { DealOptions } from "./deal.ts";
+import type { GasSnapshotMode } from "./gas.ts";
 import type { CacheMode, RpcCacheStats } from "./rpc-cache.ts";
 
 /** Options for forking one chain. */
@@ -31,6 +32,14 @@ export interface ForkOptions<TChain extends Chain = Chain> {
    * `off` skips that. `FORKIT_TRACES=off` sets the default.
    */
   traces?: "on-failure" | "off";
+  /**
+   * What {@link Fork.gasSnapshot} does with a measurement: `write` it to the snapshot file
+   * (default), `check` it against the file (default when `CI` is set), or `off`.
+   * `FORKIT_GAS_SNAPSHOT` sets the default.
+   */
+  gasSnapshot?: GasSnapshotMode;
+  /** Gas snapshot file. Default `FORKIT_GAS_SNAPSHOT_FILE` or `.gas-snapshot` in the working directory. */
+  gasSnapshotFile?: string;
   /** anvil binary. Default `anvil` (from PATH). */
   anvilBinary?: string;
   /** Where warnings go (e.g. unpinned forks). Default `console.warn`. */
@@ -39,6 +48,13 @@ export interface ForkOptions<TChain extends Chain = Chain> {
 
 /** A chain, or the full options for one fork. */
 export type ForkTarget<TChain extends Chain = Chain> = TChain | ForkOptions<TChain>;
+
+/** A transaction to measure: its hash or receipt, a promise of one, or a function returning one. */
+export type GasSource =
+  | Hex
+  | { transactionHash: Hex; gasUsed?: bigint }
+  | Promise<Hex | { transactionHash: Hex; gasUsed?: bigint }>
+  | (() => Promise<Hex | { transactionHash: Hex; gasUsed?: bigint }>);
 
 /** Opaque id returned by {@link Fork.snapshot}. */
 export type SnapshotId = Hex;
@@ -91,6 +107,11 @@ export interface Fork<TChain extends Chain = Chain> {
     delta: bigint,
     fn: () => Promise<T>,
   ): Promise<T>;
+  /**
+   * Measure a transaction's gas and record it under `label` in the gas snapshot file, like
+   * `forge snapshot` (see `gasSnapshot` in the fork options). Resolves to the gas used.
+   */
+  gasSnapshot(label: string, tx: GasSource): Promise<bigint>;
   /** Take an EVM snapshot. */
   snapshot(): Promise<SnapshotId>;
   /**

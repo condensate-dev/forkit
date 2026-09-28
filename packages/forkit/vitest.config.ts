@@ -20,6 +20,17 @@ export default defineConfig({
         },
       },
       {
+        // Needs anvil: one fork shared by every file (globalSetup), files take turns on it.
+        test: {
+          name: "shared",
+          include: ["test/shared/**/*.vitest.ts"],
+          globalSetup: ["test/shared/global-setup.ts"],
+          env: { FORKIT_CACHE: "off" },
+          testTimeout: 30_000,
+          hookTimeout: 60_000,
+        },
+      },
+      {
         // Needs anvil and a real RPC (public by default; override with FORKIT_RPC_URL_<chainId>).
         test: {
           name: "e2e",

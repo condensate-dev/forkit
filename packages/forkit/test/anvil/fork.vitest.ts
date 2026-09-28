@@ -78,6 +78,19 @@ describe("fork()", () => {
     expect(Date.now() - started).toBeLessThan(2_000);
   });
 
+  test("a bad gas snapshot mode also throws before anything boots", async () => {
+    const started = Date.now();
+    await expect(
+      fork({
+        chain: foundry,
+        forkUrl: "http://127.0.0.1:9",
+        blockNumber: 1n,
+        gasSnapshot: "sometimes" as "off",
+      }),
+    ).rejects.toThrow(/gasSnapshot "sometimes" is not one of/);
+    expect(Date.now() - started).toBeLessThan(2_000);
+  });
+
   test("fails loudly when the upstream is unreachable", async () => {
     await expect(
       fork({

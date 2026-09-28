@@ -12,7 +12,7 @@ Pre-alpha. The design is in [docs/spec.md](docs/spec.md); work lands milestone b
 - [x] **2. Core**: `fork()`, deal, prank, warp, roll, snapshot, the vitest adapter, and the fork state cache (record once, replay offline).
 - [x] **3. Multi-chain and every runner**: `fork([base, arbitrum])` with `on(chain)`, and `describeFork` / `itFork` for bun:test, jest and node:test as well as vitest.
 - [x] **4. Assertions, traces, labels**: `expectRevert`, `expectEmit`, `expectBalanceChange`; reverted writes carry a decoded, Foundry-style call trace; `label(address, name)`.
-- [ ] 5. Gas snapshots, shared fork across files.
+- [x] **5. Gas snapshots and a shared fork**: `f.gasSnapshot(label, tx)` writes or checks a `.gas-snapshot` file, like `forge snapshot`; `startSharedForks()` in a global setup boots one fork that every file attaches to.
 - [ ] 5b. Simulated cross-chain providers: HTTP quote record/replay, Across and Relay relayer simulators.
 - [ ] 6. ERC-4337 bundler add-on.
 - [ ] 7. Docs, landscape comparison, npm publish.
@@ -119,6 +119,39 @@ When `sendTransaction`, `writeContract` or `deployContract` on a fork client rev
 
 `label(address, "USDC")` (or `f.label`) names an address in every error and trace, like Foundry's `vm.label`. Labels are process-wide.
 
+### Gas snapshots
+
+Like `forge snapshot`: label a transaction, and forkit records its gas in `.gas-snapshot` (one `label (gas: N)` line each, sorted, meant to be committed).
+
+```ts
+await f.gasSnapshot("deposit", () => vault.write.deposit({ value: 1n })); // a function, hash, promise or receipt
+```
+
+- Locally (`write`, the default), measurements update the file. Parallel workers merge their entries under a lock.
+- In CI (`check`, the default when `CI` is set), a missing entry or a changed value fails the test: `gas for "deposit" changed: 51234 → 53012, +1778 (+3.47%)`.
+- `off` just returns the gas.
+
+Set the mode with `gasSnapshot` in the fork options or `FORKIT_GAS_SNAPSHOT`, and the file with `gasSnapshotFile` / `FORKIT_GAS_SNAPSHOT_FILE`.
+
+### One fork shared by every file
+
+Booting and syncing a fork is the slow part, so boot it once in a global setup and let every file attach to it:
+
+```ts
+// vitest.global-setup.ts  (vitest.config: test.globalSetup)
+import { startSharedForks } from "@condensate/forkit";
+import { base } from "viem/chains";
+
+export default async () => (await startSharedForks({ chain: base, blockNumber: 51_800_000n })).stop;
+```
+
+```ts
+// any test file
+describeFork("swaps", base, (f) => { /* ... */ }, { shared: true });
+```
+
+The global setup publishes the fork URLs in `FORKIT_SHARED_FORKS`, which workers started after it inherit. This works for jest's `globalSetup` too; call `stop()` in `globalTeardown`. A fork has one state, so attaching takes an exclusive lease: files running in parallel take turns. Each file reverts the fork to the state it found before handing it on, and per-test isolation still applies inside a file. `attachSharedFork(targets)` is the runner-free form. Its `stop()` releases the fork and leaves the anvil running.
+
 ### How writes behave
 
 Unless you pass `gas`, fork-client writes estimate gas first and send with it, as a real node does. On anvil, an impersonated transaction that reverts would otherwise be mined silently, and you would only get a hash. With automine on, a write returns only once its state is visible, so the next read sees it. Pass an explicit `gas` to mine a reverting transaction on purpose; then `expectRevert(receiptPromise, …, { client: f.client })` decodes it from the trace. With automine off, the estimate runs against `latest`, so a transaction that depends on another one still pending fails at estimation; pass `gas` for it.
@@ -192,7 +225,7 @@ bun install
 bun run typecheck   # tsc, strict + noUncheckedIndexedAccess
 bun run lint        # biome lint + format check; `any` is an error
 bun run test        # no anvil: unit + smoke tests under bun:test, vitest, jest and node:test
-bun run test:anvil  # needs anvil: forks local anvils, no network; every runner adapter
+bun run test:anvil  # needs anvil: forks local anvils, no network; every runner adapter, shared fork
 bun run test:e2e    # needs anvil: forks Base (replays .forkit-cache; FORKIT_CACHE=off for live)
 bun run format      # apply biome fixes
 ```

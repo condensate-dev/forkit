@@ -6,7 +6,8 @@ import type { DealOptions } from "./deal.ts";
 import { ForkitError } from "./errors.ts";
 import { DEFAULT_BOOT_TIMEOUT_MS, DEFAULT_STOP_TIMEOUT_MS, fork, toForkOptions } from "./fork.ts";
 import type { RpcCacheStats } from "./rpc-cache.ts";
-import type { Fork, ForkOptions, ForkTarget, SnapshotId } from "./types.ts";
+import { type AttachOptions, attachSharedFork, DEFAULT_LEASE_TIMEOUT_MS } from "./shared.ts";
+import type { Fork, ForkOptions, ForkTarget, GasSource, SnapshotId } from "./types.ts";
 
 type Hook = () => Promise<void> | void;
 type RegisterHook = (fn: Hook, timeoutMs?: number) => void;
@@ -26,6 +27,12 @@ export interface ForkSuiteOptions {
    * `describe.concurrent` / `test.concurrent` inside a fork suite.
    */
   isolate?: boolean;
+  /**
+   * Attach to the forks a global setup started with `startSharedForks()` instead of booting
+   * new ones. Files take turns on a shared fork (an exclusive lease), and each file leaves it
+   * as it found it.
+   */
+  shared?: boolean | AttachOptions;
 }
 
 /** One chain, or several for a multi-chain fork (the first is selected). */
@@ -100,6 +107,9 @@ class DeferredFork<TChain extends Chain> implements Fork<TChain> {
   ): Promise<T> {
     return this.#fork.expectBalanceChange(token, holder, delta, fn);
   }
+  gasSnapshot(label: string, tx: GasSource): Promise<bigint> {
+    return this.#fork.gasSnapshot(label, tx);
+  }
   snapshot(): Promise<SnapshotId> {
     return this.#fork.snapshot();
   }
@@ -132,7 +142,11 @@ export function createForkSuite<TChain extends Chain>(
   ).map((t) => toForkOptions(t));
   const first = list[0];
   if (first === undefined) throw new ForkitError("forkit: a fork suite needs at least one chain.");
-  for (const binary of new Set(list.map((o) => o.anvilBinary))) assertAnvilInstalled(binary);
+  const shared =
+    options.shared === true ? {} : options.shared === false ? undefined : options.shared;
+  if (shared === undefined) {
+    for (const binary of new Set(list.map((o) => o.anvilBinary))) assertAnvilInstalled(binary);
+  }
 
   let current: Fork<TChain> | undefined;
   const handle = new DeferredFork(first.chain as TChain, () => current);
@@ -141,13 +155,20 @@ export function createForkSuite<TChain extends Chain>(
   // Chains boot in parallel, so the slowest one sets the ceiling.
   const bootMs = Math.max(...list.map((o) => o.bootTimeoutMs ?? DEFAULT_BOOT_TIMEOUT_MS));
   const stopMs = Math.max(...list.map((o) => o.stopTimeoutMs ?? DEFAULT_STOP_TIMEOUT_MS));
-  hooks.beforeAll(async () => {
-    const booted =
-      list.length === 1
-        ? await fork(first)
-        : await fork(list as unknown as readonly [ForkTarget, ...ForkTarget[]]);
-    current = booted as unknown as Fork<TChain>;
-  }, bootMs + HOOK_SLACK_MS);
+  const tuple = list as unknown as readonly [ForkTarget, ...ForkTarget[]];
+  hooks.beforeAll(
+    async () => {
+      const booted =
+        shared !== undefined
+          ? await attachSharedFork(tuple, shared)
+          : list.length === 1
+            ? await fork(first)
+            : await fork(tuple);
+      current = booted as unknown as Fork<TChain>;
+    },
+    (shared === undefined ? bootMs : (shared.leaseTimeoutMs ?? DEFAULT_LEASE_TIMEOUT_MS)) +
+      HOOK_SLACK_MS,
+  );
   hooks.afterAll(async () => {
     await current?.stop();
     current = undefined;

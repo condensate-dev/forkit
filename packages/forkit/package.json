@@ -17,7 +17,7 @@
     "test:vitest": "vitest run --project unit",
     "test:jest": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:node": "node --test test/node.smoke.ts",
-    "test:anvil": "vitest run --project anvil && bun test ./test/anvil/bun-adapter.test.ts && NODE_OPTIONS=--experimental-vm-modules jest --config jest.anvil.config.js && node --test test/anvil/node-adapter.test.ts",
+    "test:anvil": "vitest run --project anvil --project shared && bun test ./test/anvil/bun-adapter.test.ts && NODE_OPTIONS=--experimental-vm-modules jest --config jest.anvil.config.js && node --test test/anvil/node-adapter.test.ts",
     "test:e2e": "vitest run --project e2e"
   },
   "dependencies": {

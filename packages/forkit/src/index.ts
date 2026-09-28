@@ -32,6 +32,14 @@ export {
   NotImplementedError,
 } from "./errors.ts";
 export { DEFAULT_BOOT_TIMEOUT_MS, DEFAULT_STOP_TIMEOUT_MS, fork } from "./fork.ts";
+export {
+  DEFAULT_GAS_SNAPSHOT_FILE,
+  formatGasSnapshot,
+  GAS_SNAPSHOT_ENV,
+  GAS_SNAPSHOT_FILE_ENV,
+  type GasSnapshotMode,
+  parseGasSnapshot,
+} from "./gas.ts";
 export { clearLabels, formatAddress, label, labelOf, registerAbi } from "./labels.ts";
 export { type DecodedRevert, decodeRevert, describeRevert, revertOf } from "./revert.ts";
 export { type ResolvedRpc, type RpcSource, resolveForkUrl, rpcEnvVar } from "./rpc.ts";
@@ -43,10 +51,17 @@ export {
   type RpcCacheStats,
 } from "./rpc-cache.ts";
 export {
+  type AttachOptions,
+  attachSharedFork,
+  SHARED_FORKS_ENV,
+  type SharedForks,
+  startSharedForks,
+} from "./shared.ts";
+export {
   createForkSuite,
   type ForkSuiteOptions,
   type ForkTargets,
   type SuiteHooks,
 } from "./suite.ts";
 export { type CallFrame, formatTrace } from "./trace.ts";
-export type { Fork, ForkOptions, ForkTarget, SnapshotId } from "./types.ts";
+export type { Fork, ForkOptions, ForkTarget, GasSource, SnapshotId } from "./types.ts";
