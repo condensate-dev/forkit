@@ -9,7 +9,8 @@
     "./bun": "./src/bun.ts",
     "./jest": "./src/jest.ts",
     "./node": "./src/node.ts",
-    "./http": "./src/http/index.ts"
+    "./http": "./src/http/index.ts",
+    "./bridges": "./src/bridges/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",

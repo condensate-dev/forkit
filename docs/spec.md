@@ -87,7 +87,7 @@ This runs on a multi-fork handle, e.g. `fork([base, arbitrum])`.
 
 - `bridge.across(f)`: watch the origin fork for the SpokePool deposit event (V3 funds-deposited). Decode it, then on the destination fork impersonate a funded relayer and call the destination SpokePool's fill function with the deposit's params. The recipient's output-token balance and any message or handler call then land for real.
 - `bridge.relay(f)`: watch for the deposit into Relay's receiver/depository on the origin. On the destination, a simulated solver (impersonated and funded) executes the solver's fill: a transfer plus the calldata, if any.
-- `bridge.custom({ originEvent, onDeposit })` for any other bridge, e.g. CCTP mint or native bridges via L2 messenger impersonation.
+- `bridge.custom(f, { originEvent, destinationOf, onDeposit })` for any other bridge, e.g. CCTP mint or native bridges via L2 messenger impersonation.
 - `await bridge.settle()` processes every pending deposit, and `bridge.fills` gives what was filled. Fees and slippage are configurable, e.g. `outputAmount = inputAmount - fee`, so tests can assert on economics.
 - Addresses and ABIs come only from each protocol's public docs and verified contracts, never from private code.
 
