@@ -4,6 +4,8 @@ import { anvilParameters } from "../../src/fork.ts";
 import {
   AnvilNotFoundError,
   assertAnvilInstalled,
+  ForkitError,
+  fork,
   freePort,
   isOpStack,
   resolveForkUrl,
@@ -86,5 +88,16 @@ describe("redactUrl", () => {
     );
     expect(redactUrl("https://rpc.example/?apikey=secret")).toBe("https://rpc.example/?<redacted>");
     expect(redactUrl("https://user:pass@rpc.example/")).toBe("https://rpc.example/");
+  });
+});
+
+describe("fork([...]) arguments", () => {
+  test("refuses an empty list", async () => {
+    await expect(fork([] as unknown as Parameters<typeof fork>[0])).rejects.toThrow(/at least one/);
+  });
+
+  test("refuses the same chain twice before booting anything", async () => {
+    await expect(fork([base, { chain: base, blockNumber: 1n }])).rejects.toThrow(ForkitError);
+    await expect(fork([base, { chain: base }])).rejects.toThrow(/lists chain 8453 twice/);
   });
 });

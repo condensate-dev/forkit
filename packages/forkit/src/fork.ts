@@ -3,7 +3,7 @@ import type { Address, Chain } from "viem";
 import { assertAnvilInstalled, freePort, isOpStack } from "./anvil.ts";
 import { createForkClient, type ForkClient, type PrankClient, rawRequest } from "./client.ts";
 import { type DealOptions, dealErc20 } from "./deal.ts";
-import { ForkBootError, ForkitError, NotImplementedError } from "./errors.ts";
+import { ForkBootError, ForkitError } from "./errors.ts";
 import { redactUrl, resolveForkUrl, rpcEnvVar } from "./rpc.ts";
 import {
   type RpcCache,
@@ -77,6 +77,34 @@ function killHard(instance: AnvilInstance): void {
   }
 }
 
+/**
+ * The forks booted by one `fork()` call. Every handle in a group can reach the others with
+ * `on(chain)`, and stopping any of them stops them all.
+ */
+class ForkGroup {
+  /** Indexed by position in the `fork()` call, not by boot order (chains boot in parallel). */
+  readonly #slots: Fork[] = [];
+  readonly #stoppers: (() => Promise<void>)[] = [];
+
+  get members(): readonly Fork[] {
+    return this.#slots.filter((m) => m !== undefined);
+  }
+
+  add(slot: number, member: Fork, stopSelf: () => Promise<void>): void {
+    this.#slots[slot] = member;
+    this.#stoppers.push(stopSelf);
+  }
+
+  /** Idempotent: each member memoizes its own stop. */
+  async stop(): Promise<void> {
+    await Promise.all(this.#stoppers.map((stopSelf) => stopSelf()));
+  }
+}
+
+function describeChains(chains: readonly Chain[]): string {
+  return chains.map((c) => `${c.name} (${c.id})`).join(", ");
+}
+
 class SingleFork<TChain extends Chain> implements Fork<TChain> {
   readonly chain: TChain;
   readonly rpcUrl: string;
@@ -87,6 +115,7 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
   readonly #cache: RpcCache | undefined;
   readonly #stopTimeoutMs: number;
   readonly #pranks = new Map<string, number>();
+  readonly #group: ForkGroup;
   #stopping: Promise<void> | undefined;
 
   constructor(
@@ -95,6 +124,8 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
     instance: AnvilInstance,
     cache: RpcCache | undefined,
     stopTimeoutMs: number,
+    group: ForkGroup,
+    slot: number,
   ) {
     this.chain = chain;
     this.rpcUrl = rpcUrl;
@@ -103,6 +134,12 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
     this.#instance = instance;
     this.#cache = cache;
     this.#stopTimeoutMs = stopTimeoutMs;
+    this.#group = group;
+    group.add(slot, this as unknown as Fork, () => this.#stopSelf());
+  }
+
+  get forks(): readonly Fork[] {
+    return this.#group.members;
   }
 
   cacheStats(): RpcCacheStats | undefined {
@@ -173,15 +210,21 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
   }
 
   on<TOther extends Chain>(chain: TOther): Fork<TOther> {
-    if (chain.id !== this.chain.id) {
+    const member = this.#group.members.find((m) => m.chain.id === chain.id);
+    if (member === undefined) {
       throw new ForkitError(
-        `forkit: this handle forks ${this.chain.name} (${this.chain.id}), not ${chain.name} (${chain.id}).`,
+        `forkit: this handle forks ${describeChains(this.#group.members.map((m) => m.chain))}, not ${chain.name} (${chain.id}).`,
       );
     }
-    return this as unknown as Fork<TOther>;
+    return member as unknown as Fork<TOther>;
   }
 
+  /** Stop every fork in the handle (for a multi-chain fork, all of them). Idempotent. */
   stop(): Promise<void> {
+    return this.#group.stop();
+  }
+
+  #stopSelf(): Promise<void> {
     this.#stopping ??= withTimeout(
       this.#instance.stop(),
       this.#stopTimeoutMs,
@@ -196,7 +239,11 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
   }
 }
 
-async function forkOne<TChain extends Chain>(target: ForkTarget<TChain>): Promise<Fork<TChain>> {
+async function forkOne<TChain extends Chain>(
+  target: ForkTarget<TChain>,
+  group: ForkGroup,
+  slot: number,
+): Promise<Fork<TChain>> {
   const options = toForkOptions(target);
   const { chain } = options;
   const warn = options.onWarn ?? ((message: string) => console.warn(message));
@@ -254,6 +301,8 @@ async function forkOne<TChain extends Chain>(target: ForkTarget<TChain>): Promis
     instance,
     cache,
     options.stopTimeoutMs ?? DEFAULT_STOP_TIMEOUT_MS,
+    group,
+    slot,
   );
   const servedChainId = await handle.client.getChainId().catch(async (error: unknown) => {
     await handle.stop();
@@ -270,12 +319,38 @@ async function forkOne<TChain extends Chain>(target: ForkTarget<TChain>): Promis
   return handle;
 }
 
-/** Boot an anvil fork of one chain, or of several chains for cross-chain tests. */
+/**
+ * Boot an anvil fork of one chain, or of several chains for cross-chain tests.
+ *
+ * With several targets, every chain boots in parallel on its own anvil and port. The handle
+ * selects the first chain; `on(chain)` selects another, and `stop()` on any of them stops all.
+ * If one chain fails to boot, the others are stopped before the error is thrown.
+ */
 export function fork<TChain extends Chain>(target: ForkTarget<TChain>): Promise<Fork<TChain>>;
 export function fork<TChain extends Chain>(
   targets: readonly [ForkTarget<TChain>, ...ForkTarget[]],
 ): Promise<Fork<TChain>>;
 export async function fork(target: ForkTarget | readonly ForkTarget[]): Promise<Fork> {
-  if (Array.isArray(target)) throw new NotImplementedError("fork([...]) (multi-chain)", 3);
-  return await forkOne(target as ForkTarget);
+  const group = new ForkGroup();
+  if (!Array.isArray(target)) return await forkOne(target as ForkTarget, group, 0);
+
+  const targets = target as readonly ForkTarget[];
+  if (targets.length === 0) throw new ForkitError("forkit: fork([]) needs at least one chain.");
+  const chains = targets.map((t) => toForkOptions(t).chain);
+  const seen = new Set<number>();
+  for (const chain of chains) {
+    if (seen.has(chain.id)) {
+      throw new ForkitError(
+        `forkit: fork([...]) lists chain ${chain.id} twice (${describeChains(chains)}). Each chain gets one fork; select it with on(chain).`,
+      );
+    }
+    seen.add(chain.id);
+  }
+  const booted = await Promise.allSettled(targets.map((t, slot) => forkOne(t, group, slot)));
+  const failed = booted.find((r): r is PromiseRejectedResult => r.status === "rejected");
+  if (failed !== undefined) {
+    await group.stop();
+    throw failed.reason;
+  }
+  return (booted[0] as PromiseFulfilledResult<Fork>).value;
 }

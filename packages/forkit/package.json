@@ -5,7 +5,10 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./vitest": "./src/vitest.ts"
+    "./vitest": "./src/vitest.ts",
+    "./bun": "./src/bun.ts",
+    "./jest": "./src/jest.ts",
+    "./node": "./src/node.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
@@ -14,7 +17,7 @@
     "test:vitest": "vitest run --project unit",
     "test:jest": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:node": "node --test test/node.smoke.ts",
-    "test:anvil": "vitest run --project anvil",
+    "test:anvil": "vitest run --project anvil && bun test ./test/anvil/bun-adapter.test.ts && NODE_OPTIONS=--experimental-vm-modules jest --config jest.anvil.config.js && node --test test/anvil/node-adapter.test.ts",
     "test:e2e": "vitest run --project e2e"
   },
   "dependencies": {
@@ -30,9 +33,13 @@
     "vitest": "^5.0.2"
   },
   "peerDependencies": {
+    "@jest/globals": ">=29",
     "vitest": ">=3"
   },
   "peerDependenciesMeta": {
+    "@jest/globals": {
+      "optional": true
+    },
     "vitest": {
       "optional": true
     }

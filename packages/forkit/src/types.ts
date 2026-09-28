@@ -36,10 +36,15 @@ export type ForkTarget<TChain extends Chain = Chain> = TChain | ForkOptions<TCha
 /** Opaque id returned by {@link Fork.snapshot}. */
 export type SnapshotId = Hex;
 
-/** Handle to one or more running forks. */
+/**
+ * Handle to one or more running forks. Every method acts on the selected chain ({@link Fork.chain});
+ * in a multi-chain fork, {@link Fork.on} selects another.
+ */
 export interface Fork<TChain extends Chain = Chain> {
-  /** The forked chain. */
+  /** The selected chain. */
   readonly chain: TChain;
+  /** One handle per chain in this fork, in the order they were passed to `fork()`. */
+  readonly forks: readonly Fork[];
   /** URL of the local anvil JSON-RPC endpoint. */
   readonly rpcUrl: string;
   /** Hit/miss counts of the fork state cache, or `undefined` when it is not in use. */
@@ -72,8 +77,8 @@ export interface Fork<TChain extends Chain = Chain> {
    * later ones), so take a fresh one to revert again.
    */
   revertTo(id: SnapshotId): Promise<void>;
-  /** Select one chain in a multi-fork handle. */
+  /** The handle for another chain of the same `fork([...])` call. Throws for a chain it does not fork. */
   on<TOther extends Chain>(chain: TOther): Fork<TOther>;
-  /** Stop every anvil process behind this handle. Idempotent. */
+  /** Stop every anvil process behind this handle, on every chain. Idempotent. */
   stop(): Promise<void>;
 }

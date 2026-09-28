@@ -5,7 +5,7 @@ import type { DealOptions } from "./deal.ts";
 import { ForkitError } from "./errors.ts";
 import { DEFAULT_BOOT_TIMEOUT_MS, DEFAULT_STOP_TIMEOUT_MS, fork, toForkOptions } from "./fork.ts";
 import type { RpcCacheStats } from "./rpc-cache.ts";
-import type { Fork, ForkTarget, SnapshotId } from "./types.ts";
+import type { Fork, ForkOptions, ForkTarget, SnapshotId } from "./types.ts";
 
 type Hook = () => Promise<void> | void;
 type RegisterHook = (fn: Hook, timeoutMs?: number) => void;
@@ -20,38 +20,47 @@ export interface SuiteHooks {
 
 export interface ForkSuiteOptions {
   /**
-   * Snapshot before each test and revert after it (default `true`). Tests in one suite share a
-   * fork, so isolation assumes they run one at a time: do not use `describe.concurrent` /
-   * `test.concurrent` inside a fork suite.
+   * Snapshot every chain before each test and revert after it (default `true`). Tests in one
+   * suite share a fork, so isolation assumes they run one at a time: do not use
+   * `describe.concurrent` / `test.concurrent` inside a fork suite.
    */
   isolate?: boolean;
 }
+
+/** One chain, or several for a multi-chain fork (the first is selected). */
+export type ForkTargets<TChain extends Chain = Chain> =
+  | ForkTarget<TChain>
+  | readonly [ForkTarget<TChain>, ...ForkTarget[]];
 
 /** Slack on top of forkit's own ceilings, so forkit's error wins the race against the runner's. */
 const HOOK_SLACK_MS = 5_000;
 const EACH_HOOK_TIMEOUT_MS = 30_000;
 
+const NOT_RUNNING =
+  "forkit: the fork is not running. Use it inside a test or hook, not while tests are being collected.";
+
 /**
  * A {@link Fork} that forwards to the fork booted in `beforeAll`. Using it before then (e.g. at
- * collection time) throws.
+ * collection time) throws, except `on(chain)`, which returns another deferred handle.
  */
 class DeferredFork<TChain extends Chain> implements Fork<TChain> {
   readonly chain: TChain;
-  current: Fork<TChain> | undefined;
+  readonly #resolve: () => Fork<TChain> | undefined;
 
-  constructor(chain: TChain) {
+  constructor(chain: TChain, resolve: () => Fork<TChain> | undefined) {
     this.chain = chain;
+    this.#resolve = resolve;
   }
 
   get #fork(): Fork<TChain> {
-    if (this.current === undefined) {
-      throw new ForkitError(
-        "forkit: the fork is not running. Use it inside a test or hook, not while tests are being collected.",
-      );
-    }
-    return this.current;
+    const current = this.#resolve();
+    if (current === undefined) throw new ForkitError(NOT_RUNNING);
+    return current;
   }
 
+  get forks(): readonly Fork[] {
+    return this.#fork.forks;
+  }
   get rpcUrl(): string {
     return this.#fork.rpcUrl;
   }
@@ -83,7 +92,10 @@ class DeferredFork<TChain extends Chain> implements Fork<TChain> {
     return this.#fork.revertTo(id);
   }
   on<TOther extends Chain>(chain: TOther): Fork<TOther> {
-    return this.#fork.on(chain);
+    const current = this.#resolve();
+    // Running: select now, so an unknown chain throws here. Collecting: defer, checked on use.
+    if (current !== undefined) return current.on(chain);
+    return new DeferredFork(chain, () => this.#resolve()?.on(chain));
   }
   stop(): Promise<void> {
     return this.#fork.stop();
@@ -91,43 +103,51 @@ class DeferredFork<TChain extends Chain> implements Fork<TChain> {
 }
 
 /**
- * Runner-agnostic fork lifecycle: boot once per suite, snapshot/revert around every test, stop
- * at the end. Call it while tests are being collected: a missing anvil throws right here, so the
- * suite fails loudly instead of skipping.
+ * Runner-agnostic fork lifecycle: boot once per suite, snapshot/revert every chain around every
+ * test, stop at the end. Call it while tests are being collected: a missing anvil throws right
+ * here, so the suite fails loudly instead of skipping.
  */
 export function createForkSuite<TChain extends Chain>(
-  target: ForkTarget<TChain>,
+  targets: ForkTargets<TChain>,
   hooks: SuiteHooks,
   options: ForkSuiteOptions = {},
 ): Fork<TChain> {
-  const forkOptions = toForkOptions(target);
-  assertAnvilInstalled(forkOptions.anvilBinary);
-  const handle = new DeferredFork(forkOptions.chain);
-  let snapshot: SnapshotId | undefined;
+  const list: readonly ForkOptions[] = (
+    Array.isArray(targets) ? (targets as readonly ForkTarget[]) : [targets as ForkTarget]
+  ).map((t) => toForkOptions(t));
+  const first = list[0];
+  if (first === undefined) throw new ForkitError("forkit: a fork suite needs at least one chain.");
+  for (const binary of new Set(list.map((o) => o.anvilBinary))) assertAnvilInstalled(binary);
 
-  hooks.beforeAll(
-    async () => {
-      handle.current = await fork(forkOptions);
-    },
-    (forkOptions.bootTimeoutMs ?? DEFAULT_BOOT_TIMEOUT_MS) + HOOK_SLACK_MS,
-  );
-  hooks.afterAll(
-    async () => {
-      await handle.current?.stop();
-      handle.current = undefined;
-    },
-    (forkOptions.stopTimeoutMs ?? DEFAULT_STOP_TIMEOUT_MS) + HOOK_SLACK_MS,
-  );
+  let current: Fork<TChain> | undefined;
+  const handle = new DeferredFork(first.chain as TChain, () => current);
+  let snapshots: [Fork, SnapshotId][] = [];
+
+  // Chains boot in parallel, so the slowest one sets the ceiling.
+  const bootMs = Math.max(...list.map((o) => o.bootTimeoutMs ?? DEFAULT_BOOT_TIMEOUT_MS));
+  const stopMs = Math.max(...list.map((o) => o.stopTimeoutMs ?? DEFAULT_STOP_TIMEOUT_MS));
+  hooks.beforeAll(async () => {
+    const booted =
+      list.length === 1
+        ? await fork(first)
+        : await fork(list as unknown as readonly [ForkTarget, ...ForkTarget[]]);
+    current = booted as unknown as Fork<TChain>;
+  }, bootMs + HOOK_SLACK_MS);
+  hooks.afterAll(async () => {
+    await current?.stop();
+    current = undefined;
+  }, stopMs + HOOK_SLACK_MS);
   if (options.isolate !== false) {
     hooks.beforeEach(async () => {
-      if (handle.current !== undefined) snapshot = await handle.current.snapshot();
+      if (current === undefined) return;
+      snapshots = await Promise.all(
+        current.forks.map(async (f): Promise<[Fork, SnapshotId]> => [f, await f.snapshot()]),
+      );
     }, EACH_HOOK_TIMEOUT_MS);
     hooks.afterEach(async () => {
-      if (handle.current !== undefined && snapshot !== undefined) {
-        const id = snapshot;
-        snapshot = undefined;
-        await handle.current.revertTo(id);
-      }
+      const taken = snapshots;
+      snapshots = [];
+      await Promise.all(taken.map(([f, id]) => f.revertTo(id)));
     }, EACH_HOOK_TIMEOUT_MS);
   }
   return handle;

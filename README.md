@@ -10,7 +10,7 @@ Pre-alpha. The design is in [docs/spec.md](docs/spec.md); work lands milestone b
 
 - [x] **1. Scaffold**: bun workspace, strict TypeScript, biome, CI, and the public API as typed stubs that throw `NotImplementedError`.
 - [x] **2. Core**: `fork()`, deal, prank, warp, roll, snapshot, the vitest adapter, and the fork state cache (record once, replay offline).
-- [ ] 3. Multi-chain handle, bun:test and jest adapters.
+- [x] **3. Multi-chain and every runner**: `fork([base, arbitrum])` with `on(chain)`, and `describeFork` / `itFork` for bun:test, jest and node:test as well as vitest.
 - [ ] 4. Assertions, traces-on-failure, labels.
 - [ ] 5. Gas snapshots, shared fork across files.
 - [ ] 5b. Simulated cross-chain providers: HTTP quote record/replay, Across and Relay relayer simulators.
@@ -45,6 +45,17 @@ describeFork("my route", { chain: base, blockNumber: 51_800_000n }, (f) => {
 });
 ```
 
+The same `describeFork` / `itFork` pair comes in one adapter per runner, all with the same behaviour:
+
+| Runner | Import |
+|---|---|
+| vitest | `@condensate/forkit/vitest` |
+| bun:test | `@condensate/forkit/bun` |
+| jest (native ESM) | `@condensate/forkit/jest` |
+| node:test | `@condensate/forkit/node` |
+
+For any other runner, `createForkAdapter({ describe, it, hooks })` builds the pair from its `describe`, `it` and lifecycle hooks.
+
 To use the core without a runner, call `const f = await fork({ chain: base, blockNumber })`. The handle gives you:
 
 - `f.client`: viem test, public and wallet actions;
@@ -53,6 +64,25 @@ To use the core without a runner, call `const f = await fork({ chain: base, bloc
 - `warp` and `roll`;
 - `snapshot` and `revertTo`;
 - `stop`.
+
+### Multi-chain
+
+Pass several chains to fork them side by side, one anvil each, booted in parallel:
+
+```ts
+import { arbitrum, base } from "viem/chains";
+
+const f = await fork([
+  { chain: base, blockNumber: 51_800_000n },
+  { chain: arbitrum, blockNumber: 380_000_000n },
+]);
+f.chain;                         // base: the first chain is selected
+const arb = f.on(arbitrum);      // arbitrum's handle; arb.on(base) === f
+f.forks;                         // [baseHandle, arbHandle], in the order given
+await f.stop();                  // stops both, from either handle
+```
+
+Every method (`client`, `deal`, `snapshot`, ...) acts on the selected chain. If one chain fails to boot, the others are stopped before the error is thrown. `describeFork` takes the same array, and its per-test isolation snapshots and reverts every chain. Inside a `describeFork` body, `f.on(chain)` works at collection time too: it returns a handle that resolves once the fork is up.
 
 anvil must be on `PATH`. If it is missing, test collection fails with an install hint instead of skipping.
 
@@ -109,7 +139,7 @@ After changing a pinned block, or adding a test that touches new state, re-recor
 ```
 packages/
   forkit/        @condensate/forkit: core; runner adapters are subpath exports
-                 (/vitest now; /bun, /jest, /node next)
+                 (/vitest, /bun, /jest, /node)
 ```
 
 Add-ons with their own dependencies get their own workspace package under `packages/` when they are built. That covers the 4337 bundler, the milestone 5b bridge simulators and the HTTP quote record/replay.
@@ -123,7 +153,7 @@ bun install
 bun run typecheck   # tsc, strict + noUncheckedIndexedAccess
 bun run lint        # biome lint + format check; `any` is an error
 bun run test        # no anvil: unit + smoke tests under bun:test, vitest, jest and node:test
-bun run test:anvil  # needs anvil: forks a local anvil, no network
+bun run test:anvil  # needs anvil: forks local anvils, no network; every runner adapter
 bun run test:e2e    # needs anvil: forks Base (replays .forkit-cache; FORKIT_CACHE=off for live)
 bun run format      # apply biome fixes
 ```
