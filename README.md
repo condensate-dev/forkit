@@ -13,7 +13,7 @@ Pre-alpha. The design is in [docs/spec.md](docs/spec.md); work lands milestone b
 - [x] **3. Multi-chain and every runner**: `fork([base, arbitrum])` with `on(chain)`, and `describeFork` / `itFork` for bun:test, jest and node:test as well as vitest.
 - [x] **4. Assertions, traces, labels**: `expectRevert`, `expectEmit`, `expectBalanceChange`; reverted writes carry a decoded, Foundry-style call trace; `label(address, name)`.
 - [x] **5. Gas snapshots and a shared fork**: `f.gasSnapshot(label, tx)` writes or checks a `.gas-snapshot` file, like `forge snapshot`; `startSharedForks()` in a global setup boots one fork that every file attaches to.
-- [ ] 5b. Simulated cross-chain providers: HTTP quote record/replay, Across and Relay relayer simulators.
+- [x] **5b. Simulated cross-chain providers**: `@condensate/forkit/http` records quote APIs and replays them pinned to the fork block; `@condensate/forkit/bridges` has Across and Relay relayer simulators plus `bridge.custom`; the Base → Arbitrum e2e runs offline.
 - [ ] 6. ERC-4337 bundler add-on.
 - [ ] 7. Docs, landscape comparison, npm publish.
 
@@ -206,15 +206,42 @@ Unpinned forks are never cached, and they warn because they are not reproducible
 
 After changing a pinned block, or adding a test that touches new state, re-record by running once with network access and `FORKIT_CACHE=readwrite` (the default).
 
+## Cross-chain routes, deterministically
+
+Test a cross-chain route end to end on a multi-chain fork, with no live relayer and no live quote API:
+
+```ts
+import { bridge } from "@condensate/forkit/bridges";
+import { http } from "@condensate/forkit/http";
+
+const f = await fork([{ chain: base, blockNumber: B }, { chain: arbitrum, blockNumber: A }]);
+const across = bridge.across(f);                  // watch Base's SpokePool from now on
+
+// Your app's own fetch calls: recorded once, replayed in CI (pinned to the Base block).
+const quote = await http.with({ name: "across/base-arb-usdc", blockNumber: B, hosts: ["app.across.to"] }, () =>
+  getAcrossQuote(),
+);
+await depositOnBase(quote);                       // your production code
+const [fill] = await across.settle();             // the simulated relayer fills on Arbitrum
+fill.outputAmount; fill.details.fee;              // assert on economics
+```
+
+- **HTTP record/replay** (`@condensate/forkit/http`) intercepts `globalThis.fetch`. Fixtures are pinned to their fork block (replaying at another block warns), secrets are redacted from headers and URLs, and an unmatched request can fail or pass through. `FORKIT_HTTP=record|replay|auto|off`, with `replay` the default when `CI` is set. See [docs/http.md](docs/http.md).
+- **`bridge.across(f)`** decodes the SpokePool's `FundsDeposited` event. On `settle()`, it impersonates a funded relayer (the exclusive relayer while that relayer's window is open) and calls `fillRelay` on the destination SpokePool, so the recipient's balance and any message handler land for real. See [docs/bridges-across.md](docs/bridges-across.md).
+- **`bridge.relay(f)`** watches Relay's depository (`RelayNativeDeposit` / `RelayErc20Deposit`). A simulated solver pays the order registered with `b.expect(orderId, …)` or `b.expectQuote(quote)`, running any calls through Relay's router. An unknown order fails loudly. See [docs/bridges-relay.md](docs/bridges-relay.md).
+- **`bridge.custom(f, { originEvent, destinationOf, onDeposit })`** covers any other bridge.
+
+Fees are configurable, and every fill reports its fee in `details`. `test/e2e/base-arbitrum-across.vitest.ts` shows the whole loop: an Across quote replayed from a fixture, a Base USDC deposit, a fill on Arbitrum, and fee accounting that matches the quote exactly.
+
 ## Layout
 
 ```
 packages/
-  forkit/        @condensate/forkit: core; runner adapters are subpath exports
-                 (/vitest, /bun, /jest, /node)
+  forkit/        @condensate/forkit: core; subpath exports for the runner adapters
+                 (/vitest, /bun, /jest, /node), /http and /bridges
 ```
 
-Add-ons with their own dependencies get their own workspace package under `packages/` when they are built. That covers the 4337 bundler, the milestone 5b bridge simulators and the HTTP quote record/replay.
+The bridge simulators (`/bridges`) and HTTP record/replay (`/http`) need nothing beyond viem, so they are subpath exports of the core package. Add-ons with their own dependencies, such as the 4337 bundler, get their own workspace package under `packages/`.
 
 ## Development
 

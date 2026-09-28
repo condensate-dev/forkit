@@ -1,0 +1,101 @@
+{
+  "blockNumber": "51907866",
+  "chainId": 8453,
+  "entries": [
+    {
+      "request": {
+        "headers": {},
+        "method": "GET",
+        "url": "https://app.across.to/api/suggested-fees?inputToken=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&outputToken=0xaf88d065e77c8cC2239327C5EDb3A432268e5831&originChainId=8453&destinationChainId=42161&amount=1000000000"
+      },
+      "response": {
+        "headers": {
+          "access-control-allow-headers": "X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization",
+          "access-control-allow-methods": "GET,POST,DELETE,OPTIONS",
+          "access-control-allow-origin": "*",
+          "cache-control": "public, max-age=0, must-revalidate",
+          "cf-cache-status": "DYNAMIC",
+          "cf-ray": "a42362368c5d488c-EWR",
+          "content-security-policy-report-only": "default-src 'self' *.across.to across.to wss://api.blocknative.com; font-src 'self' fonts.gstatic.com assets.vercel.com data:; img-src 'self' *.walletconnect.com assets.vercel.com data:; connect-src wss://*.walletconnect.com *.walletconnect.com wss://api.blocknative.com mainnet.infura.io *.across.to across.to *.wallet.coinbase.com *.alchemy.com *.infura.io api2.amplitude.com *.sentry.io; script-src 'self' 'unsafe-inline' 'unsafe-eval' platform.twitter.com vercel.live; style-src 'self' 'unsafe-inline'; frame-src 'self' vercel.live platform.twitter.com *.walletconnect.com; frame-ancestors 'self'; report-uri https://umaproject.uriports.com/reports/report; report-to default",
+          "content-type": "application/json; charset=utf-8",
+          "etag": "W/\"4f6-x+9w52/H91urjLc3x4fffif6n/o\"",
+          "nel": "{\"report_to\":\"default\",\"max_age\":2592000,\"include_subdomains\":true,\"failure_fraction\":0.5}",
+          "permissions-policy": "geolocation=(self), microphone=(), camera=()",
+          "referrer-policy": "strict-origin",
+          "report-to": "{\"group\":\"default\",\"max_age\":10886400,\"endpoints\":[{\"url\":\"https://umaproject.uriports.com/reports\"}],\"include_subdomains\":false}",
+          "server": "cloudflare",
+          "strict-transport-security": "max-age=63072000",
+          "vary": "accept-encoding",
+          "x-content-type-options": "nosniff",
+          "x-frame-options": "DENY",
+          "x-vercel-cache": "MISS",
+          "x-vercel-id": "iad1::iad1::cpbbf-1790605172254-22950e1a1627",
+          "x-xss-protection": "1; mode=block"
+        },
+        "json": {
+          "estimatedFillTimeSec": 1,
+          "capitalFeePct": "100000000000000",
+          "capitalFeeTotal": "100000",
+          "relayGasFeePct": "9222000000000",
+          "relayGasFeeTotal": "9222",
+          "relayFeePct": "109222000000000",
+          "relayFeeTotal": "109222",
+          "lpFeePct": "0",
+          "timestamp": "1790605079",
+          "isAmountTooLow": false,
+          "quoteBlock": "26076500",
+          "exclusiveRelayer": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD",
+          "exclusivityDeadline": 3,
+          "spokePoolAddress": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64",
+          "destinationSpokePoolAddress": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+          "totalRelayFee": {
+            "pct": "109222000000000",
+            "total": "109222"
+          },
+          "relayerCapitalFee": {
+            "pct": "100000000000000",
+            "total": "100000"
+          },
+          "relayerGasFee": {
+            "pct": "9222000000000",
+            "total": "9222"
+          },
+          "lpFee": {
+            "pct": "0",
+            "total": "0"
+          },
+          "internalizedSwapFee": {
+            "pct": "0",
+            "total": "0"
+          },
+          "limits": {
+            "minDeposit": "500055",
+            "maxDeposit": "30823483165",
+            "maxDepositInstant": "12386610403",
+            "maxDepositShortDelay": "30823483165",
+            "recommendedDepositInstant": "12386610403"
+          },
+          "fillDeadline": "1790612279",
+          "outputAmount": "999890778",
+          "inputToken": {
+            "address": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+            "symbol": "USDC",
+            "decimals": 6,
+            "chainId": 8453
+          },
+          "outputToken": {
+            "address": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+            "symbol": "USDC",
+            "decimals": 6,
+            "chainId": 42161
+          },
+          "id": "cpbbf-1790605172254-22950e1a1627"
+        },
+        "status": 200,
+        "statusText": ""
+      }
+    }
+  ],
+  "name": "across/base-arb-usdc",
+  "version": 1
+}
