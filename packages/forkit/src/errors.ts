@@ -42,3 +42,24 @@ export class ForkBootError extends ForkitError {
 export class DealError extends ForkitError {
   override name = "DealError";
 }
+
+/**
+ * An expectation (`expectRevert`, `expectEmit`, `expectBalanceChange`) did not hold. Carries
+ * `actual` and `expected` so runners that understand them (vitest, mocha-style) print a diff.
+ */
+export class ForkitAssertionError extends ForkitError {
+  override name = "ForkitAssertionError";
+  readonly actual: unknown;
+  readonly expected: unknown;
+  readonly showDiff: boolean;
+
+  constructor(
+    message: string,
+    details: { actual?: unknown; expected?: unknown; cause?: unknown } = {},
+  ) {
+    super(message, details.cause === undefined ? undefined : { cause: details.cause });
+    this.actual = details.actual;
+    this.expected = details.expected;
+    this.showDiff = "actual" in details && "expected" in details;
+  }
+}

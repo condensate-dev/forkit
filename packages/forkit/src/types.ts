@@ -1,4 +1,5 @@
 import type { Address, Chain, Hex } from "viem";
+import type { NATIVE } from "./assertions.ts";
 import type { ForkClient, PrankClient } from "./client.ts";
 import type { DealOptions } from "./deal.ts";
 import type { CacheMode, RpcCacheStats } from "./rpc-cache.ts";
@@ -24,6 +25,12 @@ export interface ForkOptions<TChain extends Chain = Chain> {
   bootTimeoutMs?: number;
   /** Ceiling for teardown, in milliseconds, so a wedged anvil cannot hang the suite. Default 10 000. */
   stopTimeoutMs?: number;
+  /**
+   * `on-failure` (default): when `sendTransaction`, `writeContract` or `deployContract` reverts,
+   * forkit replays it with `debug_traceCall` and appends the decoded call trace to the error.
+   * `off` skips that. `FORKIT_TRACES=off` sets the default.
+   */
+  traces?: "on-failure" | "off";
   /** anvil binary. Default `anvil` (from PATH). */
   anvilBinary?: string;
   /** Where warnings go (e.g. unpinned forks). Default `console.warn`. */
@@ -70,6 +77,20 @@ export interface Fork<TChain extends Chain = Chain> {
    * `roll(0)` does nothing.
    */
   roll(blocks: bigint | number): Promise<void>;
+  /** Name `address` in errors and traces (process-wide, like Foundry's `vm.label`). */
+  label(address: Address, name: string): void;
+  /** The decoded call trace of a mined transaction, Foundry-style. */
+  trace(hash: Hex): Promise<string>;
+  /**
+   * Assert that `fn` changes `holder`'s balance of `token` (an ERC-20 or `NATIVE`) by exactly
+   * `delta` on this chain. Resolves to what `fn` resolved to.
+   */
+  expectBalanceChange<T>(
+    token: Address | typeof NATIVE,
+    holder: Address,
+    delta: bigint,
+    fn: () => Promise<T>,
+  ): Promise<T>;
   /** Take an EVM snapshot. */
   snapshot(): Promise<SnapshotId>;
   /**

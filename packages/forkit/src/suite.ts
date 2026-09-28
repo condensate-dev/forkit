@@ -1,5 +1,6 @@
-import type { Address, Chain } from "viem";
+import type { Address, Chain, Hex } from "viem";
 import { assertAnvilInstalled } from "./anvil.ts";
+import type { NATIVE } from "./assertions.ts";
 import type { ForkClient, PrankClient } from "./client.ts";
 import type { DealOptions } from "./deal.ts";
 import { ForkitError } from "./errors.ts";
@@ -84,6 +85,20 @@ class DeferredFork<TChain extends Chain> implements Fork<TChain> {
   }
   roll(blocks: bigint | number): Promise<void> {
     return this.#fork.roll(blocks);
+  }
+  label(address: Address, name: string): void {
+    this.#fork.label(address, name);
+  }
+  trace(hash: Hex): Promise<string> {
+    return this.#fork.trace(hash);
+  }
+  expectBalanceChange<T>(
+    token: Address | typeof NATIVE,
+    holder: Address,
+    delta: bigint,
+    fn: () => Promise<T>,
+  ): Promise<T> {
+    return this.#fork.expectBalanceChange(token, holder, delta, fn);
   }
   snapshot(): Promise<SnapshotId> {
     return this.#fork.snapshot();

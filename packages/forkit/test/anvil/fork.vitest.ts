@@ -63,6 +63,21 @@ describe("fork()", () => {
     );
   });
 
+  test("a bad option throws before anything boots, so no anvil is left running", async () => {
+    // The upstream is unreachable: had anvil been started first, this would be a ForkBootError
+    // after the boot timeout, not the option error at once.
+    const started = Date.now();
+    await expect(
+      fork({
+        chain: foundry,
+        forkUrl: "http://127.0.0.1:9",
+        blockNumber: 1n,
+        traces: "sometimes" as "off",
+      }),
+    ).rejects.toThrow(/traces must be "on-failure" or "off"/);
+    expect(Date.now() - started).toBeLessThan(2_000);
+  });
+
   test("fails loudly when the upstream is unreachable", async () => {
     await expect(
       fork({

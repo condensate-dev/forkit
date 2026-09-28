@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, test } from "node:test";
 import * as forkit from "../src/index.ts";
-import { PUBLIC_FUNCTIONS, STUB_CALLS } from "./public-api.ts";
+import { PUBLIC_FUNCTIONS } from "./public-api.ts";
 
 const exported: Record<string, unknown> = { ...forkit };
 
@@ -12,9 +12,7 @@ describe("public API (node:test)", () => {
     });
   }
 
-  for (const [name, call] of Object.entries(STUB_CALLS)) {
-    test(`stub ${name} throws NotImplementedError`, async () => {
-      await assert.rejects(call(), forkit.NotImplementedError);
-    });
-  }
+  test("expectRevert fails on a call that succeeds", async () => {
+    await assert.rejects(forkit.expectRevert(Promise.resolve(), "x"), forkit.ForkitAssertionError);
+  });
 });

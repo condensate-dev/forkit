@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import * as forkit from "../src/index.ts";
-import { PUBLIC_FUNCTIONS, STUB_CALLS } from "./public-api.ts";
+import { PUBLIC_FUNCTIONS } from "./public-api.ts";
 
 const exported: Record<string, unknown> = { ...forkit };
 
@@ -11,9 +11,9 @@ describe("public API (vitest)", () => {
     });
   }
 
-  for (const [name, call] of Object.entries(STUB_CALLS)) {
-    test(`stub ${name} throws NotImplementedError`, async () => {
-      await expect(call()).rejects.toBeInstanceOf(forkit.NotImplementedError);
-    });
-  }
+  test("expectRevert fails on a call that succeeds", async () => {
+    await expect(forkit.expectRevert(Promise.resolve(), "x")).rejects.toBeInstanceOf(
+      forkit.ForkitAssertionError,
+    );
+  });
 });

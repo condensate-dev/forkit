@@ -1,9 +1,11 @@
 import { Instance } from "prool";
-import type { Address, Chain } from "viem";
+import type { Address, Chain, Hex } from "viem";
 import { assertAnvilInstalled, freePort, isOpStack } from "./anvil.ts";
+import { expectBalanceChange, type NATIVE } from "./assertions.ts";
 import { createForkClient, type ForkClient, type PrankClient, rawRequest } from "./client.ts";
 import { type DealOptions, dealErc20 } from "./deal.ts";
 import { ForkBootError, ForkitError } from "./errors.ts";
+import { label } from "./labels.ts";
 import { redactUrl, resolveForkUrl, rpcEnvVar } from "./rpc.ts";
 import {
   type RpcCache,
@@ -11,6 +13,7 @@ import {
   resolveCacheSettings,
   startRpcCache,
 } from "./rpc-cache.ts";
+import { formatTrace, traceTransaction } from "./trace.ts";
 import type { Fork, ForkOptions, ForkTarget, SnapshotId } from "./types.ts";
 
 export const DEFAULT_BOOT_TIMEOUT_MS = 120_000;
@@ -51,6 +54,20 @@ export function anvilParameters(
     ...(isOpStack(options.chain) ? { optimism: true } : {}),
     ...(viaCache ? { noStorageCaching: true, noRateLimit: true } : {}),
   };
+}
+
+/** `traces` option, then `FORKIT_TRACES`, then `on-failure`. */
+export function resolveTraces(
+  option: ForkOptions["traces"],
+  env: Readonly<Record<string, string | undefined>> = process.env,
+): boolean {
+  const value = option ?? env.FORKIT_TRACES ?? "on-failure";
+  if (value !== "on-failure" && value !== "off") {
+    throw new ForkitError(
+      `forkit: traces must be "on-failure" or "off", got ${JSON.stringify(value)}`,
+    );
+  }
+  return value === "on-failure";
 }
 
 function toCount(value: bigint | number, what: string): number {
@@ -116,6 +133,8 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
   readonly #stopTimeoutMs: number;
   readonly #pranks = new Map<string, number>();
   readonly #group: ForkGroup;
+  readonly #traces: boolean;
+  readonly #warn: (message: string) => void;
   #stopping: Promise<void> | undefined;
 
   constructor(
@@ -126,11 +145,15 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
     stopTimeoutMs: number,
     group: ForkGroup,
     slot: number,
+    traces: boolean,
+    warn: (message: string) => void,
   ) {
     this.chain = chain;
     this.rpcUrl = rpcUrl;
-    this.client = createForkClient(chain, rpcUrl);
-    this.#anyChainClient = createForkClient<Chain>(chain, rpcUrl);
+    this.#traces = traces;
+    this.#warn = warn;
+    this.client = createForkClient(chain, rpcUrl, undefined, traces, warn);
+    this.#anyChainClient = createForkClient<Chain>(chain, rpcUrl, undefined, traces, warn);
     this.#instance = instance;
     this.#cache = cache;
     this.#stopTimeoutMs = stopTimeoutMs;
@@ -166,7 +189,9 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
     this.#pranks.set(key, depth + 1);
     let result: T;
     try {
-      result = await fn(createForkClient(this.chain, this.rpcUrl, account));
+      result = await fn(
+        createForkClient(this.chain, this.rpcUrl, account, this.#traces, this.#warn),
+      );
     } catch (error) {
       // fn's error is the one that matters; a failure to stop impersonating must not hide it.
       await this.#endPrank(key, account).catch(() => {});
@@ -194,6 +219,23 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
   async roll(blocks: bigint | number): Promise<void> {
     const count = toCount(blocks, "roll blocks");
     if (count > 0) await this.client.mine({ blocks: count });
+  }
+
+  label(address: Address, name: string): void {
+    label(address, name);
+  }
+
+  async trace(hash: Hex): Promise<string> {
+    return formatTrace(await traceTransaction(rawRequest(this.client), hash));
+  }
+
+  expectBalanceChange<T>(
+    token: Address | typeof NATIVE,
+    holder: Address,
+    delta: bigint,
+    fn: () => Promise<T>,
+  ): Promise<T> {
+    return expectBalanceChange(this.client, token, holder, delta, fn);
   }
 
   async snapshot(): Promise<SnapshotId> {
@@ -256,7 +298,10 @@ async function forkOne<TChain extends Chain>(
     );
   }
 
+  // Resolve every option before anything boots: a bad value must throw with no anvil (or RPC
+  // cache) left running behind it.
   const cacheSettings = resolveCacheSettings(options.cache, options.cacheDir);
+  const traces = resolveTraces(options.traces);
   const cache =
     options.blockNumber === undefined || cacheSettings.mode === "off"
       ? undefined
@@ -303,6 +348,8 @@ async function forkOne<TChain extends Chain>(
     options.stopTimeoutMs ?? DEFAULT_STOP_TIMEOUT_MS,
     group,
     slot,
+    traces,
+    warn,
   );
   const servedChainId = await handle.client.getChainId().catch(async (error: unknown) => {
     await handle.stop();

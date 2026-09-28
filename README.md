@@ -11,7 +11,7 @@ Pre-alpha. The design is in [docs/spec.md](docs/spec.md); work lands milestone b
 - [x] **1. Scaffold**: bun workspace, strict TypeScript, biome, CI, and the public API as typed stubs that throw `NotImplementedError`.
 - [x] **2. Core**: `fork()`, deal, prank, warp, roll, snapshot, the vitest adapter, and the fork state cache (record once, replay offline).
 - [x] **3. Multi-chain and every runner**: `fork([base, arbitrum])` with `on(chain)`, and `describeFork` / `itFork` for bun:test, jest and node:test as well as vitest.
-- [ ] 4. Assertions, traces-on-failure, labels.
+- [x] **4. Assertions, traces, labels**: `expectRevert`, `expectEmit`, `expectBalanceChange`; reverted writes carry a decoded, Foundry-style call trace; `label(address, name)`.
 - [ ] 5. Gas snapshots, shared fork across files.
 - [ ] 5b. Simulated cross-chain providers: HTTP quote record/replay, Across and Relay relayer simulators.
 - [ ] 6. ERC-4337 bundler add-on.
@@ -83,6 +83,45 @@ await f.stop();                  // stops both, from either handle
 ```
 
 Every method (`client`, `deal`, `snapshot`, ...) acts on the selected chain. If one chain fails to boot, the others are stopped before the error is thrown. `describeFork` takes the same array, and its per-test isolation snapshots and reverts every chain. Inside a `describeFork` body, `f.on(chain)` works at collection time too: it returns a handle that resolves once the fork is up.
+
+### Assertions
+
+Framework-agnostic: they throw `ForkitAssertionError` (with `actual` and `expected`, so vitest prints a diff) and return what they matched.
+
+```ts
+import { expectBalanceChange, expectEmit, expectRevert, NATIVE } from "@condensate/forkit";
+
+await expectRevert(f.client.writeContract({ ...vault, functionName: "deposit", value: 0n }), "Vault: zero deposit");
+await expectRevert(write, "InsufficientBalance(address,uint256,uint256)");         // signature → selector
+await expectRevert(write, { abi: vaultAbi, errorName: "InsufficientBalance", args: [alice, 0n, 1n] });
+await expectRevert(read, /division or modulo by zero/);                             // panics too
+
+expectEmit(receipt, depositedEvent, { account: alice });                            // partial args match
+await f.expectBalanceChange(USDC, bob, 500_000n, () => pay(bob));                 // or NATIVE; negative for a decrease
+```
+
+A mismatch reads like `expected Error("Vault: zero deposit"), got InsufficientBalance(alice (0x0000…11cE), 0, 1)`, followed by the trace.
+
+### Traces on failure
+
+When `sendTransaction`, `writeContract` or `deployContract` on a fork client reverts, forkit replays the call with `debug_traceCall` and appends the decoded call tree to the error (also available as `traceOf(error)`):
+
+```
+[29461] Vault::audit(5)
+  ├─ [2810] Ledger::check(5) [staticcall]
+  │   └─ ← [Revert] Error("Ledger: not enough entries")
+  └─ ← [Revert] Error("Ledger: not enough entries")
+```
+
+`f.trace(hash)` renders any mined transaction the same way. Calls, return values, custom errors and events decode against known ABIs: ERC-20, every ABI passed to `writeContract` / `deployContract` / `expectRevert`, and anything you `registerAbi(abi)`. Turn traces off with `traces: "off"` or `FORKIT_TRACES=off`.
+
+### Labels
+
+`label(address, "USDC")` (or `f.label`) names an address in every error and trace, like Foundry's `vm.label`. Labels are process-wide.
+
+### How writes behave
+
+Unless you pass `gas`, fork-client writes estimate gas first and send with it, as a real node does. On anvil, an impersonated transaction that reverts would otherwise be mined silently, and you would only get a hash. With automine on, a write returns only once its state is visible, so the next read sees it. Pass an explicit `gas` to mine a reverting transaction on purpose; then `expectRevert(receiptPromise, …, { client: f.client })` decodes it from the trace. With automine off, the estimate runs against `latest`, so a transaction that depends on another one still pending fails at estimation; pass `gas` for it.
 
 anvil must be on `PATH`. If it is missing, test collection fails with an install hint instead of skipping.
 

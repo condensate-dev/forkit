@@ -7,8 +7,16 @@
 
 export { createForkAdapter, type ForkAdapter, type RunnerApi } from "./adapter.ts";
 export { assertAnvilInstalled, freePort, isOpStack } from "./anvil.ts";
-export { expectBalanceChange, expectEmit, expectRevert } from "./assertions.ts";
-export type { ForkClient, PrankClient } from "./client.ts";
+export {
+  type ExpectEmitOptions,
+  type ExpectedRevert,
+  type ExpectRevertOptions,
+  expectBalanceChange,
+  expectEmit,
+  expectRevert,
+  NATIVE,
+} from "./assertions.ts";
+export { type ForkClient, type PrankClient, TRACE_PROPERTY, traceOf } from "./client.ts";
 export {
   type DealOptions,
   type DealStrategy,
@@ -19,10 +27,13 @@ export {
   AnvilNotFoundError,
   DealError,
   ForkBootError,
+  ForkitAssertionError,
   ForkitError,
   NotImplementedError,
 } from "./errors.ts";
 export { DEFAULT_BOOT_TIMEOUT_MS, DEFAULT_STOP_TIMEOUT_MS, fork } from "./fork.ts";
+export { clearLabels, formatAddress, label, labelOf, registerAbi } from "./labels.ts";
+export { type DecodedRevert, decodeRevert, describeRevert, revertOf } from "./revert.ts";
 export { type ResolvedRpc, type RpcSource, resolveForkUrl, rpcEnvVar } from "./rpc.ts";
 export {
   CACHE_DIR_ENV,
@@ -37,4 +48,5 @@ export {
   type ForkTargets,
   type SuiteHooks,
 } from "./suite.ts";
+export { type CallFrame, formatTrace } from "./trace.ts";
 export type { Fork, ForkOptions, ForkTarget, SnapshotId } from "./types.ts";
