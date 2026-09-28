@@ -9,7 +9,9 @@
     "typecheck": "bun run --filter '*' typecheck",
     "lint": "biome check --error-on-warnings .",
     "format": "biome check --write .",
-    "test": "bun run --filter '*' test"
+    "test": "bun run --filter '*' test",
+    "test:anvil": "bun run --filter '*' test:anvil",
+    "test:e2e": "bun run --filter '*' test:e2e"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",

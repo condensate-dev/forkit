@@ -4,17 +4,21 @@
   "description": "Foundry-style fork tests in TypeScript, for any test runner.",
   "type": "module",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./vitest": "./src/vitest.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "test": "bun run test:bun && bun run test:vitest && bun run test:jest && bun run test:node",
     "test:bun": "bun test ./test/bun.test.ts",
-    "test:vitest": "vitest run",
-    "test:jest": "jest",
-    "test:node": "node --test test/node.smoke.ts"
+    "test:vitest": "vitest run --project unit",
+    "test:jest": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "test:node": "node --test test/node.smoke.ts",
+    "test:anvil": "vitest run --project anvil",
+    "test:e2e": "vitest run --project e2e"
   },
   "dependencies": {
+    "prool": "^0.2.16",
     "viem": "^2.56.9"
   },
   "devDependencies": {
@@ -24,5 +28,13 @@
     "@types/bun": "^1.4.2",
     "jest": "^30.5.2",
     "vitest": "^5.0.2"
+  },
+  "peerDependencies": {
+    "vitest": ">=3"
+  },
+  "peerDependenciesMeta": {
+    "vitest": {
+      "optional": true
+    }
   }
 }

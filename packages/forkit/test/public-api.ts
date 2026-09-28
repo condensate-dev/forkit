@@ -1,5 +1,4 @@
 import { parseAbiItem, type TransactionReceipt, zeroAddress } from "viem";
-import { foundry } from "viem/chains";
 import * as forkit from "../src/index.ts";
 
 /** The runtime exports every runner's smoke test checks for. */
@@ -16,11 +15,13 @@ const Transfer = parseAbiItem(
 // A stub never reads its arguments; the cast only satisfies the signature.
 const receipt = { logs: [] } as unknown as TransactionReceipt;
 
-/** One call per stub, each expected to reject with NotImplementedError until its milestone. */
+/**
+ * One call per API that is still a stub, each expected to reject with NotImplementedError until
+ * its milestone (fork is real since milestone 2).
+ */
 export const STUB_CALLS: Readonly<
-  Record<(typeof PUBLIC_FUNCTIONS)[number], () => Promise<unknown>>
+  Record<Exclude<(typeof PUBLIC_FUNCTIONS)[number], "fork">, () => Promise<unknown>>
 > = {
-  fork: () => forkit.fork(foundry),
   expectRevert: () => forkit.expectRevert(Promise.resolve(), "x"),
   // expectEmit throws synchronously; the async wrapper turns that into a rejection.
   expectEmit: async () => forkit.expectEmit(receipt, Transfer),
