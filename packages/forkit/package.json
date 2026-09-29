@@ -11,7 +11,10 @@
     "./node": "./src/node.ts",
     "./http": "./src/http/index.ts",
     "./bridges": "./src/bridges/index.ts",
-    "./4337": "./src/4337/index.ts"
+    "./4337": "./src/4337/index.ts",
+    "./reporter": "./src/reporter/index.ts",
+    "./reporter/setup": "./src/reporter/setup.ts",
+    "./reporter/bun": "./src/reporter/bun.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",

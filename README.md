@@ -60,6 +60,7 @@ The same `describeFork` / `itFork` pair ships for [vitest](docs/getting-started/
 - **Foundry ergonomics**: `deal`, `prank`, `warp`, `roll`, `snapshot`/`revertTo` and `label`. The [cheatcode reference](docs/reference/cheatcodes.md) maps every cheatcode.
 - **Any runner**: vitest, bun:test, jest (native ESM) and node:test, with per-test snapshot isolation and nested `describe` support.
 - **Assertions and traces**: `expectRevert` (reasons, selectors, custom errors), `expectEmit` and `expectBalanceChange`. A reverted write carries a decoded, Foundry-style call trace. See the [guide](docs/guides/assertions-and-traces.md).
+- **Terminal output**: `@condensate/forkit/reporter` prints each fork's boot line, a per-test table of transactions, gas and signed balance changes, bridge fills and a gas snapshot diff; `NO_COLOR`, TTY and CI aware. See the [guide](docs/guides/terminal-output.md).
 - **Record once, replay offline**: the fork cache records every RPC answer at a pinned block, so CI runs fork tests with no network and no RPC key. See the [guide](docs/guides/fork-cache-and-ci.md).
 - **Multi-chain**: `fork([base, arbitrum])` boots the chains in parallel, and `f.on(chain)` selects one. See the [guide](docs/guides/multi-chain.md).
 - **Cross-chain routes**: Across and Relay relayer simulators and `bridge.custom`, plus quote-API record/replay pinned to the fork block. See the [guide](docs/guides/cross-chain.md).

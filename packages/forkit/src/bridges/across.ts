@@ -461,6 +461,7 @@ function acrossSimulator(
     events.map((event) => ({
       event,
       sim: custom(f, {
+        name: "across",
         originEvent: { event: getAbiItem({ abi: spokePoolAbi, name: event }), address },
         destinationOf: (args: Record<string, unknown>) => args.destinationChainId as bigint,
         onDeposit: (context) =>

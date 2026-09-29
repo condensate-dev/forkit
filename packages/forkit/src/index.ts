@@ -31,6 +31,20 @@ export {
   ForkitError,
   NotImplementedError,
 } from "./errors.ts";
+export {
+  type BridgeFillEvent,
+  type ForkBootEvent,
+  type ForkitEvent,
+  type GasSnapshotEvent,
+  type HttpEvent,
+  onForkitEvent,
+  type TestEndEvent,
+  type TestStartEvent,
+  type TxLog,
+  type TxMinedEvent,
+  type TxRevertedEvent,
+  type TxSentEvent,
+} from "./events.ts";
 export { DEFAULT_BOOT_TIMEOUT_MS, DEFAULT_STOP_TIMEOUT_MS, fork } from "./fork.ts";
 export {
   DEFAULT_GAS_SNAPSHOT_FILE,

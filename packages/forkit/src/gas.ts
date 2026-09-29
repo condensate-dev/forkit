@@ -5,6 +5,7 @@
 import { mkdirSync, readFileSync, renameSync, rmdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { ForkitAssertionError, ForkitError } from "./errors.ts";
+import { emitForkitEvent } from "./events.ts";
 
 /**
  * - `write`: record every measurement into the file (default outside CI).
@@ -129,9 +130,23 @@ export async function recordGas(
       `forkit: gas snapshot label ${JSON.stringify(label)} must be one non-empty line without surrounding spaces`,
     );
   }
-  if (settings.mode === "off") return;
+  const emit = (previous: bigint | undefined) =>
+    emitForkitEvent({
+      type: "gas:snapshot",
+      ts: Date.now(),
+      label,
+      gas,
+      mode: settings.mode,
+      file: settings.file,
+      ...(previous === undefined ? {} : { previous }),
+    });
+  if (settings.mode === "off") {
+    emit(read(settings.file).get(label));
+    return;
+  }
   if (settings.mode === "check") {
     const recorded = read(settings.file).get(label);
+    emit(recorded);
     if (recorded === undefined) {
       throw new ForkitAssertionError(
         `forkit: no gas snapshot for "${label}" in ${settings.file}. Record it with ${GAS_SNAPSHOT_ENV}=write and commit the file.`,
@@ -147,6 +162,7 @@ export async function recordGas(
   }
   await withLock(settings.file, () => {
     const entries = read(settings.file);
+    emit(entries.get(label));
     if (entries.get(label) === gas) return;
     entries.set(label, gas);
     const tmp = `${settings.file}.${process.pid}.${Date.now()}.tmp`;

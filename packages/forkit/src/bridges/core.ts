@@ -6,6 +6,7 @@
 import type { AbiEvent, Address, Chain, Hex, Log } from "viem";
 import { parseEventLogs } from "viem";
 import { ForkitError } from "../errors.ts";
+import { emitForkitEvent } from "../events.ts";
 import type { Fork } from "../types.ts";
 
 /** A block, by number and hash. */
@@ -72,6 +73,8 @@ export interface BridgeSimulator<TArgs = Record<string, unknown>> {
 }
 
 export interface CustomBridgeOptions<TEvent extends AbiEvent, TArgs> {
+  /** Name in run events and reports (default `custom`). */
+  name?: string;
   /** The deposit event, and the contract(s) emitting it per origin chain id. */
   originEvent: { event: TEvent; address: Readonly<Record<number, Address | readonly Address[]>> };
   /** Destination chain id of a deposit (e.g. from a `destinationChainId` arg). */
@@ -228,6 +231,18 @@ export function custom<const TEvent extends AbiEvent, TArgs = Record<string, unk
         ...(result?.details === undefined ? {} : { details: result.details }),
       };
       fills.push(fill);
+      emitForkitEvent({
+        type: "bridge:fill",
+        ts: Date.now(),
+        bridge: options.name ?? "custom",
+        depositId: deposit.id,
+        originChainId: deposit.originChainId,
+        destinationChainId: deposit.destinationChainId,
+        depositTxHash: deposit.txHash,
+        txHashes: fill.txHashes,
+        ...(fill.outputAmount === undefined ? {} : { outputAmount: fill.outputAmount }),
+        ...(fill.details === undefined ? {} : { details: fill.details }),
+      });
       made.push(fill);
     }
     return made;

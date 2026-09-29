@@ -257,6 +257,7 @@ function relaySimulator(f: MultiFork, options: RelayOptions = {}): RelaySimulato
           ? relayErc20DepositEvent
           : fundsForwardedWithDataEvent;
     const sim = custom<typeof event, Record<string, unknown>>(f, {
+      name: "relay",
       originEvent: { event, address },
       destinationOf: (args, origin) => destinationOf(kind, args, origin),
       onDeposit: (context) => onDeposit(kind, context),

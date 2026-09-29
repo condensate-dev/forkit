@@ -6,6 +6,7 @@
  * is active at a time: two layers of mocks over one global would make it unclear who answered.
  */
 import { ForkitError } from "../errors.ts";
+import { emitForkitEvent, type HttpEvent } from "../events.ts";
 import {
   decodeBody,
   encodeBody,
@@ -298,6 +299,16 @@ export function use(options: HttpOptions): HttpFixtures {
   const inflight = new Set<Promise<unknown>>();
   let intercepting = true;
 
+  const note = (fixture: FixtureRequest, outcome: HttpEvent["outcome"]): void =>
+    emitForkitEvent({
+      type: "http:request",
+      ts: Date.now(),
+      fixture: options.name,
+      method: fixture.method,
+      url: fixture.url,
+      outcome,
+    });
+
   async function forward(
     request: Request,
     fixture: FixtureRequest,
@@ -306,10 +317,12 @@ export function use(options: HttpOptions): HttpFixtures {
     const response = await original(request);
     if (!canRecord) {
       passthrough++;
+      note(fixture, "passthrough");
       return response;
     }
     if (mode === "auto" && isTransient(response.status)) {
       passthrough++;
+      note(fixture, "passthrough");
       warn(
         `forkit/http: not recording ${fixture.method} ${fixture.url}: HTTP ${response.status} is a transient or auth failure.`,
       );
@@ -328,6 +341,7 @@ export function use(options: HttpOptions): HttpFixtures {
     const list = session.get(key) ?? [];
     list.push(entry);
     session.set(key, list);
+    note(fixture, "recorded");
     return response;
   }
 
@@ -344,6 +358,7 @@ export function use(options: HttpOptions): HttpFixtures {
         slot.next++;
         if (response !== undefined) {
           hits++;
+          note(fixture, "hit");
           return toResponse(response, request.url);
         }
       }
@@ -351,12 +366,16 @@ export function use(options: HttpOptions): HttpFixtures {
         console.error(`forkit/http miss: ${fixture.method} ${fixture.url}`);
       }
       // A miss `auto` records is expected; one that nothing records is worth reporting.
-      if (mode === "replay" || !canRecord) unmatched.push(`${fixture.method} ${fixture.url}`);
+      if (mode === "replay" || !canRecord) {
+        unmatched.push(`${fixture.method} ${fixture.url}`);
+        note(fixture, "unmatched");
+      }
       if (mode === "replay") {
         if (options.unmatched !== "passthrough") {
           throw new HttpUnmatchedError(fixture.method, fixture.url, path, file !== undefined);
         }
         passthrough++;
+        note(fixture, "passthrough");
         return original(request);
       }
     }

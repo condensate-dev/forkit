@@ -11,6 +11,7 @@ import {
 } from "./client.ts";
 import { type DealOptions, dealErc20 } from "./deal.ts";
 import { ForkBootError, ForkitError } from "./errors.ts";
+import { emitForkitEvent } from "./events.ts";
 import { type GasSnapshotSettings, recordGas, resolveGasSettings } from "./gas.ts";
 import { label } from "./labels.ts";
 import { redactUrl, resolveForkUrl, rpcEnvVar } from "./rpc.ts";
@@ -361,6 +362,7 @@ async function forkOne<TChain extends Chain>(
   const where = `${chain.name} (${chain.id}) via ${redactUrl(rpc.url)}${
     options.blockNumber === undefined ? "" : ` at block ${options.blockNumber}`
   }`;
+  const bootStarted = Date.now();
   try {
     await withTimeout(
       instance.start(),
@@ -410,6 +412,18 @@ async function forkOne<TChain extends Chain>(
       `forkit: ${redactUrl(rpc.url)} serves chain ${servedChainId}, but the fork asked for ${chain.name} (${chain.id}).`,
     );
   }
+  const cacheStats = handle.cacheStats();
+  emitForkitEvent({
+    type: "fork:boot",
+    ts: Date.now(),
+    chainId: chain.id,
+    chainName: chain.name,
+    ...(options.blockNumber === undefined ? {} : { blockNumber: options.blockNumber }),
+    upstream: redactUrl(rpc.url),
+    rpcUrl,
+    ...(cacheStats === undefined ? {} : { cache: cacheStats }),
+    bootMs: Date.now() - bootStarted,
+  });
   return handle;
 }
 

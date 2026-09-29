@@ -1,6 +1,7 @@
 import { type Address, parseEther } from "viem";
 import { foundry } from "viem/chains";
 import { afterAll, describe, expect } from "vitest";
+import { onForkitEvent, type TestEndEvent, type TestStartEvent } from "../../src/index.ts";
 import * as vitestAdapter from "../../src/vitest.ts";
 import { describeFork, itFork } from "../../src/vitest.ts";
 import { adapterContract, startUpstreams } from "./adapter-contract.ts";
@@ -11,6 +12,10 @@ const alice: Address = "0x00000000000000000000000000000000000a11ce";
 // module load and hand describeFork URLs we know now.
 const upstreams = await startUpstreams();
 afterAll(() => upstreams.stop());
+const testEvents: (TestStartEvent | TestEndEvent)[] = [];
+onForkitEvent((e) => {
+  if (e.type === "test:start" || e.type === "test:end") testEvents.push(e);
+});
 
 describeFork(
   "describeFork",
@@ -27,6 +32,17 @@ describeFork(
 
     itFork("the handle is the same object in both styles", async (g) => {
       expect(g.rpcUrl).toBe(f.rpcUrl);
+    });
+
+    itFork("emits test:start before and test:end after each itFork", async () => {
+      const mine = testEvents.filter(
+        (e) => e.name === "emits test:start before and test:end after each itFork",
+      );
+      expect(mine.map((e) => e.type)).toEqual(["test:start"]);
+      const earlier = testEvents.find(
+        (e) => e.type === "test:end" && e.name === "the first test changes state",
+      );
+      expect(earlier).toMatchObject({ suite: "describeFork", status: "pass" });
     });
 
     describe("a nested describe", () => {

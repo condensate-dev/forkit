@@ -11,6 +11,7 @@ import {
   publicActions,
   walletActions,
 } from "viem";
+import { emitForkitEvent, hasForkitListeners, type TxLog, type TxSentEvent } from "./events.ts";
 import { registerAbi } from "./labels.ts";
 import { isRevertError } from "./revert.ts";
 import { formatTrace, type RpcCallRequest, traceCall } from "./trace.ts";
@@ -103,6 +104,83 @@ async function waitForNonce(
   }
 }
 
+interface RpcReceipt {
+  status: Hex;
+  from: Address;
+  to: Address | null;
+  contractAddress?: Address | null;
+  blockNumber: Hex;
+  gasUsed: Hex;
+  effectiveGasPrice?: Hex;
+  logs: { address: Address; topics: Hex[]; data: Hex; logIndex: Hex }[];
+}
+
+const RECEIPT_TRIES = 20;
+
+/**
+ * Read a just-sent transaction's receipt and emit `tx:mined`, for reporters and run records. It
+ * runs inside the test, before the per-test `evm_revert` after which anvil may not find the
+ * transaction. Best effort: with automine off (no receipt yet) or on any error, nothing is emitted.
+ */
+async function emitMined(request: RawRequest, chainId: number, url: string, hash: Hex) {
+  try {
+    if ((await request({ method: "anvil_getAutomine" })) !== true) return;
+    let receipt: RpcReceipt | null = null;
+    for (let i = 0; i < RECEIPT_TRIES && receipt === null; i++) {
+      if (i > 0) await new Promise((ok) => setTimeout(ok, 5));
+      receipt = (await request({
+        method: "eth_getTransactionReceipt",
+        params: [hash],
+      })) as RpcReceipt | null;
+    }
+    if (receipt === null) return;
+    const logs: TxLog[] = receipt.logs.map((log) => ({
+      address: log.address,
+      topics: log.topics,
+      data: log.data,
+      logIndex: Number(BigInt(log.logIndex)),
+    }));
+    emitForkitEvent({
+      type: "tx:mined",
+      ts: Date.now(),
+      chainId,
+      rpcUrl: url,
+      hash,
+      status: BigInt(receipt.status) === 1n ? "success" : "reverted",
+      from: receipt.from,
+      ...(receipt.to === null ? {} : { to: receipt.to }),
+      ...(receipt.contractAddress ? { contractAddress: receipt.contractAddress } : {}),
+      blockNumber: BigInt(receipt.blockNumber),
+      gasUsed: BigInt(receipt.gasUsed),
+      effectiveGasPrice: BigInt(receipt.effectiveGasPrice ?? "0x0"),
+      logs,
+    });
+  } catch {
+    // Observability must never break a write.
+  }
+}
+
+/** The event fields that describe a write: from, to, calldata, value, function name. */
+function describeTx(
+  args: TxArgs,
+  from: Address | undefined,
+  toCall: (args: TxArgs) => Omit<RpcCallRequest, "from" | "value">,
+): Pick<TxSentEvent, "from" | "to" | "data" | "value" | "functionName"> {
+  let call: Omit<RpcCallRequest, "from" | "value"> = {};
+  try {
+    call = toCall(args);
+  } catch {
+    // Unencodable args: the send itself will say why; the event just lacks calldata.
+  }
+  return {
+    ...(from === undefined ? {} : { from }),
+    ...(call.to === undefined ? {} : { to: call.to }),
+    ...(call.data === undefined ? {} : { data: call.data }),
+    ...(args.value === undefined ? {} : { value: args.value }),
+    ...(args.functionName === undefined ? {} : { functionName: args.functionName }),
+  };
+}
+
 /** Build the viem client forkit hands out: test + public + wallet actions over one anvil. */
 export function createForkClient<
   TChain extends Chain,
@@ -146,6 +224,7 @@ export function createForkClient<
     args: object,
   ) => Promise<bigint>;
   const wrap = <F>(
+    kind: TxSentEvent["kind"],
     action: F,
     toCall: (args: TxArgs) => Omit<RpcCallRequest, "from" | "value">,
     estimate: (args: TxArgs, account: Address) => Promise<bigint>,
@@ -162,8 +241,18 @@ export function createForkClient<
             : args;
         const nonce = from === undefined ? undefined : await nonceOf(request, from);
         const hash = (await send(sendArgs)) as Hex;
+        emitForkitEvent({
+          type: "tx:sent",
+          ts: Date.now(),
+          chainId: chain.id,
+          rpcUrl: url,
+          hash,
+          kind,
+          ...describeTx(args, from, toCall),
+        });
         if (from !== undefined && nonce !== undefined)
           await waitForNonce(request, from, nonce, warn);
+        if (hasForkitListeners()) await emitMined(request, chain.id, url, hash);
         return hash;
       } catch (error) {
         if (traces) {
@@ -173,6 +262,18 @@ export function createForkClient<
             ...toCall(args),
           }));
         }
+        if (isRevertError(error)) {
+          emitForkitEvent({
+            type: "tx:reverted",
+            ts: Date.now(),
+            chainId: chain.id,
+            rpcUrl: url,
+            kind,
+            ...describeTx(args, from, toCall),
+            message: error instanceof Error ? (error.message.split("\n")[0] ?? "") : String(error),
+            ...(traceOf(error) === undefined ? {} : { trace: traceOf(error) as string }),
+          });
+        }
         throw error;
       }
     }) as unknown as F;
@@ -181,6 +282,7 @@ export function createForkClient<
     encodeDeployData({ abi: a.abi ?? [], bytecode: a.bytecode ?? "0x", args: a.args ?? [] });
   return base.extend(() => ({
     sendTransaction: wrap(
+      "sendTransaction",
       base.sendTransaction,
       (a) => ({
         ...(a.to ? { to: a.to } : {}),
@@ -189,6 +291,7 @@ export function createForkClient<
       (a, account) => estimateGas({ ...a, account }),
     ),
     writeContract: wrap(
+      "writeContract",
       base.writeContract,
       (a) => ({
         ...(a.address === undefined ? {} : { to: a.address }),
@@ -201,6 +304,7 @@ export function createForkClient<
       (a, account) => estimateContractGas({ ...a, account }),
     ),
     deployContract: wrap(
+      "deployContract",
       base.deployContract,
       (a) => ({ data: deployData(a) }),
       (a, account) =>

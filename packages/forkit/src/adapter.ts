@@ -4,6 +4,8 @@
  */
 import type { Chain } from "viem";
 import { ForkitError } from "./errors.ts";
+import { emitForkitEvent } from "./events.ts";
+import { formatValue } from "./format.ts";
 import {
   createForkSuite,
   type ForkSuiteOptions,
@@ -56,7 +58,18 @@ export interface ForkAdapter {
   ): void;
 }
 
+/** A failed expectation's actual and expected values, rendered, when the error carries both. */
+function expectation(error: unknown): { actual?: string; expected?: string } {
+  if (typeof error !== "object" || error === null) return {};
+  if (!("actual" in error) || !("expected" in error)) return {};
+  const { actual, expected } = error as { actual: unknown; expected: unknown };
+  if (actual === undefined && expected === undefined) return {};
+  const render = (value: unknown) => (typeof value === "string" ? value : formatValue(value));
+  return { actual: render(actual), expected: render(expected) };
+}
+
 const OUTSIDE = "forkit: itFork must be called inside a describeFork body.";
+let lastTestId = 0;
 
 export function createForkAdapter(runner: RunnerApi): ForkAdapter {
   // itFork resolves its fork when the test runs, from a stack that each describeFork's
@@ -64,7 +77,7 @@ export function createForkAdapter(runner: RunnerApi): ForkAdapter {
   // nearest enclosing describeFork, whatever order the runner collects nested `describe`
   // bodies in: jest and node:test run them inside the parent's body, but vitest and bun:test run
   // them after it returns, when a collection-time stack would already be empty.
-  const running: object[] = [];
+  const running: { handle: object; suite: string }[] = [];
   // Only for early errors: the describeFork bodies being collected, and (vitest) their suites.
   const collecting: object[] = [];
   const suites = new WeakSet<SuiteNode>();
@@ -81,7 +94,7 @@ export function createForkAdapter(runner: RunnerApi): ForkAdapter {
       runner.describe(name, () => {
         const handle = createForkSuite(targets, runner.hooks, options);
         runner.hooks.beforeEach(() => {
-          running.push(handle);
+          running.push({ handle, suite: name });
         });
         runner.hooks.afterEach(() => {
           running.pop();
@@ -104,10 +117,34 @@ export function createForkAdapter(runner: RunnerApi): ForkAdapter {
       if (insideDescribeFork() === false) throw new ForkitError(OUTSIDE);
       runner.it(
         name,
-        () => {
-          const handle = running.at(-1);
-          if (handle === undefined) throw new ForkitError(OUTSIDE);
-          return fn(handle as Fork<TChain>);
+        async () => {
+          const current = running.at(-1);
+          if (current === undefined) throw new ForkitError(OUTSIDE);
+          const testId = ++lastTestId;
+          const started = Date.now();
+          const base = { testId, suite: current.suite, name };
+          emitForkitEvent({ type: "test:start", ts: started, ...base });
+          try {
+            await fn(current.handle as Fork<TChain>);
+          } catch (error) {
+            emitForkitEvent({
+              type: "test:end",
+              ts: Date.now(),
+              ...base,
+              status: "fail",
+              durationMs: Date.now() - started,
+              error: error instanceof Error ? error.message : String(error),
+              ...expectation(error),
+            });
+            throw error;
+          }
+          emitForkitEvent({
+            type: "test:end",
+            ts: Date.now(),
+            ...base,
+            status: "pass",
+            durationMs: Date.now() - started,
+          });
         },
         timeoutMs,
       );
