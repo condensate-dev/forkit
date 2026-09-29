@@ -14,7 +14,7 @@ Pre-alpha. The design is in [docs/spec.md](docs/spec.md); work lands milestone b
 - [x] **4. Assertions, traces, labels**: `expectRevert`, `expectEmit`, `expectBalanceChange`; reverted writes carry a decoded, Foundry-style call trace; `label(address, name)`.
 - [x] **5. Gas snapshots and a shared fork**: `f.gasSnapshot(label, tx)` writes or checks a `.gas-snapshot` file, like `forge snapshot`; `startSharedForks()` in a global setup boots one fork that every file attaches to.
 - [x] **5b. Simulated cross-chain providers**: `@condensate/forkit/http` records quote APIs and replays them pinned to the fork block; `@condensate/forkit/bridges` has Across and Relay relayer simulators plus `bridge.custom`; the Base → Arbitrum e2e runs offline.
-- [ ] 6. ERC-4337 bundler add-on.
+- [x] **6. ERC-4337 bundler**: `bundler(f)` from `@condensate/forkit/4337` runs Pimlico's alto against a fork with funded executors, so user operations from real smart accounts land on forked EntryPoints. See [docs/4337.md](docs/4337.md).
 - [ ] 7. Docs, landscape comparison, npm publish.
 
 The package is `"private": true` and unpublished until the maintainers say otherwise.
@@ -238,10 +238,10 @@ Fees are configurable, and every fill reports its fee in `details`. `test/e2e/ba
 ```
 packages/
   forkit/        @condensate/forkit: core; subpath exports for the runner adapters
-                 (/vitest, /bun, /jest, /node), /http and /bridges
+                 (/vitest, /bun, /jest, /node), /http, /bridges and /4337
 ```
 
-The bridge simulators (`/bridges`) and HTTP record/replay (`/http`) need nothing beyond viem, so they are subpath exports of the core package. Add-ons with their own dependencies, such as the 4337 bundler, get their own workspace package under `packages/`.
+The bridge simulators (`/bridges`) and HTTP record/replay (`/http`) need nothing beyond viem, so they are subpath exports of the core package. The 4337 bundler (`/4337`) is a subpath too: alto is an optional peer dependency that runs as a separate process, so nothing is pulled in unless you install it.
 
 ## Development
 

@@ -10,7 +10,8 @@
     "./jest": "./src/jest.ts",
     "./node": "./src/node.ts",
     "./http": "./src/http/index.ts",
-    "./bridges": "./src/bridges/index.ts"
+    "./bridges": "./src/bridges/index.ts",
+    "./4337": "./src/4337/index.ts"
   },
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
@@ -28,18 +29,24 @@
   },
   "devDependencies": {
     "@jest/globals": "^30.5.2",
+    "@pimlico/alto": "0.0.21",
     "@swc/core": "^1.16.2",
     "@swc/jest": "^0.2.39",
     "@types/bun": "^1.4.2",
+    "@types/node": "26.6.3",
     "jest": "^30.5.2",
     "vitest": "^5.0.2"
   },
   "peerDependencies": {
     "@jest/globals": ">=29",
+    "@pimlico/alto": ">=0.0.21",
     "vitest": ">=3"
   },
   "peerDependenciesMeta": {
     "@jest/globals": {
+      "optional": true
+    },
+    "@pimlico/alto": {
       "optional": true
     },
     "vitest": {
