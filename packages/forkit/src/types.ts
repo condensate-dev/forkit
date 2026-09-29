@@ -84,8 +84,10 @@ export interface Fork<TChain extends Chain = Chain> {
   /** Impersonate `account` for the duration of `fn`; impersonation stops afterwards. */
   prank<T>(account: Address, fn: (client: PrankClient<TChain>) => Promise<T>): Promise<T>;
   /**
-   * Advance block time by `seconds` (relative, unlike Foundry's absolute `vm.warp(timestamp)`)
-   * and mine one block, so the new timestamp is visible. `warp(0)` still mines that block.
+   * Advance block time by at least `seconds` (relative, unlike Foundry's absolute
+   * `vm.warp(timestamp)`) and mine one block, so the new timestamp is visible. anvil's clock also
+   * follows wall time, so the step can be a little more; for an exact timestamp use
+   * `client.setNextBlockTimestamp` and `client.mine`. `warp(0)` still mines that block.
    */
   warp(seconds: bigint | number): Promise<void>;
   /**

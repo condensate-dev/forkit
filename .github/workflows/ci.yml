@@ -60,3 +60,7 @@ jobs:
       - run: bun run test:e2e
         env:
           FORKIT_CACHE: offline
+      # examples/*: each replays its own committed recording (examples/*/.forkit-cache).
+      - run: bun run test:examples
+        env:
+          FORKIT_CACHE: offline

@@ -14,7 +14,7 @@
  * response (`b.expectQuote(quote)`). On `settle()`, for each deposit, an impersonated and funded solver
  * pays the recipient on the destination fork (a native transfer or an ERC-20 `transfer`), then runs
  * the order's calls, if any, through Relay's router `multicall`, as Relay's quotes route them.
- * See docs/bridges-relay.md.
+ * See docs/guides/bridges-relay.md.
  */
 import {
   type Address,

@@ -3,15 +3,17 @@
   "private": true,
   "type": "module",
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ],
   "scripts": {
     "typecheck": "bun run --filter '*' typecheck",
     "lint": "biome check --error-on-warnings .",
     "format": "biome check --write .",
-    "test": "bun run --filter '*' test",
+    "test": "bun run --filter './packages/*' test",
     "test:anvil": "bun run --filter '*' test:anvil",
-    "test:e2e": "bun run --filter '*' test:e2e"
+    "test:e2e": "bun run --filter '*' test:e2e",
+    "test:examples": "bun run --filter './examples/*' test"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",

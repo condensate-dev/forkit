@@ -33,7 +33,7 @@ await http.with({ name: "relay/base-arb", blockNumber: BLOCK }, async (h) => {
 Every `fetch` to a non-loopback host, except JSON-RPC. The fork's own traffic stays out of the fixtures:
 
 - viem clients talk to anvil on `127.0.0.1`;
-- the [fork cache](../README.md#fast-deterministic-runs-the-fork-cache) records the upstream JSON-RPC by block, and it does that better.
+- the [fork cache](fork-cache-and-ci.md) records the upstream JSON-RPC by block, and it does that better.
 
 Pass `hosts: ["api.0x.org", "api.relay.link"]` to intercept only those hosts (`host` or `host:port`, which is also how a local stub server is included). Anything not intercepted goes to the network untouched and does not appear in the stats.
 

@@ -1,0 +1,17 @@
+{
+  "name": "forkit-example-bun-multichain",
+  "private": true,
+  "description": "forkit example: fork Base and Optimism side by side (bun:test).",
+  "type": "module",
+  "scripts": {
+    "test": "bun test --timeout 60000 ./test",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@condensate/forkit": "workspace:*",
+    "viem": "^2.56.9"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.4.2"
+  }
+}

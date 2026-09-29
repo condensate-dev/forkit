@@ -1,0 +1,21 @@
+{
+  "name": "forkit-example-jest-bridge",
+  "private": true,
+  "description": "forkit example: Base USDC to Arbitrum through a simulated Across relayer (jest).",
+  "type": "module",
+  "scripts": {
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@condensate/forkit": "workspace:*",
+    "viem": "^2.56.9"
+  },
+  "devDependencies": {
+    "@jest/globals": "^30.5.2",
+    "@swc/core": "^1.16.2",
+    "@swc/jest": "^0.2.39",
+    "@types/node": "26.6.3",
+    "jest": "^30.5.2"
+  }
+}

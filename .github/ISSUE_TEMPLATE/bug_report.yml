@@ -1,0 +1,33 @@
+name: Bug report
+description: Something in forkit doesn't work as documented
+labels: ["area:forkit"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you ran, what you expected, and what you got instead. Paste the full error, including forkit's trace if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: A test file (the chain, pinned block and runner) that shows the problem. Say whether it fails with `FORKIT_CACHE=offline`, live, or both.
+      render: ts
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Versions
+      description: "`anvil --version`, the runner and its version, Node/bun version, and the forkit commit or version"
+    validations:
+      required: true
+  - type: dropdown
+    id: runner
+    attributes:
+      label: Runner
+      options: [vitest, bun:test, jest, node:test, other]
+    validations:
+      required: true

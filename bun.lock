@@ -9,6 +9,41 @@
         "typescript": "^7.0.2",
       },
     },
+    "examples/bun-multichain": {
+      "name": "forkit-example-bun-multichain",
+      "dependencies": {
+        "@condensate/forkit": "workspace:*",
+        "viem": "^2.56.9",
+      },
+      "devDependencies": {
+        "@types/bun": "^1.4.2",
+      },
+    },
+    "examples/jest-bridge": {
+      "name": "forkit-example-jest-bridge",
+      "dependencies": {
+        "@condensate/forkit": "workspace:*",
+        "viem": "^2.56.9",
+      },
+      "devDependencies": {
+        "@jest/globals": "^30.5.2",
+        "@swc/core": "^1.16.2",
+        "@swc/jest": "^0.2.39",
+        "@types/node": "26.6.3",
+        "jest": "^30.5.2",
+      },
+    },
+    "examples/vitest-swap": {
+      "name": "forkit-example-vitest-swap",
+      "dependencies": {
+        "@condensate/forkit": "workspace:*",
+        "viem": "^2.56.9",
+      },
+      "devDependencies": {
+        "@types/node": "26.6.3",
+        "vitest": "^5.0.2",
+      },
+    },
     "packages/forkit": {
       "name": "@condensate/forkit",
       "dependencies": {
@@ -27,10 +62,12 @@
       },
       "peerDependencies": {
         "@jest/globals": ">=29",
+        "@pimlico/alto": ">=0.0.21",
         "vitest": ">=3",
       },
       "optionalPeers": [
         "@jest/globals",
+        "@pimlico/alto",
         "vitest",
       ],
     },
@@ -813,6 +850,12 @@
     "follow-redirects": ["follow-redirects@1.16.0", "", {}, "sha512-y5rN/uOsadFT/JfYwhxRS5R7Qce+g3zG97+JrtFZlC9klX/W5hD7iiLzScI4nZqUS7DNUdhPgw4xI8W2LuXlUw=="],
 
     "foreground-child": ["foreground-child@3.3.1", "", { "dependencies": { "cross-spawn": "^7.0.6", "signal-exit": "^4.0.1" } }, "sha512-gIXjKqtFuWEgzFRJA9WCQeSJLZDjgJUOMCMzxtvFq/37KojM1BFGufqsCy0r4qSQmYLsZYMeyRqzIWOMup03sw=="],
+
+    "forkit-example-bun-multichain": ["forkit-example-bun-multichain@workspace:examples/bun-multichain"],
+
+    "forkit-example-jest-bridge": ["forkit-example-jest-bridge@workspace:examples/jest-bridge"],
+
+    "forkit-example-vitest-swap": ["forkit-example-vitest-swap@workspace:examples/vitest-swap"],
 
     "forwarded": ["forwarded@0.2.0", "", {}, "sha512-buRG0fpBtRHSTCOASe6hD258tEubFoRLb4ZNA6NxMVHNw2gOcwHo9wyablzMzOA5z9xA9L1KNjk/Nt6MT9aYow=="],
 

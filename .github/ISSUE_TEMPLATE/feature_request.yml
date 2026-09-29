@@ -1,0 +1,16 @@
+name: Feature request
+description: A Foundry cheatcode, runner or chain feature forkit should support
+labels: ["area:forkit"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: What you're trying to test
+      description: The test you want to write, and what gets in the way today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What forkit could offer
+      description: The API you'd like. If it mirrors a Foundry cheatcode, name it.

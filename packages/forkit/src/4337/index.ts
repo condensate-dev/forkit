@@ -233,7 +233,7 @@ const INCLUDED_WAIT_MS = 10_000;
  *
  * Start it before taking snapshots (in `beforeAll`, not inside a test): alto deploys helper
  * contracts and forkit funds its executors when it starts, and reverting to an earlier snapshot
- * would undo both. Per-test snapshot/revert after that is fine; see "Reverts" in docs/4337.md for
+ * would undo both. Per-test snapshot/revert after that is fine; see "Reverts" in docs/guides/erc-4337.md for
  * what forkit does so that alto keeps bundling across them.
  */
 export async function bundler<TChain extends Chain>(

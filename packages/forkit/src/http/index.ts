@@ -9,7 +9,7 @@
  * ```
  *
  * `FORKIT_HTTP=record|replay|auto|off` picks the mode; CI (`CI` set) replays by default, with no
- * network and no API keys. See docs/http.md.
+ * network and no API keys. See docs/guides/http-replay.md.
  */
 import { record, replay, use, withHttp } from "./intercept.ts";
 

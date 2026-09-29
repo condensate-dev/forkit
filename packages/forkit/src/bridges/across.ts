@@ -11,7 +11,7 @@
  * with `ExpiredFillDeadline` once `fillDeadline < block.timestamp`; it pulls `outputAmount` of the
  * output token from the caller, sends it to the recipient (unwrapping WETH for EOAs), then calls
  * `handleV3AcrossMessage(token, amount, relayer, message)` on a contract recipient when the
- * message is not empty. See docs/bridges-across.md.
+ * message is not empty. See docs/guides/bridges-across.md.
  */
 import {
   type Address,
