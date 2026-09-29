@@ -113,3 +113,26 @@ This slots in as **milestone 5b**, after assertions and traces:
 1. HTTP record and replay.
 2. Across and Relay simulators.
 3. An e2e test: Base USDC → Arbitrum via simulated Across, asserting that the recipient's balance changed on the destination fork and that the fee accounting is right.
+
+## Developer experience (2026-09-29)
+
+### Milestone 8: terminal output
+Readable output in any runner. Honour NO_COLOR and TTY detection, and fall back to plain text in CI logs.
+- **Fork boot line:** chain, block, RPC host with secrets masked, cache hit or miss, and boot ms.
+- **Per-test summary:** txs sent, gas used, and balance changes as a compact table of labelled addresses per token, with signs.
+- **Failure trace:** Foundry-style indented call trace with decoded function names, args and revert reasons, using labels and known ABIs. Show the failing assertion with an expected-vs-actual diff.
+- **Bridge simulator lines:** deposit id, origin to destination, fill tx, fee, and settled amount.
+- **Gas snapshot diff:** a table vs the committed snapshot, with coloured deltas.
+Provide `forkit/reporter` for vitest and bun, plus a plain `formatRun()` for the other runners.
+
+### Milestone 9: post-test explorer (`forkit explore`)
+Each run can write a run record, `.forkit/runs/<id>.json`: forks, blocks, every tx (to, calldata, decoded call, logs, gas, status, trace), labels, balance deltas, bridge fills, and HTTP replay hits. `forkit explore [run]` serves a local, read-only web UI with:
+- a run list;
+- per-test timelines;
+- a tx view with a decoded call tree and events (like a block explorer, but for your test);
+- an address view with labels and balance history;
+- cross-chain fills linked origin to destination.
+It must be offline, need no external services, and ship as static assets inside the package. There is a screenshot test at 390 and 1440 px.
+
+### Milestone 10: condensate.dev/forkit page
+A single static page under `site/forkit/` (index.html plus assets): pitch, install, a 20-line quickstart, a "Foundry cheatcode → forkit" table, terminal-output and explorer screenshots, the cross-chain example, and links. It is built for a Cloudflare Pages subpath with no framework, and it must work under `/forkit/`. Do NOT deploy it. the maintainers deploy it to condensate.dev.
