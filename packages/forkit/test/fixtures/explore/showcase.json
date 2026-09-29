@@ -1,0 +1,2424 @@
+{
+  "version": 1,
+  "id": "showcase",
+  "cwd": "<forkit>",
+  "startedAt": 1790651809701,
+  "updatedAt": 1790651817504,
+  "workers": [
+    {
+      "worker": "5270-f83f5e",
+      "pid": 5270,
+      "argv": ["vitest/dist/workers/forks.js"],
+      "startedAt": 1790651809701,
+      "updatedAt": 1790651817504
+    }
+  ],
+  "forks": [
+    {
+      "worker": "5270-f83f5e",
+      "ts": 1790651811206,
+      "chainId": 42161,
+      "chainName": "Arbitrum One",
+      "nativeSymbol": "ETH",
+      "blockNumber": "509730857",
+      "upstream": "https://arb1.arbitrum.io/rpc",
+      "rpcUrl": "http://127.0.0.1:59932",
+      "bootMs": 991,
+      "cache": {
+        "mode": "readwrite",
+        "hits": 42,
+        "misses": 0,
+        "entries": 79
+      }
+    },
+    {
+      "worker": "5270-f83f5e",
+      "ts": 1790651811345,
+      "chainId": 8453,
+      "chainName": "Base",
+      "nativeSymbol": "ETH",
+      "blockNumber": "51907866",
+      "upstream": "https://mainnet.base.org/",
+      "rpcUrl": "http://127.0.0.1:59931",
+      "bootMs": 1242,
+      "cache": {
+        "mode": "readwrite",
+        "hits": 43,
+        "misses": 0,
+        "entries": 82
+      }
+    },
+    {
+      "worker": "5270-f83f5e",
+      "ts": 1790651816798,
+      "chainId": 8453,
+      "chainName": "Base",
+      "nativeSymbol": "ETH",
+      "blockNumber": "51800000",
+      "upstream": "https://mainnet.base.org/",
+      "rpcUrl": "http://127.0.0.1:60098",
+      "bootMs": 273,
+      "cache": {
+        "mode": "readwrite",
+        "hits": 43,
+        "misses": 0,
+        "entries": 108
+      }
+    }
+  ],
+  "tests": [
+    {
+      "key": "5270-f83f5e:1",
+      "worker": "5270-f83f5e",
+      "suite": "Base → Arbitrum via simulated Across",
+      "name": "bridges 1,000 USDC to bob on Arbitrum",
+      "status": "pass",
+      "startedAt": 1790651811458,
+      "durationMs": 4461
+    },
+    {
+      "key": "5270-f83f5e:2",
+      "worker": "5270-f83f5e",
+      "suite": "Base → Arbitrum via simulated Across",
+      "name": "a deposit above alice's balance reverts",
+      "status": "pass",
+      "startedAt": 1790651815950,
+      "durationMs": 458
+    },
+    {
+      "key": "5270-f83f5e:3",
+      "worker": "5270-f83f5e",
+      "suite": "Base → Arbitrum via simulated Across",
+      "name": "fails on purpose: expects bob to receive the full input",
+      "status": "fail",
+      "startedAt": 1790651816451,
+      "durationMs": 28,
+      "error": "the relay fee comes out of the output: expected 999890778n to be 1000000000n // Object.is equality"
+    },
+    {
+      "key": "5270-f83f5e:4",
+      "worker": "5270-f83f5e",
+      "suite": "Base: swap USDC for WETH on Uniswap v3",
+      "name": "swaps 1,000 USDC for WETH through SwapRouter02",
+      "status": "pass",
+      "startedAt": 1790651816800,
+      "durationMs": 548
+    },
+    {
+      "key": "5270-f83f5e:5",
+      "worker": "5270-f83f5e",
+      "suite": "Base: swap USDC for WETH on Uniswap v3",
+      "name": "each test starts from the pinned snapshot",
+      "status": "pass",
+      "startedAt": 1790651817493,
+      "durationMs": 11
+    }
+  ],
+  "txs": [
+    {
+      "id": "5270-f83f5e:1",
+      "test": "5270-f83f5e:1",
+      "worker": "5270-f83f5e",
+      "ts": 1790651812306,
+      "chainId": 8453,
+      "kind": "writeContract",
+      "hash": "0xb6c8cd5c2a2cbeb679320221e025053397e9a60206d35338ca9aad3d3a30eb59",
+      "mined": true,
+      "status": "success",
+      "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "to": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      "data": "0x095ea7b300000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64000000000000000000000000000000000000000000000000000000003b9aca00",
+      "functionName": "approve",
+      "call": {
+        "name": "approve",
+        "signature": "approve(address,uint256)",
+        "args": [
+          {
+            "name": "spender",
+            "type": "address",
+            "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+          },
+          {
+            "name": "amount",
+            "type": "uint256",
+            "value": "1000000000"
+          }
+        ]
+      },
+      "logs": [
+        {
+          "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "topics": [
+            "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+            "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+            "0x00000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64"
+          ],
+          "data": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+          "logIndex": 0,
+          "event": {
+            "name": "Approval",
+            "signature": "Approval(address,address,uint256)",
+            "args": [
+              {
+                "name": "owner",
+                "type": "address",
+                "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+              },
+              {
+                "name": "spender",
+                "type": "address",
+                "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "value": "1000000000"
+              }
+            ]
+          }
+        }
+      ],
+      "balanceChanges": [
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "token": "native",
+          "delta": "-55713923503671",
+          "after": "999944270844222205"
+        }
+      ],
+      "blockNumber": "51907867",
+      "blockHash": "0xf6d0727e872fe87609a229b1787db94aaa51c072161601fbb1496f6065c5db46",
+      "gasUsed": "55437",
+      "effectiveGasPrice": "1004995283",
+      "blockTimestamp": 1790605080,
+      "trace": {
+        "type": "CALL",
+        "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+        "to": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "value": "0",
+        "gasUsed": "55437",
+        "input": "0x095ea7b300000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64000000000000000000000000000000000000000000000000000000003b9aca00",
+        "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "call": {
+          "name": "approve",
+          "signature": "approve(address,uint256)",
+          "args": [
+            {
+              "name": "spender",
+              "type": "address",
+              "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "value": "1000000000"
+            }
+          ]
+        },
+        "result": [
+          {
+            "name": "",
+            "type": "bool",
+            "value": true
+          }
+        ],
+        "calls": [
+          {
+            "type": "DELEGATECALL",
+            "from": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "to": "0x2ce6311ddae708829bc0784c967b7d77d19fd779",
+            "value": "0",
+            "gasUsed": "26673",
+            "input": "0x095ea7b300000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64000000000000000000000000000000000000000000000000000000003b9aca00",
+            "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "call": {
+              "name": "approve",
+              "signature": "approve(address,uint256)",
+              "args": [
+                {
+                  "name": "spender",
+                  "type": "address",
+                  "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+                },
+                {
+                  "name": "amount",
+                  "type": "uint256",
+                  "value": "1000000000"
+                }
+              ]
+            },
+            "result": [
+              {
+                "name": "",
+                "type": "bool",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "traceText": "[55437] USDC(base)::approve(SpokePool(base) (0x09ae…EC64), 1000000000)\n  ├─ [26673] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::approve(SpokePool(base) (0x09ae…EC64), 1000000000) [delegatecall]\n  │   └─ ← [Return] true\n  └─ ← [Return] true"
+    },
+    {
+      "id": "5270-f83f5e:2",
+      "test": "5270-f83f5e:1",
+      "worker": "5270-f83f5e",
+      "ts": 1790651813225,
+      "chainId": 8453,
+      "kind": "writeContract",
+      "hash": "0xbf5ab0a784e5739de77201174c7aca7b9e91aacfc4689bc92c1713ae00581507",
+      "mined": true,
+      "status": "success",
+      "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "to": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+      "data": "0xad5425c60000000000000000000000004D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273000000000000000000000000dF2d4A804D7E35526e777Bce433F3f244d756A4F000000000000000000000000833589fCD6eDb6E08f4c7C32D4f71b54bdA02913000000000000000000000000af88d065e77c8cC2239327C5EDb3A432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000000000a4b1000000000000000000000000394311A6Aaa0D8E3411D8b62DE4578D41322d1bD000000000000000000000000000000000000000000000000000000006aba7717000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba852700000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000000",
+      "functionName": "deposit",
+      "call": {
+        "name": "deposit",
+        "signature": "deposit(bytes32,bytes32,bytes32,bytes32,uint256,uint256,uint256,bytes32,uint32,uint32,uint32,bytes)",
+        "args": [
+          {
+            "name": "depositor",
+            "type": "bytes32",
+            "value": "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+          },
+          {
+            "name": "recipient",
+            "type": "bytes32",
+            "value": "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+          },
+          {
+            "name": "inputToken",
+            "type": "bytes32",
+            "value": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+          },
+          {
+            "name": "outputToken",
+            "type": "bytes32",
+            "value": "0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831"
+          },
+          {
+            "name": "inputAmount",
+            "type": "uint256",
+            "value": "1000000000"
+          },
+          {
+            "name": "outputAmount",
+            "type": "uint256",
+            "value": "999890778"
+          },
+          {
+            "name": "destinationChainId",
+            "type": "uint256",
+            "value": "42161"
+          },
+          {
+            "name": "exclusiveRelayer",
+            "type": "bytes32",
+            "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+          },
+          {
+            "name": "quoteTimestamp",
+            "type": "uint32",
+            "value": 1790605079
+          },
+          {
+            "name": "fillDeadline",
+            "type": "uint32",
+            "value": 1790612279
+          },
+          {
+            "name": "exclusivityParameter",
+            "type": "uint32",
+            "value": 1790608679
+          },
+          {
+            "name": "message",
+            "type": "bytes",
+            "value": "0x"
+          }
+        ]
+      },
+      "logs": [
+        {
+          "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "topics": [
+            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+            "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+            "0x00000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64"
+          ],
+          "data": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+          "logIndex": 0,
+          "event": {
+            "name": "Transfer",
+            "signature": "Transfer(address,address,uint256)",
+            "args": [
+              {
+                "name": "from",
+                "type": "address",
+                "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "value": "1000000000"
+              }
+            ]
+          }
+        },
+        {
+          "address": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+          "topics": [
+            "0x32ed1a409ef04c7b0227189c3a103dc5ac10e775a15b785dcc510201f7c25ad3",
+            "0x000000000000000000000000000000000000000000000000000000000000a4b1",
+            "0x00000000000000000000000000000000000000000000000000000000005f929c",
+            "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+          ],
+          "data": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000006aba7717000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba8527000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd00000000000000000000000000000000000000000000000000000000000001400000000000000000000000000000000000000000000000000000000000000000",
+          "logIndex": 1,
+          "event": {
+            "name": "FundsDeposited",
+            "signature": "FundsDeposited(bytes32,bytes32,uint256,uint256,uint256,uint256,uint32,uint32,uint32,bytes32,bytes32,bytes32,bytes)",
+            "args": [
+              {
+                "name": "inputToken",
+                "type": "bytes32",
+                "value": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+              },
+              {
+                "name": "outputToken",
+                "type": "bytes32",
+                "value": "0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831"
+              },
+              {
+                "name": "inputAmount",
+                "type": "uint256",
+                "value": "1000000000"
+              },
+              {
+                "name": "outputAmount",
+                "type": "uint256",
+                "value": "999890778"
+              },
+              {
+                "name": "destinationChainId",
+                "type": "uint256",
+                "value": "42161"
+              },
+              {
+                "name": "depositId",
+                "type": "uint256",
+                "value": "6263452"
+              },
+              {
+                "name": "quoteTimestamp",
+                "type": "uint32",
+                "value": 1790605079
+              },
+              {
+                "name": "fillDeadline",
+                "type": "uint32",
+                "value": 1790612279
+              },
+              {
+                "name": "exclusivityDeadline",
+                "type": "uint32",
+                "value": 1790608679
+              },
+              {
+                "name": "depositor",
+                "type": "bytes32",
+                "value": "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+              },
+              {
+                "name": "recipient",
+                "type": "bytes32",
+                "value": "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+              },
+              {
+                "name": "exclusiveRelayer",
+                "type": "bytes32",
+                "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+              },
+              {
+                "name": "message",
+                "type": "bytes",
+                "value": "0x"
+              }
+            ]
+          }
+        }
+      ],
+      "balanceChanges": [
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "token": "native",
+          "delta": "-69146321848476",
+          "after": "999875098135292012"
+        },
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "delta": "-1000000000",
+          "after": "0"
+        },
+        {
+          "address": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+          "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "delta": "1000000000",
+          "after": "169890542268"
+        }
+      ],
+      "blockNumber": "51907868",
+      "blockHash": "0x3563865e0c0011753dbebed4022ce41270bad3d2400c117ae8c290aa27f61117",
+      "gasUsed": "68804",
+      "effectiveGasPrice": "1004975319",
+      "blockTimestamp": 1790605081,
+      "trace": {
+        "type": "CALL",
+        "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+        "to": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+        "value": "0",
+        "gasUsed": "68804",
+        "input": "0xad5425c60000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000000000a4b1000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd000000000000000000000000000000000000000000000000000000006aba7717000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba852700000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000000",
+        "call": {
+          "name": "deposit",
+          "signature": "deposit(bytes32,bytes32,bytes32,bytes32,uint256,uint256,uint256,bytes32,uint32,uint32,uint32,bytes)",
+          "args": [
+            {
+              "name": "depositor",
+              "type": "bytes32",
+              "value": "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+            },
+            {
+              "name": "recipient",
+              "type": "bytes32",
+              "value": "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+            },
+            {
+              "name": "inputToken",
+              "type": "bytes32",
+              "value": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+            },
+            {
+              "name": "outputToken",
+              "type": "bytes32",
+              "value": "0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831"
+            },
+            {
+              "name": "inputAmount",
+              "type": "uint256",
+              "value": "1000000000"
+            },
+            {
+              "name": "outputAmount",
+              "type": "uint256",
+              "value": "999890778"
+            },
+            {
+              "name": "destinationChainId",
+              "type": "uint256",
+              "value": "42161"
+            },
+            {
+              "name": "exclusiveRelayer",
+              "type": "bytes32",
+              "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+            },
+            {
+              "name": "quoteTimestamp",
+              "type": "uint32",
+              "value": 1790605079
+            },
+            {
+              "name": "fillDeadline",
+              "type": "uint32",
+              "value": 1790612279
+            },
+            {
+              "name": "exclusivityParameter",
+              "type": "uint32",
+              "value": 1790608679
+            },
+            {
+              "name": "message",
+              "type": "bytes",
+              "value": "0x"
+            }
+          ]
+        },
+        "calls": [
+          {
+            "type": "DELEGATECALL",
+            "from": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+            "to": "0xf23c6c04a2b88e8651fe99bbdccbb5c9d306e6b0",
+            "value": "0",
+            "gasUsed": "52036",
+            "input": "0xad5425c60000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000000000a4b1000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd000000000000000000000000000000000000000000000000000000006aba7717000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba852700000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000000",
+            "call": {
+              "name": "deposit",
+              "signature": "deposit(bytes32,bytes32,bytes32,bytes32,uint256,uint256,uint256,bytes32,uint32,uint32,uint32,bytes)",
+              "args": [
+                {
+                  "name": "depositor",
+                  "type": "bytes32",
+                  "value": "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+                },
+                {
+                  "name": "recipient",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+                },
+                {
+                  "name": "inputToken",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                },
+                {
+                  "name": "outputToken",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831"
+                },
+                {
+                  "name": "inputAmount",
+                  "type": "uint256",
+                  "value": "1000000000"
+                },
+                {
+                  "name": "outputAmount",
+                  "type": "uint256",
+                  "value": "999890778"
+                },
+                {
+                  "name": "destinationChainId",
+                  "type": "uint256",
+                  "value": "42161"
+                },
+                {
+                  "name": "exclusiveRelayer",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+                },
+                {
+                  "name": "quoteTimestamp",
+                  "type": "uint32",
+                  "value": 1790605079
+                },
+                {
+                  "name": "fillDeadline",
+                  "type": "uint32",
+                  "value": 1790612279
+                },
+                {
+                  "name": "exclusivityParameter",
+                  "type": "uint32",
+                  "value": 1790608679
+                },
+                {
+                  "name": "message",
+                  "type": "bytes",
+                  "value": "0x"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "type": "CALL",
+                "from": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+                "to": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                "value": "0",
+                "gasUsed": "29328",
+                "input": "0x23b872dd0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d427300000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64000000000000000000000000000000000000000000000000000000003b9aca00",
+                "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                "call": {
+                  "name": "transferFrom",
+                  "signature": "transferFrom(address,address,uint256)",
+                  "args": [
+                    {
+                      "name": "sender",
+                      "type": "address",
+                      "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                    },
+                    {
+                      "name": "recipient",
+                      "type": "address",
+                      "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+                    },
+                    {
+                      "name": "amount",
+                      "type": "uint256",
+                      "value": "1000000000"
+                    }
+                  ]
+                },
+                "result": [
+                  {
+                    "name": "",
+                    "type": "bool",
+                    "value": true
+                  }
+                ],
+                "calls": [
+                  {
+                    "type": "DELEGATECALL",
+                    "from": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                    "to": "0x2ce6311ddae708829bc0784c967b7d77d19fd779",
+                    "value": "0",
+                    "gasUsed": "22154",
+                    "input": "0x23b872dd0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d427300000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64000000000000000000000000000000000000000000000000000000003b9aca00",
+                    "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "call": {
+                      "name": "transferFrom",
+                      "signature": "transferFrom(address,address,uint256)",
+                      "args": [
+                        {
+                          "name": "sender",
+                          "type": "address",
+                          "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                        },
+                        {
+                          "name": "recipient",
+                          "type": "address",
+                          "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+                        },
+                        {
+                          "name": "amount",
+                          "type": "uint256",
+                          "value": "1000000000"
+                        }
+                      ]
+                    },
+                    "result": [
+                      {
+                        "name": "",
+                        "type": "bool",
+                        "value": true
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "traceText": "[68804] SpokePool(base)::deposit(0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, 1000000000, 999890778, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, 1790605079, 1790612279, 1790608679, 0x)\n  ├─ [52036] 0xf23C6C04A2B88e8651FE99bbDccbB5C9D306e6B0::deposit(0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, 1000000000, 999890778, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, 1790605079, 1790612279, 1790608679, 0x) [delegatecall]\n  │   ├─ [29328] USDC(base)::transferFrom(alice (0x4D13…4273), SpokePool(base) (0x09ae…EC64), 1000000000)\n  │   │   ├─ [22154] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::transferFrom(alice (0x4D13…4273), SpokePool(base) (0x09ae…EC64), 1000000000) [delegatecall]\n  │   │   │   └─ ← [Return] true\n  │   │   └─ ← [Return] true\n  │   └─ ← [Stop]\n  └─ ← [Stop]"
+    },
+    {
+      "id": "5270-f83f5e:3",
+      "test": "5270-f83f5e:1",
+      "worker": "5270-f83f5e",
+      "ts": 1790651815860,
+      "chainId": 42161,
+      "kind": "writeContract",
+      "hash": "0x23f1793715597f840803c5c32d190fcd5a8b71a3f8a3bc17215a2bff479cf16b",
+      "mined": true,
+      "status": "success",
+      "from": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd",
+      "to": "0xe35e9842fceaca96570b734083f4a58e8f7c5f2a",
+      "data": "0xdeff4b240000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000a4b1000000000000000000000000394311A6Aaa0D8E3411D8b62DE4578D41322d1bD0000000000000000000000004D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273000000000000000000000000dF2d4A804D7E35526e777Bce433F3f244d756A4F000000000000000000000000394311A6Aaa0D8E3411D8b62DE4578D41322d1bD000000000000000000000000833589fCD6eDb6E08f4c7C32D4f71b54bdA02913000000000000000000000000af88d065e77c8cC2239327C5EDb3A432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000000000210500000000000000000000000000000000000000000000000000000000005f929c000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba852700000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000000",
+      "functionName": "fillRelay",
+      "call": {
+        "name": "fillRelay",
+        "signature": "fillRelay((bytes32,bytes32,bytes32,bytes32,bytes32,uint256,uint256,uint256,uint256,uint32,uint32,bytes),uint256,bytes32)",
+        "args": [
+          {
+            "name": "relayData",
+            "type": "tuple",
+            "value": [
+              {
+                "name": "depositor",
+                "type": "bytes32",
+                "value": "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+              },
+              {
+                "name": "recipient",
+                "type": "bytes32",
+                "value": "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+              },
+              {
+                "name": "exclusiveRelayer",
+                "type": "bytes32",
+                "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+              },
+              {
+                "name": "inputToken",
+                "type": "bytes32",
+                "value": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+              },
+              {
+                "name": "outputToken",
+                "type": "bytes32",
+                "value": "0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831"
+              },
+              {
+                "name": "inputAmount",
+                "type": "uint256",
+                "value": "1000000000"
+              },
+              {
+                "name": "outputAmount",
+                "type": "uint256",
+                "value": "999890778"
+              },
+              {
+                "name": "originChainId",
+                "type": "uint256",
+                "value": "8453"
+              },
+              {
+                "name": "depositId",
+                "type": "uint256",
+                "value": "6263452"
+              },
+              {
+                "name": "fillDeadline",
+                "type": "uint32",
+                "value": 1790612279
+              },
+              {
+                "name": "exclusivityDeadline",
+                "type": "uint32",
+                "value": 1790608679
+              },
+              {
+                "name": "message",
+                "type": "bytes",
+                "value": "0x"
+              }
+            ]
+          },
+          {
+            "name": "repaymentChainId",
+            "type": "uint256",
+            "value": "42161"
+          },
+          {
+            "name": "repaymentAddress",
+            "type": "bytes32",
+            "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+          }
+        ]
+      },
+      "logs": [
+        {
+          "address": "0xe35e9842fceaca96570b734083f4a58e8f7c5f2a",
+          "topics": [
+            "0x44b559f101f8fbcc8a0ea43fa91a05a729a5ea6e14a7c75aa750374690137208",
+            "0x0000000000000000000000000000000000000000000000000000000000002105",
+            "0x00000000000000000000000000000000000000000000000000000000005f929c",
+            "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+          ],
+          "data": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000000000a4b1000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba8527000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003b991f5a0000000000000000000000000000000000000000000000000000000000000000",
+          "logIndex": 0
+        },
+        {
+          "address": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+          "topics": [
+            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+            "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd",
+            "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+          ],
+          "data": "0x000000000000000000000000000000000000000000000000000000003b991f5a",
+          "logIndex": 1,
+          "event": {
+            "name": "Transfer",
+            "signature": "Transfer(address,address,uint256)",
+            "args": [
+              {
+                "name": "from",
+                "type": "address",
+                "value": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "value": "0xdF2d4A804D7E35526e777Bce433F3f244d756A4F"
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "value": "999890778"
+              }
+            ]
+          }
+        }
+      ],
+      "balanceChanges": [
+        {
+          "address": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd",
+          "token": "native",
+          "delta": "-122460266280352",
+          "after": "9999877539733719648"
+        },
+        {
+          "address": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd",
+          "token": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+          "delta": "-999890778",
+          "after": "28518942246"
+        },
+        {
+          "address": "0xdf2d4a804d7e35526e777bce433f3f244d756a4f",
+          "token": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+          "delta": "999890778",
+          "after": "999890778"
+        }
+      ],
+      "blockNumber": "509730858",
+      "blockHash": "0xde0b8fe5ae07892f68efc0abe6aa5aebb4ad5e8c091d2ced133d80ad9c89bdbb",
+      "gasUsed": "120352",
+      "effectiveGasPrice": "1017517501",
+      "blockTimestamp": 1790605103,
+      "trace": {
+        "type": "CALL",
+        "from": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd",
+        "to": "0xe35e9842fceaca96570b734083f4a58e8f7c5f2a",
+        "value": "0",
+        "gasUsed": "120352",
+        "input": "0xdeff4b240000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000a4b1000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000000000210500000000000000000000000000000000000000000000000000000000005f929c000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba852700000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000000",
+        "call": {
+          "name": "fillRelay",
+          "signature": "fillRelay((bytes32,bytes32,bytes32,bytes32,bytes32,uint256,uint256,uint256,uint256,uint32,uint32,bytes),uint256,bytes32)",
+          "args": [
+            {
+              "name": "relayData",
+              "type": "tuple",
+              "value": [
+                {
+                  "name": "depositor",
+                  "type": "bytes32",
+                  "value": "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+                },
+                {
+                  "name": "recipient",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+                },
+                {
+                  "name": "exclusiveRelayer",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+                },
+                {
+                  "name": "inputToken",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                },
+                {
+                  "name": "outputToken",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831"
+                },
+                {
+                  "name": "inputAmount",
+                  "type": "uint256",
+                  "value": "1000000000"
+                },
+                {
+                  "name": "outputAmount",
+                  "type": "uint256",
+                  "value": "999890778"
+                },
+                {
+                  "name": "originChainId",
+                  "type": "uint256",
+                  "value": "8453"
+                },
+                {
+                  "name": "depositId",
+                  "type": "uint256",
+                  "value": "6263452"
+                },
+                {
+                  "name": "fillDeadline",
+                  "type": "uint32",
+                  "value": 1790612279
+                },
+                {
+                  "name": "exclusivityDeadline",
+                  "type": "uint32",
+                  "value": 1790608679
+                },
+                {
+                  "name": "message",
+                  "type": "bytes",
+                  "value": "0x"
+                }
+              ]
+            },
+            {
+              "name": "repaymentChainId",
+              "type": "uint256",
+              "value": "42161"
+            },
+            {
+              "name": "repaymentAddress",
+              "type": "bytes32",
+              "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+            }
+          ]
+        },
+        "calls": [
+          {
+            "type": "DELEGATECALL",
+            "from": "0xe35e9842fceaca96570b734083f4a58e8f7c5f2a",
+            "to": "0xcfcda84333431bcc9155f2368b8362f0d1dff8c9",
+            "value": "0",
+            "gasUsed": "93318",
+            "input": "0xdeff4b240000000000000000000000000000000000000000000000000000000000000060000000000000000000000000000000000000000000000000000000000000a4b1000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000000000210500000000000000000000000000000000000000000000000000000000005f929c000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba852700000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000000",
+            "call": {
+              "name": "fillRelay",
+              "signature": "fillRelay((bytes32,bytes32,bytes32,bytes32,bytes32,uint256,uint256,uint256,uint256,uint32,uint32,bytes),uint256,bytes32)",
+              "args": [
+                {
+                  "name": "relayData",
+                  "type": "tuple",
+                  "value": [
+                    {
+                      "name": "depositor",
+                      "type": "bytes32",
+                      "value": "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+                    },
+                    {
+                      "name": "recipient",
+                      "type": "bytes32",
+                      "value": "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+                    },
+                    {
+                      "name": "exclusiveRelayer",
+                      "type": "bytes32",
+                      "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+                    },
+                    {
+                      "name": "inputToken",
+                      "type": "bytes32",
+                      "value": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                    },
+                    {
+                      "name": "outputToken",
+                      "type": "bytes32",
+                      "value": "0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831"
+                    },
+                    {
+                      "name": "inputAmount",
+                      "type": "uint256",
+                      "value": "1000000000"
+                    },
+                    {
+                      "name": "outputAmount",
+                      "type": "uint256",
+                      "value": "999890778"
+                    },
+                    {
+                      "name": "originChainId",
+                      "type": "uint256",
+                      "value": "8453"
+                    },
+                    {
+                      "name": "depositId",
+                      "type": "uint256",
+                      "value": "6263452"
+                    },
+                    {
+                      "name": "fillDeadline",
+                      "type": "uint32",
+                      "value": 1790612279
+                    },
+                    {
+                      "name": "exclusivityDeadline",
+                      "type": "uint32",
+                      "value": 1790608679
+                    },
+                    {
+                      "name": "message",
+                      "type": "bytes",
+                      "value": "0x"
+                    }
+                  ]
+                },
+                {
+                  "name": "repaymentChainId",
+                  "type": "uint256",
+                  "value": "42161"
+                },
+                {
+                  "name": "repaymentAddress",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "type": "CALL",
+                "from": "0xe35e9842fceaca96570b734083f4a58e8f7c5f2a",
+                "to": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+                "value": "0",
+                "gasUsed": "48428",
+                "input": "0x23b872dd000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f000000000000000000000000000000000000000000000000000000003b991f5a",
+                "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                "call": {
+                  "name": "transferFrom",
+                  "signature": "transferFrom(address,address,uint256)",
+                  "args": [
+                    {
+                      "name": "sender",
+                      "type": "address",
+                      "value": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD"
+                    },
+                    {
+                      "name": "recipient",
+                      "type": "address",
+                      "value": "0xdF2d4A804D7E35526e777Bce433F3f244d756A4F"
+                    },
+                    {
+                      "name": "amount",
+                      "type": "uint256",
+                      "value": "999890778"
+                    }
+                  ]
+                },
+                "result": [
+                  {
+                    "name": "",
+                    "type": "bool",
+                    "value": true
+                  }
+                ],
+                "calls": [
+                  {
+                    "type": "DELEGATECALL",
+                    "from": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+                    "to": "0x86e721b43d4ecfa71119dd38c0f938a75fdb57b3",
+                    "value": "0",
+                    "gasUsed": "41254",
+                    "input": "0x23b872dd000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f000000000000000000000000000000000000000000000000000000003b991f5a",
+                    "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "call": {
+                      "name": "transferFrom",
+                      "signature": "transferFrom(address,address,uint256)",
+                      "args": [
+                        {
+                          "name": "sender",
+                          "type": "address",
+                          "value": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD"
+                        },
+                        {
+                          "name": "recipient",
+                          "type": "address",
+                          "value": "0xdF2d4A804D7E35526e777Bce433F3f244d756A4F"
+                        },
+                        {
+                          "name": "amount",
+                          "type": "uint256",
+                          "value": "999890778"
+                        }
+                      ]
+                    },
+                    "result": [
+                      {
+                        "name": "",
+                        "type": "bool",
+                        "value": true
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "traceText": "[120352] SpokePool(arb)::fillRelay({ depositor: 0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, recipient: 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, exclusiveRelayer: 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, inputToken: 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, outputToken: 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, inputAmount: 1000000000, outputAmount: 999890778, originChainId: 8453, depositId: 6263452, fillDeadline: 1790612279, exclusivityDeadline: 1790608679, message: 0x }, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd)\n  ├─ [93318] 0xcfCDA84333431BCC9155f2368B8362F0d1dfF8c9::fillRelay({ depositor: 0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, recipient: 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, exclusiveRelayer: 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, inputToken: 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, outputToken: 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, inputAmount: 1000000000, outputAmount: 999890778, originChainId: 8453, depositId: 6263452, fillDeadline: 1790612279, exclusivityDeadline: 1790608679, message: 0x }, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd) [delegatecall]\n  │   ├─ [48428] USDC(arb)::transferFrom(0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD, bob (0xdF2d…6A4F), 999890778)\n  │   │   ├─ [41254] 0x86E721b43d4ECFa71119Dd38c0f938A75Fdb57B3::transferFrom(0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD, bob (0xdF2d…6A4F), 999890778) [delegatecall]\n  │   │   │   └─ ← [Return] true\n  │   │   └─ ← [Return] true\n  │   └─ ← [Stop]\n  └─ ← [Stop]"
+    },
+    {
+      "id": "5270-f83f5e:4",
+      "test": "5270-f83f5e:2",
+      "worker": "5270-f83f5e",
+      "ts": 1790651816338,
+      "chainId": 8453,
+      "kind": "writeContract",
+      "hash": "0xe1bdd90721994124113520426a5b4ff4e8379549312cdb20958160baa20d9685",
+      "mined": true,
+      "status": "success",
+      "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "to": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      "data": "0x095ea7b300000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64000000000000000000000000000000000000000000000000000000003b9aca00",
+      "functionName": "approve",
+      "call": {
+        "name": "approve",
+        "signature": "approve(address,uint256)",
+        "args": [
+          {
+            "name": "spender",
+            "type": "address",
+            "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+          },
+          {
+            "name": "amount",
+            "type": "uint256",
+            "value": "1000000000"
+          }
+        ]
+      },
+      "logs": [
+        {
+          "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "topics": [
+            "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+            "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+            "0x00000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64"
+          ],
+          "data": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+          "logIndex": 0,
+          "event": {
+            "name": "Approval",
+            "signature": "Approval(address,address,uint256)",
+            "args": [
+              {
+                "name": "owner",
+                "type": "address",
+                "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+              },
+              {
+                "name": "spender",
+                "type": "address",
+                "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "value": "1000000000"
+              }
+            ]
+          }
+        }
+      ],
+      "balanceChanges": [
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "token": "native",
+          "delta": "-55711714671843",
+          "after": "999944273053054033"
+        }
+      ],
+      "blockNumber": "51907867",
+      "blockHash": "0xf1619759a11b0f6111775ea881fb67c9e102c8979dadaf99a88e6fd4dcf854e6",
+      "gasUsed": "55437",
+      "effectiveGasPrice": "1004955439",
+      "blockTimestamp": 1790605080,
+      "trace": {
+        "type": "CALL",
+        "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+        "to": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "value": "0",
+        "gasUsed": "55437",
+        "input": "0x095ea7b300000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64000000000000000000000000000000000000000000000000000000003b9aca00",
+        "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "call": {
+          "name": "approve",
+          "signature": "approve(address,uint256)",
+          "args": [
+            {
+              "name": "spender",
+              "type": "address",
+              "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "value": "1000000000"
+            }
+          ]
+        },
+        "result": [
+          {
+            "name": "",
+            "type": "bool",
+            "value": true
+          }
+        ],
+        "calls": [
+          {
+            "type": "DELEGATECALL",
+            "from": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "to": "0x2ce6311ddae708829bc0784c967b7d77d19fd779",
+            "value": "0",
+            "gasUsed": "26673",
+            "input": "0x095ea7b300000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64000000000000000000000000000000000000000000000000000000003b9aca00",
+            "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "call": {
+              "name": "approve",
+              "signature": "approve(address,uint256)",
+              "args": [
+                {
+                  "name": "spender",
+                  "type": "address",
+                  "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+                },
+                {
+                  "name": "amount",
+                  "type": "uint256",
+                  "value": "1000000000"
+                }
+              ]
+            },
+            "result": [
+              {
+                "name": "",
+                "type": "bool",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "traceText": "[55437] USDC(base)::approve(SpokePool(base) (0x09ae…EC64), 1000000000)\n  ├─ [26673] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::approve(SpokePool(base) (0x09ae…EC64), 1000000000) [delegatecall]\n  │   └─ ← [Return] true\n  └─ ← [Return] true"
+    },
+    {
+      "id": "5270-f83f5e:5",
+      "test": "5270-f83f5e:2",
+      "worker": "5270-f83f5e",
+      "ts": 1790651816403,
+      "chainId": 8453,
+      "kind": "writeContract",
+      "mined": false,
+      "status": "reverted",
+      "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "to": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+      "data": "0xad5425c60000000000000000000000004D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273000000000000000000000000dF2d4A804D7E35526e777Bce433F3f244d756A4F000000000000000000000000833589fCD6eDb6E08f4c7C32D4f71b54bdA02913000000000000000000000000af88d065e77c8cC2239327C5EDb3A432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000000000a4b1000000000000000000000000394311A6Aaa0D8E3411D8b62DE4578D41322d1bD000000000000000000000000000000000000000000000000000000006aba7717000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba852700000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000000",
+      "functionName": "deposit",
+      "call": {
+        "name": "deposit",
+        "signature": "deposit(bytes32,bytes32,bytes32,bytes32,uint256,uint256,uint256,bytes32,uint32,uint32,uint32,bytes)",
+        "args": [
+          {
+            "name": "depositor",
+            "type": "bytes32",
+            "value": "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+          },
+          {
+            "name": "recipient",
+            "type": "bytes32",
+            "value": "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+          },
+          {
+            "name": "inputToken",
+            "type": "bytes32",
+            "value": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+          },
+          {
+            "name": "outputToken",
+            "type": "bytes32",
+            "value": "0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831"
+          },
+          {
+            "name": "inputAmount",
+            "type": "uint256",
+            "value": "1000000000"
+          },
+          {
+            "name": "outputAmount",
+            "type": "uint256",
+            "value": "999890778"
+          },
+          {
+            "name": "destinationChainId",
+            "type": "uint256",
+            "value": "42161"
+          },
+          {
+            "name": "exclusiveRelayer",
+            "type": "bytes32",
+            "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+          },
+          {
+            "name": "quoteTimestamp",
+            "type": "uint32",
+            "value": 1790605079
+          },
+          {
+            "name": "fillDeadline",
+            "type": "uint32",
+            "value": 1790612279
+          },
+          {
+            "name": "exclusivityParameter",
+            "type": "uint32",
+            "value": 1790608679
+          },
+          {
+            "name": "message",
+            "type": "bytes",
+            "value": "0x"
+          }
+        ]
+      },
+      "error": "The contract function \"deposit\" reverted with the following reason:",
+      "traceText": "[63367] SpokePool(base)::deposit(0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, 1000000000, 999890778, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, 1790605079, 1790612279, 1790608679, 0x)\n  ├─ [34183] 0xf23C6C04A2B88e8651FE99bbDccbB5C9D306e6B0::deposit(0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, 1000000000, 999890778, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, 1790605079, 1790612279, 1790608679, 0x) [delegatecall]\n  │   ├─ [17067] USDC(base)::transferFrom(alice (0x4D13…4273), SpokePool(base) (0x09ae…EC64), 1000000000)\n  │   │   ├─ [9877] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::transferFrom(alice (0x4D13…4273), SpokePool(base) (0x09ae…EC64), 1000000000) [delegatecall]\n  │   │   │   └─ ← [Revert] Error(\"ERC20: transfer amount exceeds balance\")\n  │   │   └─ ← [Revert] Error(\"ERC20: transfer amount exceeds balance\")\n  │   └─ ← [Revert] Error(\"ERC20: transfer amount exceeds balance\")\n  └─ ← [Revert] Error(\"ERC20: transfer amount exceeds balance\")",
+      "logs": [],
+      "balanceChanges": [],
+      "trace": {
+        "type": "CALL",
+        "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+        "to": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+        "value": "0",
+        "gasUsed": "63367",
+        "input": "0xad5425c60000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000000000a4b1000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd000000000000000000000000000000000000000000000000000000006aba7717000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba852700000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000000",
+        "output": "0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002645524332303a207472616e7366657220616d6f756e7420657863656564732062616c616e63650000000000000000000000000000000000000000000000000000",
+        "error": "execution reverted",
+        "revert": "Error(\"ERC20: transfer amount exceeds balance\")",
+        "call": {
+          "name": "deposit",
+          "signature": "deposit(bytes32,bytes32,bytes32,bytes32,uint256,uint256,uint256,bytes32,uint32,uint32,uint32,bytes)",
+          "args": [
+            {
+              "name": "depositor",
+              "type": "bytes32",
+              "value": "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+            },
+            {
+              "name": "recipient",
+              "type": "bytes32",
+              "value": "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+            },
+            {
+              "name": "inputToken",
+              "type": "bytes32",
+              "value": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+            },
+            {
+              "name": "outputToken",
+              "type": "bytes32",
+              "value": "0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831"
+            },
+            {
+              "name": "inputAmount",
+              "type": "uint256",
+              "value": "1000000000"
+            },
+            {
+              "name": "outputAmount",
+              "type": "uint256",
+              "value": "999890778"
+            },
+            {
+              "name": "destinationChainId",
+              "type": "uint256",
+              "value": "42161"
+            },
+            {
+              "name": "exclusiveRelayer",
+              "type": "bytes32",
+              "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+            },
+            {
+              "name": "quoteTimestamp",
+              "type": "uint32",
+              "value": 1790605079
+            },
+            {
+              "name": "fillDeadline",
+              "type": "uint32",
+              "value": 1790612279
+            },
+            {
+              "name": "exclusivityParameter",
+              "type": "uint32",
+              "value": 1790608679
+            },
+            {
+              "name": "message",
+              "type": "bytes",
+              "value": "0x"
+            }
+          ]
+        },
+        "calls": [
+          {
+            "type": "DELEGATECALL",
+            "from": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+            "to": "0xf23c6c04a2b88e8651fe99bbdccbb5c9d306e6b0",
+            "value": "0",
+            "gasUsed": "34183",
+            "input": "0xad5425c60000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000000000a4b1000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd000000000000000000000000000000000000000000000000000000006aba7717000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba852700000000000000000000000000000000000000000000000000000000000001800000000000000000000000000000000000000000000000000000000000000000",
+            "output": "0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002645524332303a207472616e7366657220616d6f756e7420657863656564732062616c616e63650000000000000000000000000000000000000000000000000000",
+            "error": "execution reverted",
+            "revert": "Error(\"ERC20: transfer amount exceeds balance\")",
+            "call": {
+              "name": "deposit",
+              "signature": "deposit(bytes32,bytes32,bytes32,bytes32,uint256,uint256,uint256,bytes32,uint32,uint32,uint32,bytes)",
+              "args": [
+                {
+                  "name": "depositor",
+                  "type": "bytes32",
+                  "value": "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+                },
+                {
+                  "name": "recipient",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+                },
+                {
+                  "name": "inputToken",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                },
+                {
+                  "name": "outputToken",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831"
+                },
+                {
+                  "name": "inputAmount",
+                  "type": "uint256",
+                  "value": "1000000000"
+                },
+                {
+                  "name": "outputAmount",
+                  "type": "uint256",
+                  "value": "999890778"
+                },
+                {
+                  "name": "destinationChainId",
+                  "type": "uint256",
+                  "value": "42161"
+                },
+                {
+                  "name": "exclusiveRelayer",
+                  "type": "bytes32",
+                  "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+                },
+                {
+                  "name": "quoteTimestamp",
+                  "type": "uint32",
+                  "value": 1790605079
+                },
+                {
+                  "name": "fillDeadline",
+                  "type": "uint32",
+                  "value": 1790612279
+                },
+                {
+                  "name": "exclusivityParameter",
+                  "type": "uint32",
+                  "value": 1790608679
+                },
+                {
+                  "name": "message",
+                  "type": "bytes",
+                  "value": "0x"
+                }
+              ]
+            },
+            "calls": [
+              {
+                "type": "CALL",
+                "from": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+                "to": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                "value": "0",
+                "gasUsed": "17067",
+                "input": "0x23b872dd0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d427300000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64000000000000000000000000000000000000000000000000000000003b9aca00",
+                "output": "0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002645524332303a207472616e7366657220616d6f756e7420657863656564732062616c616e63650000000000000000000000000000000000000000000000000000",
+                "error": "execution reverted",
+                "revert": "Error(\"ERC20: transfer amount exceeds balance\")",
+                "call": {
+                  "name": "transferFrom",
+                  "signature": "transferFrom(address,address,uint256)",
+                  "args": [
+                    {
+                      "name": "sender",
+                      "type": "address",
+                      "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                    },
+                    {
+                      "name": "recipient",
+                      "type": "address",
+                      "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+                    },
+                    {
+                      "name": "amount",
+                      "type": "uint256",
+                      "value": "1000000000"
+                    }
+                  ]
+                },
+                "calls": [
+                  {
+                    "type": "DELEGATECALL",
+                    "from": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                    "to": "0x2ce6311ddae708829bc0784c967b7d77d19fd779",
+                    "value": "0",
+                    "gasUsed": "9877",
+                    "input": "0x23b872dd0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d427300000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64000000000000000000000000000000000000000000000000000000003b9aca00",
+                    "output": "0x08c379a00000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002645524332303a207472616e7366657220616d6f756e7420657863656564732062616c616e63650000000000000000000000000000000000000000000000000000",
+                    "error": "execution reverted",
+                    "revert": "Error(\"ERC20: transfer amount exceeds balance\")",
+                    "call": {
+                      "name": "transferFrom",
+                      "signature": "transferFrom(address,address,uint256)",
+                      "args": [
+                        {
+                          "name": "sender",
+                          "type": "address",
+                          "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                        },
+                        {
+                          "name": "recipient",
+                          "type": "address",
+                          "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+                        },
+                        {
+                          "name": "amount",
+                          "type": "uint256",
+                          "value": "1000000000"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "revert": "Error(\"ERC20: transfer amount exceeds balance\")",
+      "gasUsed": "63367"
+    },
+    {
+      "id": "5270-f83f5e:6",
+      "test": "5270-f83f5e:4",
+      "worker": "5270-f83f5e",
+      "ts": 1790651817226,
+      "chainId": 8453,
+      "kind": "writeContract",
+      "hash": "0x900a5a734cd3e16256592bb5b7fb6725c33ccc73037687ddbe0b5a5ee77b8956",
+      "mined": true,
+      "status": "success",
+      "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "to": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      "data": "0x095ea7b30000000000000000000000002626664c2603336e57b271c5c0b26f421741e481000000000000000000000000000000000000000000000000000000003b9aca00",
+      "functionName": "approve",
+      "call": {
+        "name": "approve",
+        "signature": "approve(address,uint256)",
+        "args": [
+          {
+            "name": "spender",
+            "type": "address",
+            "value": "0x2626664c2603336E57B271c5C0b26F421741e481"
+          },
+          {
+            "name": "amount",
+            "type": "uint256",
+            "value": "1000000000"
+          }
+        ]
+      },
+      "logs": [
+        {
+          "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "topics": [
+            "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+            "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+            "0x0000000000000000000000002626664c2603336e57b271c5c0b26f421741e481"
+          ],
+          "data": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+          "logIndex": 0,
+          "event": {
+            "name": "Approval",
+            "signature": "Approval(address,address,uint256)",
+            "args": [
+              {
+                "name": "owner",
+                "type": "address",
+                "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+              },
+              {
+                "name": "spender",
+                "type": "address",
+                "value": "0x2626664c2603336E57B271c5C0b26F421741e481"
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "value": "1000000000"
+              }
+            ]
+          }
+        }
+      ],
+      "balanceChanges": [
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "token": "native",
+          "delta": "-55713789845064",
+          "after": "999944285592417205"
+        }
+      ],
+      "blockNumber": "51800001",
+      "blockHash": "0x3fdd153178a43276cc6be24f49060dc11f3a740bb0dd6199fb5639c7286364a7",
+      "gasUsed": "55437",
+      "effectiveGasPrice": "1004992872",
+      "blockTimestamp": 1790389348,
+      "trace": {
+        "type": "CALL",
+        "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+        "to": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+        "value": "0",
+        "gasUsed": "55437",
+        "input": "0x095ea7b30000000000000000000000002626664c2603336e57b271c5c0b26f421741e481000000000000000000000000000000000000000000000000000000003b9aca00",
+        "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+        "call": {
+          "name": "approve",
+          "signature": "approve(address,uint256)",
+          "args": [
+            {
+              "name": "spender",
+              "type": "address",
+              "value": "0x2626664c2603336E57B271c5C0b26F421741e481"
+            },
+            {
+              "name": "amount",
+              "type": "uint256",
+              "value": "1000000000"
+            }
+          ]
+        },
+        "result": [
+          {
+            "name": "",
+            "type": "bool",
+            "value": true
+          }
+        ],
+        "calls": [
+          {
+            "type": "DELEGATECALL",
+            "from": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+            "to": "0x2ce6311ddae708829bc0784c967b7d77d19fd779",
+            "value": "0",
+            "gasUsed": "26673",
+            "input": "0x095ea7b30000000000000000000000002626664c2603336e57b271c5c0b26f421741e481000000000000000000000000000000000000000000000000000000003b9aca00",
+            "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+            "call": {
+              "name": "approve",
+              "signature": "approve(address,uint256)",
+              "args": [
+                {
+                  "name": "spender",
+                  "type": "address",
+                  "value": "0x2626664c2603336E57B271c5C0b26F421741e481"
+                },
+                {
+                  "name": "amount",
+                  "type": "uint256",
+                  "value": "1000000000"
+                }
+              ]
+            },
+            "result": [
+              {
+                "name": "",
+                "type": "bool",
+                "value": true
+              }
+            ]
+          }
+        ]
+      },
+      "traceText": "[55437] USDC(base)::approve(SwapRouter02 (0x2626…e481), 1000000000)\n  ├─ [26673] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::approve(SwapRouter02 (0x2626…e481), 1000000000) [delegatecall]\n  │   └─ ← [Return] true\n  └─ ← [Return] true"
+    },
+    {
+      "id": "5270-f83f5e:7",
+      "test": "5270-f83f5e:4",
+      "worker": "5270-f83f5e",
+      "ts": 1790651817331,
+      "chainId": 8453,
+      "kind": "writeContract",
+      "hash": "0x4b98410524a8fba7f2efcebe27badf68fa503ffa29c9e9e92955d10809dac705",
+      "mined": true,
+      "status": "success",
+      "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "to": "0x2626664c2603336e57b271c5c0b26f421741e481",
+      "data": "0x04e45aaf000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000420000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000001f40000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000000000000000000000000000000000003b9aca0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+      "functionName": "exactInputSingle",
+      "call": {
+        "name": "exactInputSingle",
+        "signature": "exactInputSingle((address,address,uint24,address,uint256,uint256,uint160))",
+        "args": [
+          {
+            "name": "params",
+            "type": "tuple",
+            "value": [
+              {
+                "name": "tokenIn",
+                "type": "address",
+                "value": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+              },
+              {
+                "name": "tokenOut",
+                "type": "address",
+                "value": "0x4200000000000000000000000000000000000006"
+              },
+              {
+                "name": "fee",
+                "type": "uint24",
+                "value": 500
+              },
+              {
+                "name": "recipient",
+                "type": "address",
+                "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+              },
+              {
+                "name": "amountIn",
+                "type": "uint256",
+                "value": "1000000000"
+              },
+              {
+                "name": "amountOutMinimum",
+                "type": "uint256",
+                "value": "0"
+              },
+              {
+                "name": "sqrtPriceLimitX96",
+                "type": "uint160",
+                "value": "0"
+              }
+            ]
+          }
+        ]
+      },
+      "logs": [
+        {
+          "address": "0x4200000000000000000000000000000000000006",
+          "topics": [
+            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+            "0x000000000000000000000000d0b53d9277642d899df5c87a3966a349a798f224",
+            "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+          ],
+          "data": "0x0000000000000000000000000000000000000000000000000525e2bc6d57e882",
+          "logIndex": 0,
+          "event": {
+            "name": "Transfer",
+            "signature": "Transfer(address,address,uint256)",
+            "args": [
+              {
+                "name": "from",
+                "type": "address",
+                "value": "0xd0b53D9277642d899DF5C87A3966A349A798F224"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "value": "370951843244140674"
+              }
+            ]
+          }
+        },
+        {
+          "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "topics": [
+            "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+            "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+            "0x000000000000000000000000d0b53d9277642d899df5c87a3966a349a798f224"
+          ],
+          "data": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+          "logIndex": 1,
+          "event": {
+            "name": "Transfer",
+            "signature": "Transfer(address,address,uint256)",
+            "args": [
+              {
+                "name": "from",
+                "type": "address",
+                "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+              },
+              {
+                "name": "to",
+                "type": "address",
+                "value": "0xd0b53D9277642d899DF5C87A3966A349A798F224"
+              },
+              {
+                "name": "value",
+                "type": "uint256",
+                "value": "1000000000"
+              }
+            ]
+          }
+        },
+        {
+          "address": "0xd0b53d9277642d899df5c87a3966a349a798f224",
+          "topics": [
+            "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+            "0x0000000000000000000000002626664c2603336e57b271c5c0b26f421741e481",
+            "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+          ],
+          "data": "0xfffffffffffffffffffffffffffffffffffffffffffffffffada1d4392a8177e000000000000000000000000000000000000000000000000000000003b9aca000000000000000000000000000000000000000000000366dff5211949b1f8254a00000000000000000000000000000000000000000000000012103afdf40cef7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcfd2d",
+          "logIndex": 2
+        }
+      ],
+      "balanceChanges": [
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "token": "native",
+          "delta": "-129954052999498",
+          "after": "999814330921679976"
+        },
+        {
+          "address": "0xd0b53d9277642d899df5c87a3966a349a798f224",
+          "token": "0x4200000000000000000000000000000000000006",
+          "delta": "-370951843244140674",
+          "after": "1847586842554763755446"
+        },
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "token": "0x4200000000000000000000000000000000000006",
+          "delta": "370951843244140674",
+          "after": "370951843244140674"
+        },
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "delta": "-1000000000",
+          "after": "0"
+        },
+        {
+          "address": "0xd0b53d9277642d899df5c87a3966a349a798f224",
+          "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "delta": "1000000000",
+          "after": "4617464477655"
+        }
+      ],
+      "blockNumber": "51800002",
+      "blockHash": "0x599404dd87111d9c03f9d131a80b290e253ac10b9a4ec1b826fb373310d6b784",
+      "gasUsed": "129311",
+      "effectiveGasPrice": "1004972918",
+      "blockTimestamp": 1790389348,
+      "trace": {
+        "type": "CALL",
+        "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+        "to": "0x2626664c2603336e57b271c5c0b26f421741e481",
+        "value": "0",
+        "gasUsed": "129311",
+        "input": "0x04e45aaf000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000420000000000000000000000000000000000000600000000000000000000000000000000000000000000000000000000000001f40000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000000000000000000000000000000000003b9aca0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+        "output": "0x0000000000000000000000000000000000000000000000000525e2bc6d57e882",
+        "call": {
+          "name": "exactInputSingle",
+          "signature": "exactInputSingle((address,address,uint24,address,uint256,uint256,uint160))",
+          "args": [
+            {
+              "name": "params",
+              "type": "tuple",
+              "value": [
+                {
+                  "name": "tokenIn",
+                  "type": "address",
+                  "value": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"
+                },
+                {
+                  "name": "tokenOut",
+                  "type": "address",
+                  "value": "0x4200000000000000000000000000000000000006"
+                },
+                {
+                  "name": "fee",
+                  "type": "uint24",
+                  "value": 500
+                },
+                {
+                  "name": "recipient",
+                  "type": "address",
+                  "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                },
+                {
+                  "name": "amountIn",
+                  "type": "uint256",
+                  "value": "1000000000"
+                },
+                {
+                  "name": "amountOutMinimum",
+                  "type": "uint256",
+                  "value": "0"
+                },
+                {
+                  "name": "sqrtPriceLimitX96",
+                  "type": "uint160",
+                  "value": "0"
+                }
+              ]
+            }
+          ]
+        },
+        "result": [
+          {
+            "name": "amountOut",
+            "type": "uint256",
+            "value": "370951843244140674"
+          }
+        ],
+        "calls": [
+          {
+            "type": "CALL",
+            "from": "0x2626664c2603336e57b271c5c0b26f421741e481",
+            "to": "0xd0b53d9277642d899df5c87a3966a349a798f224",
+            "value": "0",
+            "gasUsed": "108962",
+            "input": "0x128acb080000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d42730000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000fffd8963efd1fc6a506488495d951d5263988d2500000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000400000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000000000000000000000000000000000000000002b833589fcd6edb6e08f4c7c32d4f71b54bda029130001f44200000000000000000000000000000000000006000000000000000000000000000000000000000000",
+            "output": "0xfffffffffffffffffffffffffffffffffffffffffffffffffada1d4392a8177e000000000000000000000000000000000000000000000000000000003b9aca00",
+            "calls": [
+              {
+                "type": "CALL",
+                "from": "0xd0b53d9277642d899df5c87a3966a349a798f224",
+                "to": "0x4200000000000000000000000000000000000006",
+                "value": "0",
+                "gasUsed": "29701",
+                "input": "0xa9059cbb0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d42730000000000000000000000000000000000000000000000000525e2bc6d57e882",
+                "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                "call": {
+                  "name": "transfer",
+                  "signature": "transfer(address,uint256)",
+                  "args": [
+                    {
+                      "name": "recipient",
+                      "type": "address",
+                      "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                    },
+                    {
+                      "name": "amount",
+                      "type": "uint256",
+                      "value": "370951843244140674"
+                    }
+                  ]
+                },
+                "result": [
+                  {
+                    "name": "",
+                    "type": "bool",
+                    "value": true
+                  }
+                ]
+              },
+              {
+                "type": "STATICCALL",
+                "from": "0xd0b53d9277642d899df5c87a3966a349a798f224",
+                "to": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                "gasUsed": "9750",
+                "input": "0x70a08231000000000000000000000000d0b53d9277642d899df5c87a3966a349a798f224",
+                "output": "0x00000000000000000000000000000000000000000000000000000432dab9add7",
+                "call": {
+                  "name": "balanceOf",
+                  "signature": "balanceOf(address)",
+                  "args": [
+                    {
+                      "name": "account",
+                      "type": "address",
+                      "value": "0xd0b53D9277642d899DF5C87A3966A349A798F224"
+                    }
+                  ]
+                },
+                "result": [
+                  {
+                    "name": "",
+                    "type": "uint256",
+                    "value": "4616464477655"
+                  }
+                ],
+                "calls": [
+                  {
+                    "type": "DELEGATECALL",
+                    "from": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                    "to": "0x2ce6311ddae708829bc0784c967b7d77d19fd779",
+                    "value": "0",
+                    "gasUsed": "2553",
+                    "input": "0x70a08231000000000000000000000000d0b53d9277642d899df5c87a3966a349a798f224",
+                    "output": "0x00000000000000000000000000000000000000000000000000000432dab9add7",
+                    "call": {
+                      "name": "balanceOf",
+                      "signature": "balanceOf(address)",
+                      "args": [
+                        {
+                          "name": "account",
+                          "type": "address",
+                          "value": "0xd0b53D9277642d899DF5C87A3966A349A798F224"
+                        }
+                      ]
+                    },
+                    "result": [
+                      {
+                        "name": "",
+                        "type": "uint256",
+                        "value": "4616464477655"
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "CALL",
+                "from": "0xd0b53d9277642d899df5c87a3966a349a798f224",
+                "to": "0x2626664c2603336e57b271c5c0b26f421741e481",
+                "value": "0",
+                "gasUsed": "26935",
+                "input": "0xfa461e33fffffffffffffffffffffffffffffffffffffffffffffffffada1d4392a8177e000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000c0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000400000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000000000000000000000000000000000000000002b833589fcd6edb6e08f4c7c32d4f71b54bda029130001f44200000000000000000000000000000000000006000000000000000000000000000000000000000000",
+                "calls": [
+                  {
+                    "type": "CALL",
+                    "from": "0x2626664c2603336e57b271c5c0b26f421741e481",
+                    "to": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                    "value": "0",
+                    "gasUsed": "22828",
+                    "input": "0x23b872dd0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000d0b53d9277642d899df5c87a3966a349a798f224000000000000000000000000000000000000000000000000000000003b9aca00",
+                    "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                    "call": {
+                      "name": "transferFrom",
+                      "signature": "transferFrom(address,address,uint256)",
+                      "args": [
+                        {
+                          "name": "sender",
+                          "type": "address",
+                          "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                        },
+                        {
+                          "name": "recipient",
+                          "type": "address",
+                          "value": "0xd0b53D9277642d899DF5C87A3966A349A798F224"
+                        },
+                        {
+                          "name": "amount",
+                          "type": "uint256",
+                          "value": "1000000000"
+                        }
+                      ]
+                    },
+                    "result": [
+                      {
+                        "name": "",
+                        "type": "bool",
+                        "value": true
+                      }
+                    ],
+                    "calls": [
+                      {
+                        "type": "DELEGATECALL",
+                        "from": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                        "to": "0x2ce6311ddae708829bc0784c967b7d77d19fd779",
+                        "value": "0",
+                        "gasUsed": "22154",
+                        "input": "0x23b872dd0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000d0b53d9277642d899df5c87a3966a349a798f224000000000000000000000000000000000000000000000000000000003b9aca00",
+                        "output": "0x0000000000000000000000000000000000000000000000000000000000000001",
+                        "call": {
+                          "name": "transferFrom",
+                          "signature": "transferFrom(address,address,uint256)",
+                          "args": [
+                            {
+                              "name": "sender",
+                              "type": "address",
+                              "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                            },
+                            {
+                              "name": "recipient",
+                              "type": "address",
+                              "value": "0xd0b53D9277642d899DF5C87A3966A349A798F224"
+                            },
+                            {
+                              "name": "amount",
+                              "type": "uint256",
+                              "value": "1000000000"
+                            }
+                          ]
+                        },
+                        "result": [
+                          {
+                            "name": "",
+                            "type": "bool",
+                            "value": true
+                          }
+                        ]
+                      }
+                    ]
+                  }
+                ]
+              },
+              {
+                "type": "STATICCALL",
+                "from": "0xd0b53d9277642d899df5c87a3966a349a798f224",
+                "to": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                "gasUsed": "1250",
+                "input": "0x70a08231000000000000000000000000d0b53d9277642d899df5c87a3966a349a798f224",
+                "output": "0x00000000000000000000000000000000000000000000000000000433165477d7",
+                "call": {
+                  "name": "balanceOf",
+                  "signature": "balanceOf(address)",
+                  "args": [
+                    {
+                      "name": "account",
+                      "type": "address",
+                      "value": "0xd0b53D9277642d899DF5C87A3966A349A798F224"
+                    }
+                  ]
+                },
+                "result": [
+                  {
+                    "name": "",
+                    "type": "uint256",
+                    "value": "4617464477655"
+                  }
+                ],
+                "calls": [
+                  {
+                    "type": "DELEGATECALL",
+                    "from": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                    "to": "0x2ce6311ddae708829bc0784c967b7d77d19fd779",
+                    "value": "0",
+                    "gasUsed": "553",
+                    "input": "0x70a08231000000000000000000000000d0b53d9277642d899df5c87a3966a349a798f224",
+                    "output": "0x00000000000000000000000000000000000000000000000000000433165477d7",
+                    "call": {
+                      "name": "balanceOf",
+                      "signature": "balanceOf(address)",
+                      "args": [
+                        {
+                          "name": "account",
+                          "type": "address",
+                          "value": "0xd0b53D9277642d899DF5C87A3966A349A798F224"
+                        }
+                      ]
+                    },
+                    "result": [
+                      {
+                        "name": "",
+                        "type": "uint256",
+                        "value": "4617464477655"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "traceText": "[129311] SwapRouter02::exactInputSingle({ tokenIn: USDC(base) (0x8335…2913), tokenOut: WETH (0x4200…0006), fee: 500, recipient: alice (0x4D13…4273), amountIn: 1000000000, amountOutMinimum: 0, sqrtPriceLimitX96: 0 })\n  ├─ [108962] 0xd0b53D9277642d899DF5C87A3966A349A798F224::0x128acb08(384 bytes)\n  │   ├─ [29701] WETH::transfer(alice (0x4D13…4273), 370951843244140674)\n  │   │   └─ ← [Return] true\n  │   ├─ [9750] USDC(base)::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [staticcall]\n  │   │   ├─ [2553] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [delegatecall]\n  │   │   │   └─ ← [Return] 4616464477655\n  │   │   └─ ← [Return] 4616464477655\n  │   ├─ [26935] SwapRouter02::0xfa461e33(320 bytes)\n  │   │   ├─ [22828] USDC(base)::transferFrom(alice (0x4D13…4273), 0xd0b53D9277642d899DF5C87A3966A349A798F224, 1000000000)\n  │   │   │   ├─ [22154] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::transferFrom(alice (0x4D13…4273), 0xd0b53D9277642d899DF5C87A3966A349A798F224, 1000000000) [delegatecall]\n  │   │   │   │   └─ ← [Return] true\n  │   │   │   └─ ← [Return] true\n  │   │   └─ ← [Stop]\n  │   ├─ [1250] USDC(base)::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [staticcall]\n  │   │   ├─ [553] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [delegatecall]\n  │   │   │   └─ ← [Return] 4617464477655\n  │   │   └─ ← [Return] 4617464477655\n  │   └─ ← [Return] 0xfffffffffffffffffffffffffffffffffffffffffffffffffada1d4392a8177e… (64 bytes)\n  └─ ← [Return] 370951843244140674"
+    }
+  ],
+  "blocks": [
+    {
+      "chainId": 8453,
+      "number": "51907867",
+      "hash": "0xf6d0727e872fe87609a229b1787db94aaa51c072161601fbb1496f6065c5db46",
+      "timestamp": 1790605080,
+      "txs": ["5270-f83f5e:1"]
+    },
+    {
+      "chainId": 8453,
+      "number": "51907868",
+      "hash": "0x3563865e0c0011753dbebed4022ce41270bad3d2400c117ae8c290aa27f61117",
+      "timestamp": 1790605081,
+      "txs": ["5270-f83f5e:2"]
+    },
+    {
+      "chainId": 42161,
+      "number": "509730858",
+      "hash": "0xde0b8fe5ae07892f68efc0abe6aa5aebb4ad5e8c091d2ced133d80ad9c89bdbb",
+      "timestamp": 1790605103,
+      "txs": ["5270-f83f5e:3"]
+    },
+    {
+      "chainId": 8453,
+      "number": "51907867",
+      "hash": "0xf1619759a11b0f6111775ea881fb67c9e102c8979dadaf99a88e6fd4dcf854e6",
+      "timestamp": 1790605080,
+      "txs": ["5270-f83f5e:4"]
+    },
+    {
+      "chainId": 8453,
+      "number": "51800001",
+      "hash": "0x3fdd153178a43276cc6be24f49060dc11f3a740bb0dd6199fb5639c7286364a7",
+      "timestamp": 1790389348,
+      "txs": ["5270-f83f5e:6"]
+    },
+    {
+      "chainId": 8453,
+      "number": "51800002",
+      "hash": "0x599404dd87111d9c03f9d131a80b290e253ac10b9a4ec1b826fb373310d6b784",
+      "timestamp": 1790389348,
+      "txs": ["5270-f83f5e:7"]
+    }
+  ],
+  "deals": [
+    {
+      "test": "5270-f83f5e:1",
+      "worker": "5270-f83f5e",
+      "ts": 1790651811919,
+      "chainId": 8453,
+      "token": "native",
+      "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "amount": "1000000000000000000"
+    },
+    {
+      "test": "5270-f83f5e:1",
+      "worker": "5270-f83f5e",
+      "ts": 1790651812097,
+      "chainId": 8453,
+      "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "amount": "1000000000"
+    },
+    {
+      "test": "5270-f83f5e:1",
+      "worker": "5270-f83f5e",
+      "ts": 1790651813410,
+      "chainId": 42161,
+      "token": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+      "holder": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd",
+      "amount": "29518833024"
+    },
+    {
+      "test": "5270-f83f5e:1",
+      "worker": "5270-f83f5e",
+      "ts": 1790651815704,
+      "chainId": 42161,
+      "token": "native",
+      "holder": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd",
+      "amount": "10000000000000000000"
+    },
+    {
+      "test": "5270-f83f5e:2",
+      "worker": "5270-f83f5e",
+      "ts": 1790651815962,
+      "chainId": 8453,
+      "token": "native",
+      "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "amount": "1000000000000000000"
+    },
+    {
+      "test": "5270-f83f5e:2",
+      "worker": "5270-f83f5e",
+      "ts": 1790651816034,
+      "chainId": 8453,
+      "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "amount": "10000000"
+    },
+    {
+      "test": "5270-f83f5e:4",
+      "worker": "5270-f83f5e",
+      "ts": 1790651816920,
+      "chainId": 8453,
+      "token": "native",
+      "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "amount": "1000000000000000000"
+    },
+    {
+      "test": "5270-f83f5e:4",
+      "worker": "5270-f83f5e",
+      "ts": 1790651817008,
+      "chainId": 8453,
+      "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+      "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "amount": "1000000000"
+    }
+  ],
+  "fills": [
+    {
+      "test": "5270-f83f5e:1",
+      "worker": "5270-f83f5e",
+      "ts": 1790651815877,
+      "bridge": "across",
+      "depositId": "8453:0xbf5ab0a784e5739de77201174c7aca7b9e91aacfc4689bc92c1713ae00581507:1",
+      "originChainId": 8453,
+      "destinationChainId": 42161,
+      "depositTxHash": "0xbf5ab0a784e5739de77201174c7aca7b9e91aacfc4689bc92c1713ae00581507",
+      "txHashes": ["0x23f1793715597f840803c5c32d190fcd5a8b71a3f8a3bc17215a2bff479cf16b"],
+      "outputAmount": "999890778",
+      "details": {
+        "fee": "109222",
+        "depositOutputAmount": "999890778",
+        "relayer": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD",
+        "exclusive": true,
+        "repaymentChainId": 42161,
+        "spokePool": "0xe35e9842fceaCA96570B734083f4a58e8F7C5f2A",
+        "fillFunction": "fillRelay"
+      }
+    }
+  ],
+  "http": [
+    {
+      "test": "5270-f83f5e:1",
+      "worker": "5270-f83f5e",
+      "ts": 1790651811468,
+      "fixture": "across/base-arb-usdc",
+      "method": "GET",
+      "url": "https://app.across.to/api/suggested-fees?inputToken=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&outputToken=0xaf88d065e77c8cC2239327C5EDb3A432268e5831&originChainId=8453&destinationChainId=42161&amount=1000000000",
+      "outcome": "hit"
+    },
+    {
+      "test": "5270-f83f5e:2",
+      "worker": "5270-f83f5e",
+      "ts": 1790651815952,
+      "fixture": "across/base-arb-usdc",
+      "method": "GET",
+      "url": "https://app.across.to/api/suggested-fees?inputToken=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&outputToken=0xaf88d065e77c8cC2239327C5EDb3A432268e5831&originChainId=8453&destinationChainId=42161&amount=1000000000",
+      "outcome": "hit"
+    },
+    {
+      "test": "5270-f83f5e:3",
+      "worker": "5270-f83f5e",
+      "ts": 1790651816466,
+      "fixture": "across/base-arb-usdc",
+      "method": "GET",
+      "url": "https://app.across.to/api/suggested-fees?inputToken=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&outputToken=0xaf88d065e77c8cC2239327C5EDb3A432268e5831&originChainId=8453&destinationChainId=42161&amount=1000000000",
+      "outcome": "hit"
+    }
+  ],
+  "gas": [
+    {
+      "test": "5270-f83f5e:4",
+      "worker": "5270-f83f5e",
+      "ts": 1790651817345,
+      "label": "uniswap exactInputSingle",
+      "gas": "129311",
+      "mode": "write",
+      "file": "<scratch>/.gas-snapshot"
+    }
+  ],
+  "labels": {
+    "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273": "alice",
+    "0xdf2d4a804d7e35526e777bce433f3f244d756a4f": "bob",
+    "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913": "USDC(base)",
+    "0xaf88d065e77c8cc2239327c5edb3a432268e5831": "USDC(arb)",
+    "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64": "SpokePool(base)",
+    "0xe35e9842fceaca96570b734083f4a58e8f7c5f2a": "SpokePool(arb)",
+    "0x4200000000000000000000000000000000000006": "WETH",
+    "0x2626664c2603336e57b271c5c0b26f421741e481": "SwapRouter02"
+  },
+  "tokens": {
+    "8453:0x833589fcd6edb6e08f4c7c32d4f71b54bda02913": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "name": "USD Coin"
+    },
+    "42161:0xaf88d065e77c8cc2239327c5edb3a432268e5831": {
+      "symbol": "USDC",
+      "decimals": 6,
+      "name": "USD Coin"
+    },
+    "8453:0x4200000000000000000000000000000000000006": {
+      "symbol": "WETH",
+      "decimals": 18,
+      "name": "Wrapped Ether"
+    }
+  }
+}

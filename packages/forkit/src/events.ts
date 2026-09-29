@@ -25,6 +25,8 @@ export interface ForkBootEvent extends Base {
   /** Fork cache state right after boot, when the cache is in use. */
   cache?: RpcCacheStats;
   bootMs: number;
+  /** The chain's native currency symbol (`ETH`, `POL`, ...). */
+  nativeSymbol?: string;
 }
 
 /** A fork client sent a transaction (the hash is known; the receipt may not be yet). */
@@ -79,6 +81,7 @@ export interface TxRevertedEvent extends Base {
   from?: Address;
   to?: Address;
   data?: Hex;
+  value?: bigint;
   functionName?: string;
   message: string;
   /** Decoded call trace, when traces are on. */
@@ -144,6 +147,18 @@ export interface TestEndEvent extends Base {
   expected?: string;
 }
 
+/** `deal` or `dealNative` set a balance. */
+export interface DealEvent extends Base {
+  type: "deal";
+  chainId: number;
+  rpcUrl: string;
+  /** The ERC-20 token, or `native` for `dealNative`. */
+  token: Address | "native";
+  holder: Address;
+  /** The balance it was set to. */
+  amount: bigint;
+}
+
 export type ForkitEvent =
   | TestStartEvent
   | TestEndEvent
@@ -153,7 +168,8 @@ export type ForkitEvent =
   | TxRevertedEvent
   | BridgeFillEvent
   | GasSnapshotEvent
-  | HttpEvent;
+  | HttpEvent
+  | DealEvent;
 
 type Listener = (event: ForkitEvent) => void;
 const listeners = new Set<Listener>();
@@ -180,4 +196,21 @@ export function emitForkitEvent(event: ForkitEvent): void {
       // Observers must never break a test.
     }
   }
+}
+
+const work = new Set<Promise<unknown>>();
+
+/**
+ * Let an observer's async work (a run record reading receipts and traces, say) finish before
+ * forkit changes the fork under it: `revertTo` and `stop` wait for it. A rejection is ignored.
+ */
+export function trackObserverWork(promise: Promise<unknown>): void {
+  const tracked = promise.catch(() => {});
+  work.add(tracked);
+  void tracked.finally(() => work.delete(tracked));
+}
+
+/** Resolves once every tracked observer promise has settled, including ones added meanwhile. */
+export async function observersSettled(): Promise<void> {
+  while (work.size > 0) await Promise.all(work);
 }

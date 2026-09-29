@@ -5,6 +5,7 @@ import { resolveAlto } from "../../src/4337/alto.ts";
 import {
   AltoNotFoundError,
   altoChainType,
+  altoIsDone,
   containsSend,
   DEFAULT_EXECUTOR_KEY,
   DEFAULT_UTILITY_KEY,
@@ -91,6 +92,15 @@ describe("keys and alto resolution", () => {
 });
 
 describe("proxy helpers", () => {
+  test("altoIsDone holds a receipt while alto may still be processing the operation", () => {
+    // The bundle is mined before alto marks it submitted: not_submitted is not done.
+    expect(altoIsDone("not_submitted")).toBe(false);
+    expect(altoIsDone("submitted")).toBe(false);
+    for (const status of ["included", "reverted", "failed", "rejected", "not_found"]) {
+      expect(altoIsDone(status)).toBe(true);
+    }
+  });
+
   test("containsSend spots a user operation send, alone or in a batch", () => {
     expect(containsSend({ method: "eth_sendUserOperation" })).toBe(true);
     expect(

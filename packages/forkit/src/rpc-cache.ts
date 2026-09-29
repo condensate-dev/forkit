@@ -340,6 +340,7 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
   let misses = 0;
   let offlineMisses = 0;
   const missesByMethod: Record<string, number> = {};
+  const offlineMissesByMethod: Record<string, number> = {};
 
   async function answer(request: JsonRpcRequest): Promise<JsonRpcResponse> {
     const id = request.id ?? null;
@@ -387,6 +388,7 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
     if (options.mode === "offline") {
       if (HASH_LOOKUPS.has(request.method)) return { jsonrpc: "2.0", id, result: null };
       offlineMisses++;
+      offlineMissesByMethod[request.method] = (offlineMissesByMethod[request.method] ?? 0) + 1;
       return {
         jsonrpc: "2.0",
         id,
@@ -485,7 +487,11 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
         }
         if (offlineMisses > 0) {
           options.onWarn(
-            `forkit: ${offlineMisses} request(s) missed the offline fork cache ${path}; record them with FORKIT_CACHE=readwrite.`,
+            `forkit: ${offlineMisses} request(s) missed the offline fork cache ${path} (${Object.entries(
+              offlineMissesByMethod,
+            )
+              .map(([method, n]) => `${method} ×${n}`)
+              .join(", ")}); record them with FORKIT_CACHE=readwrite.`,
           );
         }
       })();

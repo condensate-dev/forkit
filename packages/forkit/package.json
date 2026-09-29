@@ -3,6 +3,9 @@
   "private": true,
   "description": "Foundry-style fork tests in TypeScript, for any test runner.",
   "type": "module",
+  "bin": {
+    "forkit": "./src/explore/cli.ts"
+  },
   "exports": {
     ".": "./src/index.ts",
     "./vitest": "./src/vitest.ts",
@@ -12,6 +15,8 @@
     "./http": "./src/http/index.ts",
     "./bridges": "./src/bridges/index.ts",
     "./4337": "./src/4337/index.ts",
+    "./explore": "./src/explore/index.ts",
+    "./explore/record": "./src/explore/record.ts",
     "./reporter": "./src/reporter/index.ts",
     "./reporter/setup": "./src/reporter/setup.ts",
     "./reporter/bun": "./src/reporter/bun.ts"
@@ -24,7 +29,9 @@
     "test:jest": "NODE_OPTIONS=--experimental-vm-modules jest",
     "test:node": "node --test test/node.smoke.ts",
     "test:anvil": "vitest run --project anvil --project shared && bun test ./test/anvil/bun-adapter.test.ts && NODE_OPTIONS=--experimental-vm-modules jest --config jest.anvil.config.js && node --test test/anvil/node-adapter.test.ts",
-    "test:e2e": "vitest run --project e2e"
+    "test:e2e": "vitest run --project e2e",
+    "explore:fixture": "bun test/explore/make-fixture.ts",
+    "test:screens": "vitest run --project screens"
   },
   "dependencies": {
     "prool": "^0.2.16",
@@ -38,6 +45,7 @@
     "@types/bun": "^1.4.2",
     "@types/node": "26.6.3",
     "jest": "^30.5.2",
+    "playwright": "1.63.0",
     "vitest": "^5.0.2"
   },
   "peerDependencies": {

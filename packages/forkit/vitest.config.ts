@@ -31,6 +31,24 @@ export default defineConfig({
         },
       },
       {
+        // Headless Chromium over the explorer UI (Playwright); writes PNGs, never commits them.
+        test: {
+          name: "screens",
+          include: ["test/screens/**/*.screens.ts"],
+          testTimeout: 60_000,
+          hookTimeout: 60_000,
+        },
+      },
+      {
+        // Not a gate: the explorer's showcase run, recorded by `bun run explore:fixture`.
+        test: {
+          name: "explore-fixture",
+          include: ["test/explore/showcase.fixture.ts"],
+          testTimeout: 120_000,
+          hookTimeout: 180_000,
+        },
+      },
+      {
         // Needs anvil and a real RPC (public by default; override with FORKIT_RPC_URL_<chainId>).
         test: {
           name: "e2e",

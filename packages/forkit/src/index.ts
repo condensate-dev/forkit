@@ -33,10 +33,12 @@ export {
 } from "./errors.ts";
 export {
   type BridgeFillEvent,
+  type DealEvent,
   type ForkBootEvent,
   type ForkitEvent,
   type GasSnapshotEvent,
   type HttpEvent,
+  observersSettled,
   onForkitEvent,
   type TestEndEvent,
   type TestStartEvent,
@@ -44,6 +46,7 @@ export {
   type TxMinedEvent,
   type TxRevertedEvent,
   type TxSentEvent,
+  trackObserverWork,
 } from "./events.ts";
 export { DEFAULT_BOOT_TIMEOUT_MS, DEFAULT_STOP_TIMEOUT_MS, fork } from "./fork.ts";
 export {
@@ -54,7 +57,14 @@ export {
   type GasSnapshotMode,
   parseGasSnapshot,
 } from "./gas.ts";
-export { clearLabels, formatAddress, label, labelOf, registerAbi } from "./labels.ts";
+export {
+  allLabels,
+  clearLabels,
+  formatAddress,
+  label,
+  labelOf,
+  registerAbi,
+} from "./labels.ts";
 export { type DecodedRevert, decodeRevert, describeRevert, revertOf } from "./revert.ts";
 export { type ResolvedRpc, type RpcSource, resolveForkUrl, rpcEnvVar } from "./rpc.ts";
 export {

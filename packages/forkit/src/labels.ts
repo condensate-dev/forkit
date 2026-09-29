@@ -34,6 +34,11 @@ export function labelOf(address: string): string | undefined {
   return labels.get(address.toLowerCase());
 }
 
+/** Every label, keyed by lowercase address. */
+export function allLabels(): Record<string, string> {
+  return Object.fromEntries(labels);
+}
+
 /** `USDC (0x8335…2913)` for a labelled address, the checksummed address otherwise. */
 export function formatAddress(address: string): string {
   const name = labelOf(address);

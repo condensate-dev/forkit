@@ -189,3 +189,36 @@ describe("upstream errors", () => {
     }
   });
 });
+
+describe("offline misses", () => {
+  test("the warning names the methods that missed", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "forkit-cache-offline-"));
+    const warnings: string[] = [];
+    const cache = await startRpcCache({
+      upstream: "http://127.0.0.1:9",
+      chainId: 1,
+      blockNumber: 100n,
+      mode: "offline",
+      dir,
+      port: await freePort(),
+      onWarn: (message) => warnings.push(message),
+    });
+    const ask = (id: number, method: string, params: unknown[]) =>
+      fetch(cache.url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id, method, params }),
+      });
+    try {
+      const address = "0x0000000000000000000000000000000000000001";
+      await ask(1, "eth_getBalance", [address, "0x64"]);
+      await ask(2, "eth_getBalance", [address, "0x64"]);
+      await ask(3, "eth_getCode", [address, "0x64"]);
+    } finally {
+      await cache.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+    expect(warnings).toEqual([expect.stringMatching(/3 request\(s\) missed/)]);
+    expect(warnings[0]).toContain("(eth_getBalance ×2, eth_getCode ×1)");
+  });
+});

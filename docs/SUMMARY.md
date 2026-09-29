@@ -21,6 +21,7 @@
 - [Gas snapshots](guides/gas-snapshots.md)
 - [Assertions, traces and labels](guides/assertions-and-traces.md)
 - [Terminal output](guides/terminal-output.md)
+- [Post-test explorer](guides/explore.md)
 - [Multi-chain forks](guides/multi-chain.md)
 - [Cross-chain routes](guides/cross-chain.md)
   - [HTTP record and replay](guides/http-replay.md)

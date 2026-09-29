@@ -13,6 +13,7 @@
     "test": "bun run --filter './packages/*' test",
     "test:anvil": "bun run --filter '*' test:anvil",
     "test:e2e": "bun run --filter '*' test:e2e",
+    "test:screens": "bun run --filter '*' test:screens",
     "test:examples": "bun run --filter './examples/*' test"
   },
   "devDependencies": {

@@ -228,6 +228,21 @@ async function callAlto(url: string, method: string, params: unknown[]): Promise
 const INCLUDED_WAIT_MS = 10_000;
 
 /**
+ * Whether alto is done with a user operation, given its `pimlico_getUserOperationStatus` status.
+ *
+ * alto sends the bundle transaction before it marks the operation `submitted`, and anvil mines
+ * it on send, so the receipt is on chain while the operation is still `not_submitted` and still
+ * in alto's processing set. alto takes an operation out of that set before it marks it
+ * `included`, `reverted` or `failed`. Only those, `rejected` and `not_found` mean it is done: an
+ * operation left in the set across a revert blocks the same sender with "AA10 ... Another
+ * deployment operation for this sender is already being processed", and
+ * `debug_bundler_clearState` does not clear the set.
+ */
+export function altoIsDone(status: unknown): boolean {
+  return status !== "not_submitted" && status !== "submitted";
+}
+
+/**
  * Start an ERC-4337 bundler (alto) on the selected chain of `f`; for another chain of a
  * multi-chain fork, pass `f.on(chain)`.
  *
@@ -384,10 +399,11 @@ export async function bundler<TChain extends Chain>(
   const awaitIncluded = async (userOpHash: unknown) => {
     const deadline = Date.now() + INCLUDED_WAIT_MS;
     while (Date.now() < deadline) {
-      const status = (await callAlto(altoUrl, "pimlico_getUserOperationStatus", [userOpHash]).catch(
+      const reply = (await callAlto(altoUrl, "pimlico_getUserOperationStatus", [userOpHash]).catch(
         () => undefined,
       )) as { status?: unknown } | undefined;
-      if (status?.status !== "submitted") return;
+      // No answer is not an answer: ask again rather than let a revert strand the operation.
+      if (reply !== undefined && altoIsDone(reply.status)) return;
       await new Promise((resolve) => setTimeout(resolve, 25));
     }
   };

@@ -11,7 +11,8 @@ import {
 } from "./client.ts";
 import { type DealOptions, dealErc20 } from "./deal.ts";
 import { ForkBootError, ForkitError } from "./errors.ts";
-import { emitForkitEvent } from "./events.ts";
+import { emitForkitEvent, observersSettled } from "./events.ts";
+import { autoRecord } from "./explore/auto.ts";
 import { type GasSnapshotSettings, recordGas, resolveGasSettings } from "./gas.ts";
 import { label } from "./labels.ts";
 import { redactUrl, resolveForkUrl, rpcEnvVar } from "./rpc.ts";
@@ -218,10 +219,24 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
     options?: DealOptions,
   ): Promise<void> {
     await dealErc20(this.#anyChainClient, token, holder, amount, options);
+    this.#emitDeal(token, holder, amount);
   }
 
   async dealNative(holder: Address, amount: bigint): Promise<void> {
     await this.client.setBalance({ address: holder, value: amount });
+    this.#emitDeal("native", holder, amount);
+  }
+
+  #emitDeal(token: Address | "native", holder: Address, amount: bigint): void {
+    emitForkitEvent({
+      type: "deal",
+      ts: Date.now(),
+      chainId: this.chain.id,
+      rpcUrl: this.rpcUrl,
+      token,
+      holder,
+      amount,
+    });
   }
 
   async prank<T>(account: Address, fn: (client: PrankClient<TChain>) => Promise<T>): Promise<T> {
@@ -291,6 +306,8 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
   }
 
   async revertTo(id: SnapshotId): Promise<void> {
+    // Observers (a run record) read receipts and traces of what the revert is about to undo.
+    await observersSettled();
     const ok = await rawRequest(this.client)({ method: "evm_revert", params: [id] });
     if (ok !== true) {
       throw new ForkitError(
@@ -315,7 +332,9 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
   }
 
   #stopSelf(): Promise<void> {
-    this.#stopping ??= this.#stopOwner().then(() => this.#cache?.close());
+    this.#stopping ??= observersSettled()
+      .then(() => this.#stopOwner())
+      .then(() => this.#cache?.close());
     return this.#stopping;
   }
 }
@@ -423,6 +442,7 @@ async function forkOne<TChain extends Chain>(
     rpcUrl,
     ...(cacheStats === undefined ? {} : { cache: cacheStats }),
     bootMs: Date.now() - bootStarted,
+    nativeSymbol: chain.nativeCurrency.symbol,
   });
   return handle;
 }
@@ -441,6 +461,7 @@ export async function attachForks(
   targets: readonly AttachTarget[],
   release: () => Promise<void>,
 ): Promise<Fork> {
+  autoRecord();
   const settings = targets.map(({ options }) => resolveHandleSettings(options));
   const group = new ForkGroup();
   let released: Promise<void> | undefined;
@@ -491,6 +512,7 @@ export function fork<TChain extends Chain>(
   targets: readonly [ForkTarget<TChain>, ...ForkTarget[]],
 ): Promise<Fork<TChain>>;
 export async function fork(target: ForkTarget | readonly ForkTarget[]): Promise<Fork> {
+  autoRecord();
   const group = new ForkGroup();
   if (!Array.isArray(target)) return await forkOne(target as ForkTarget, group, 0);
 

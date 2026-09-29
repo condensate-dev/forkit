@@ -1,3 +1,6 @@
 node_modules
 dist
 .anvil-cache
+# Run records (forkit explore) and explorer screenshots: never commit them.
+.forkit/
+forkit-screens/

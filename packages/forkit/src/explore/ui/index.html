@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>forkit explore</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="top-inner">
+        <a class="brand" href="#/"><span class="brand-mark" aria-hidden="true"></span>forkit<span class="brand-sub">explore</span></a>
+        <nav class="crumbs" id="crumbs" aria-label="Breadcrumbs"></nav>
+        <search class="search"><form id="search">
+          <input id="search-input" type="search" placeholder="Address or tx hash" aria-label="Search this run by address or transaction hash" autocomplete="off" spellcheck="false" />
+        </form></search>
+      </div>
+    </header>
+    <main id="app" class="page" aria-live="polite">
+      <p class="muted">Loading…</p>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>
