@@ -7,6 +7,7 @@
     "examples/*"
   ],
   "scripts": {
+    "build": "bun run --filter './packages/*' build",
     "typecheck": "bun run --filter '*' typecheck",
     "lint": "biome check --error-on-warnings .",
     "format": "biome check --write .",
@@ -14,7 +15,8 @@
     "test:anvil": "bun run --filter '*' test:anvil",
     "test:e2e": "bun run --filter '*' test:e2e",
     "test:screens": "bun run --filter '*' test:screens",
-    "test:examples": "bun run --filter './examples/*' test"
+    "test:examples": "bun run --filter './examples/*' test",
+    "test:pack": "bun run --filter './packages/*' test:pack"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",

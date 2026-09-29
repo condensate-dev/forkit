@@ -1,27 +1,97 @@
 {
   "name": "@condensate/forkit",
+  "version": "1.0.0",
   "private": true,
   "description": "Foundry-style fork tests in TypeScript, for any test runner.",
+  "keywords": [
+    "foundry",
+    "anvil",
+    "fork",
+    "testing",
+    "viem",
+    "vitest",
+    "jest",
+    "bun",
+    "node-test",
+    "ethereum",
+    "erc-4337"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/condensate-dev/forkit.git",
+    "directory": "packages/forkit"
+  },
+  "homepage": "https://github.com/condensate-dev/forkit#readme",
+  "bugs": "https://github.com/condensate-dev/forkit/issues",
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "bin": {
-    "forkit": "./src/explore/cli.ts"
+    "forkit": "./dist/explore/cli.js"
   },
   "exports": {
-    ".": "./src/index.ts",
-    "./vitest": "./src/vitest.ts",
-    "./bun": "./src/bun.ts",
-    "./jest": "./src/jest.ts",
-    "./node": "./src/node.ts",
-    "./http": "./src/http/index.ts",
-    "./bridges": "./src/bridges/index.ts",
-    "./4337": "./src/4337/index.ts",
-    "./explore": "./src/explore/index.ts",
-    "./explore/record": "./src/explore/record.ts",
-    "./reporter": "./src/reporter/index.ts",
-    "./reporter/setup": "./src/reporter/setup.ts",
-    "./reporter/bun": "./src/reporter/bun.ts"
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./vitest": {
+      "types": "./dist/vitest.d.ts",
+      "default": "./dist/vitest.js"
+    },
+    "./bun": {
+      "types": "./dist/bun.d.ts",
+      "default": "./dist/bun.js"
+    },
+    "./jest": {
+      "types": "./dist/jest.d.ts",
+      "default": "./dist/jest.js"
+    },
+    "./node": {
+      "types": "./dist/node.d.ts",
+      "default": "./dist/node.js"
+    },
+    "./http": {
+      "types": "./dist/http/index.d.ts",
+      "default": "./dist/http/index.js"
+    },
+    "./bridges": {
+      "types": "./dist/bridges/index.d.ts",
+      "default": "./dist/bridges/index.js"
+    },
+    "./4337": {
+      "types": "./dist/4337/index.d.ts",
+      "default": "./dist/4337/index.js"
+    },
+    "./explore": {
+      "types": "./dist/explore/index.d.ts",
+      "default": "./dist/explore/index.js"
+    },
+    "./explore/record": {
+      "types": "./dist/explore/record.d.ts",
+      "default": "./dist/explore/record.js"
+    },
+    "./reporter": {
+      "types": "./dist/reporter/index.d.ts",
+      "default": "./dist/reporter/index.js"
+    },
+    "./reporter/setup": {
+      "types": "./dist/reporter/setup.d.ts",
+      "default": "./dist/reporter/setup.js"
+    },
+    "./reporter/bun": {
+      "types": "./dist/reporter/bun.d.ts",
+      "default": "./dist/reporter/bun.js"
+    }
   },
+  "files": [
+    "dist",
+    "src",
+    "README.md"
+  ],
   "scripts": {
+    "build": "rm -rf dist && tsc -p tsconfig.build.json && cp -R src/explore/ui dist/explore/ui",
+    "prepack": "bun run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "bun run test:bun && bun run test:vitest && bun run test:jest && bun run test:node",
     "test:bun": "bun test ./test/bun.test.ts",
@@ -31,7 +101,8 @@
     "test:anvil": "vitest run --project anvil --project shared && bun test ./test/anvil/bun-adapter.test.ts && NODE_OPTIONS=--experimental-vm-modules jest --config jest.anvil.config.js && node --test test/anvil/node-adapter.test.ts",
     "test:e2e": "vitest run --project e2e",
     "explore:fixture": "bun test/explore/make-fixture.ts",
-    "test:screens": "vitest run --project screens"
+    "test:screens": "vitest run --project screens",
+    "test:pack": "bun test/pack/pack.smoke.ts"
   },
   "dependencies": {
     "prool": "^0.2.16",

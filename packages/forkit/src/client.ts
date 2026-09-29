@@ -2,13 +2,20 @@ import {
   type Abi,
   type Address,
   type Chain,
+  type Client,
   createTestClient,
   encodeDeployData,
   encodeFunctionData,
   type Hex,
+  type HttpTransport,
   http,
   numberToHex,
+  type ParseAccount,
+  type PublicActions,
   publicActions,
+  type TestActions,
+  type TestRpcSchema,
+  type WalletActions,
   walletActions,
 } from "viem";
 import { emitForkitEvent, hasForkitListeners, type TxLog, type TxSentEvent } from "./events.ts";
@@ -181,6 +188,20 @@ function describeTx(
   };
 }
 
+/**
+ * The client {@link createForkClient} returns, spelled with viem's public types so that the
+ * published declarations name it instead of reaching into viem's internal modules.
+ */
+export type ForkClientOf<TChain extends Chain, TAccount extends Address | undefined> = Client<
+  HttpTransport,
+  TChain,
+  ParseAccount<TAccount>,
+  TestRpcSchema<"anvil">,
+  { mode: "anvil" } & TestActions &
+    PublicActions<HttpTransport, TChain, ParseAccount<TAccount>> &
+    WalletActions<TChain, ParseAccount<TAccount>>
+>;
+
 /** Build the viem client forkit hands out: test + public + wallet actions over one anvil. */
 export function createForkClient<
   TChain extends Chain,
@@ -191,7 +212,7 @@ export function createForkClient<
   account?: TAccount,
   traces = true,
   warn: (message: string) => void = (message) => console.warn(message),
-) {
+): ForkClientOf<TChain, TAccount> {
   const base = createTestClient({
     mode: "anvil",
     chain,
@@ -318,11 +339,7 @@ export function createForkClient<
 }
 
 /** viem client with test, public and wallet actions, bound to one fork. */
-export type ForkClient<TChain extends Chain = Chain> = ReturnType<
-  typeof createForkClient<TChain, undefined>
->;
+export type ForkClient<TChain extends Chain = Chain> = ForkClientOf<TChain, undefined>;
 
 /** A {@link ForkClient} whose default account is an impersonated address (see `prank`). */
-export type PrankClient<TChain extends Chain = Chain> = ReturnType<
-  typeof createForkClient<TChain, Address>
->;
+export type PrankClient<TChain extends Chain = Chain> = ForkClientOf<TChain, Address>;

@@ -10,13 +10,17 @@ You need [bun](https://bun.sh), Node ≥ 22.18 (for the jest and node:test runne
 
 ```sh
 bun install
+bun run build         # dist/: what npm ships; examples/* and their typecheck import it
 bun run typecheck     # tsc, strict + noUncheckedIndexedAccess
 bun run lint          # biome; `any` is an error (bun run format fixes formatting)
 bun run test          # unit + smoke tests under bun:test, vitest, jest and node:test; no anvil
 bun run test:anvil    # local anvils, no network; every runner adapter and the shared fork
 bun run test:e2e      # forks real chains; replays committed recordings (FORKIT_CACHE=offline in CI)
-bun run test:examples # the runnable examples, offline
+bun run test:examples # the runnable examples, offline, against dist/
+bun run test:pack     # npm pack, install in a fresh project, import under all four runners
 ```
+
+The package's own tests import `src/` directly. Anything that imports `@condensate/forkit` by name (the examples, users) gets the built `dist/`, so rebuild after changing `src/` before running the examples.
 
 Before a PR, run all of them on **both** anvil versions. A fork test that passes on only one version is a bug.
 

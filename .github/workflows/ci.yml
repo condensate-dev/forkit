@@ -27,9 +27,29 @@ jobs:
         with:
           node-version: 24
       - run: bun install --frozen-lockfile
+      # examples/* import @condensate/forkit as users do, from its built dist/.
+      - run: bun run build
       - run: bun run typecheck
       - run: bun run lint
       - run: bun run test
+
+  pack:
+    # What `npm install @condensate/forkit` gets: pack, install into a fresh project, and import it
+    # from node_modules under node:test, jest, vitest and bun:test; typecheck a strict consumer;
+    # run the `forkit` bin.
+    name: packed install
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: bun install --frozen-lockfile
+      - run: bun run test:pack
 
   screens:
     # forkit explore's UI in headless Chromium at 390 and 1440 px, over a committed run record.
@@ -87,7 +107,9 @@ jobs:
       - run: bun run test:e2e
         env:
           FORKIT_CACHE: offline
-      # examples/*: each replays its own committed recording (examples/*/.forkit-cache).
+      # examples/*: each replays its own committed recording (examples/*/.forkit-cache), against
+      # forkit's built dist/.
+      - run: bun run build
       - run: bun run test:examples
         env:
           FORKIT_CACHE: offline
