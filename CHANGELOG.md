@@ -5,6 +5,7 @@ All notable changes to `@condensate/forkit`. The format follows [Keep a Changelo
 ## [Unreleased]
 
 ### Added
+- **condensate.dev/forkit page** (milestone 10): a static page in `site/forkit/` (no framework, relative URLs, works under `/forkit/`), with a screenshot test under the subpath and `site/tools/build-assets.ts` to regenerate its explorer screenshots and terminal output. Not deployed from this repo.
 - **Post-test explorer** (milestone 9): `FORKIT_RECORD=1` writes a run record per test run (`.forkit/runs/<id>.json`: forks, transactions with decoded calls, traces and logs, balance changes, bridge fills, HTTP replays, gas snapshots), and `forkit explore [run]` serves a local, offline web UI over it. A `deal` run event for reporters and records.
 - **Docs** (milestone 7): the forkit book (`docs/`, table of contents in `docs/SUMMARY.md`), with getting-started pages per runner, the Foundry → forkit cheatcode reference, guides, a landscape comparison, a FAQ and troubleshooting. Runnable examples in `examples/`, plus contributor, security and GitHub templates.
 - **ERC-4337 bundler** (milestone 6): `@condensate/forkit/4337`. `bundler(f)` runs Pimlico's alto against a fork, with funded executors, EntryPoints v0.6–v0.9, and bundling that survives snapshot/revert.

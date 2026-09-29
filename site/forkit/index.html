@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>forkit: Foundry-style fork tests in TypeScript</title>
+  <meta name="description" content="Fork real chains with anvil, deal, prank, warp, snapshot and revert, then assert on what landed. Foundry ergonomics for TypeScript, in vitest, bun:test, jest or node:test.">
+  <meta name="color-scheme" content="light dark">
+  <meta property="og:title" content="forkit: Foundry-style fork tests in TypeScript">
+  <meta property="og:description" content="Real anvil, your production TypeScript, any test runner, Foundry ergonomics.">
+  <meta property="og:type" content="website">
+  <link rel="icon" href="assets/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <header class="top">
+    <div class="wrap top-row">
+      <a class="brand" href="./" aria-label="forkit home">
+        <picture>
+          <source media="(prefers-color-scheme: dark)" srcset="assets/lockup-dark.svg">
+          <img src="assets/lockup.svg" alt="forkit" width="136" height="40">
+        </picture>
+      </a>
+      <nav aria-label="Primary">
+        <a href="#quickstart">Quickstart</a>
+        <a href="#foundry">Cheatcodes</a>
+        <a href="#explore">Explorer</a>
+        <a href="https://github.com/condensate-dev/forkit/blob/main/docs/README.md">Docs</a>
+        <a href="https://github.com/condensate-dev/forkit">GitHub</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">A Condensate project</p>
+        <h1>Foundry-style fork tests in&nbsp;TypeScript.</h1>
+        <p class="lead">Foundry gives Solidity devs <code>createSelectFork</code>, <code>deal</code>, <code>prank</code>, <code>warp</code>, <code>snapshot</code> and <code>expectRevert</code>. forkit gives TypeScript devs the same things against real forked chains, inside the test runner they already use. Your production code (routing, quoting, SDK calls, bundlers, bridges) runs against real mainnet state, and you assert on what actually landed.</p>
+        <ul class="runners" aria-label="Supported test runners">
+          <li>vitest</li><li>bun:test</li><li>jest</li><li>node:test</li>
+        </ul>
+        <div class="install" id="install">
+          <h2 class="sr-only">Install</h2>
+          <pre><code><span class="t-dim">$</span> bun add -d @condensate/forkit viem   <span class="t-dim"># or npm / pnpm / yarn</span>
+<span class="t-dim">$</span> curl -L https://foundry.paradigm.xyz | bash &amp;&amp; foundryup   <span class="t-dim"># anvil 1.7.1+</span></code></pre>
+          <p class="note">Not on npm yet: until it is, depend on <code>packages/forkit</code> from a checkout of the repo.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="quickstart" class="band">
+      <div class="wrap split">
+        <div class="prose">
+          <h2>Quickstart</h2>
+          <p>One <code>describeFork</code> boots an anvil that forks Base at a pinned block. Every <code>itFork</code> starts from the same snapshot and is reverted afterwards.</p>
+          <ul class="ticks">
+            <li><code>f.deal</code> sets an exact ERC-20 balance and reads it back.</li>
+            <li><code>f.prank</code> impersonates any address. No private key.</li>
+            <li><code>f.expectBalanceChange</code> fails unless the balance moved by exactly that much.</li>
+            <li>Record once, replay offline: CI needs no RPC and no key.</li>
+          </ul>
+        </div>
+        <figure class="code">
+          <figcaption>usdc.fork.test.ts</figcaption>
+<pre><code><span class="k">import</span> { erc20Abi, parseEther, parseUnits } <span class="k">from</span> <span class="s">"viem"</span>;
+<span class="k">import</span> { base } <span class="k">from</span> <span class="s">"viem/chains"</span>;
+<span class="k">import</span> { describeFork, itFork } <span class="k">from</span> <span class="s">"@condensate/forkit/vitest"</span>;
+
+<span class="k">const</span> USDC = <span class="s">"0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"</span>; <span class="c">// USDC on Base</span>
+<span class="k">const</span> alice = <span class="s">"0x778dd60929c5b6f928aeab807fec6986f6ea3d82"</span>;
+<span class="k">const</span> bob = <span class="s">"0x4a3bcc777d2982e91fc24c678af32f7119c48883"</span>;
+
+<span class="f">describeFork</span>(<span class="s">"USDC on Base"</span>, { chain: base, blockNumber: <span class="n">51_800_000n</span> }, (f) =&gt; {
+  <span class="f">itFork</span>(<span class="s">"alice pays bob"</span>, <span class="k">async</span> () =&gt; {
+    <span class="k">await</span> f.<span class="f">deal</span>(USDC, alice, <span class="f">parseUnits</span>(<span class="s">"1000"</span>, <span class="n">6</span>));
+    <span class="k">await</span> f.<span class="f">dealNative</span>(alice, <span class="f">parseEther</span>(<span class="s">"1"</span>)); <span class="c">// for gas</span>
+    <span class="k">await</span> f.<span class="f">expectBalanceChange</span>(USDC, bob, <span class="f">parseUnits</span>(<span class="s">"250"</span>, <span class="n">6</span>), () =&gt;
+      f.<span class="f">prank</span>(alice, (c) =&gt;
+        c.<span class="f">writeContract</span>({ address: USDC, abi: erc20Abi, functionName: <span class="s">"transfer"</span>, args: [bob, <span class="f">parseUnits</span>(<span class="s">"250"</span>, <span class="n">6</span>)] }),
+      ),
+    );
+  });
+});</code></pre>
+        </figure>
+      </div>
+    </section>
+
+    <section id="foundry">
+      <div class="wrap">
+        <h2>Foundry → forkit</h2>
+        <p class="sub">The cheatcodes you already know, against a real anvil over JSON-RPC. Every write is a real transaction.</p>
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th scope="col">Foundry</th><th scope="col">forkit</th></tr></thead>
+            <tbody>
+              <tr><td><code>vm.createSelectFork(url, block)</code></td><td><code>fork({ chain, forkUrl, blockNumber })</code>, or <code>describeFork(name, target, body)</code></td></tr>
+              <tr><td><code>vm.createFork</code> + <code>vm.selectFork</code></td><td><code>fork([base, arbitrum])</code> + <code>f.on(chain)</code></td></tr>
+              <tr><td><code>deal(token, who, amount)</code></td><td><code>f.deal(token, who, amount)</code></td></tr>
+              <tr><td><code>vm.deal(who, amount)</code></td><td><code>f.dealNative(who, amount)</code></td></tr>
+              <tr><td><code>vm.startPrank(who)</code> … <code>stopPrank()</code></td><td><code>f.prank(who, async (c) =&gt; { … })</code></td></tr>
+              <tr><td><code>skip(seconds)</code> / <code>vm.roll</code></td><td><code>f.warp(seconds)</code> / <code>f.roll(blocks)</code></td></tr>
+              <tr><td><code>vm.snapshotState()</code> / <code>revertToState(id)</code></td><td><code>f.snapshot()</code> / <code>f.revertTo(id)</code></td></tr>
+              <tr><td><code>vm.expectRevert("reason")</code></td><td><code>expectRevert(promise, "reason")</code></td></tr>
+              <tr><td><code>vm.expectEmit</code></td><td><code>expectEmit(receipt, eventAbi, args)</code></td></tr>
+              <tr><td><code>vm.label(addr, "name")</code></td><td><code>f.label(addr, "name")</code></td></tr>
+              <tr><td><code>-vvv</code> traces on failure</td><td>on by default: a decoded, Foundry-style trace on every reverted write</td></tr>
+              <tr><td><code>forge snapshot</code> / <code>--check</code></td><td><code>f.gasSnapshot("label", tx)</code>, checked in CI</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="more"><a href="https://github.com/condensate-dev/forkit/blob/main/docs/reference/cheatcodes.md">Every cheatcode, mapped →</a></p>
+      </div>
+    </section>
+
+    <section id="output" class="band">
+      <div class="wrap">
+        <h2>Readable output, in any runner</h2>
+        <p class="sub">Boot lines, per-test transactions and gas, signed balance changes per labelled address, bridge fills, decoded traces on failure and a gas snapshot diff. Honours <code>NO_COLOR</code>; plain text in CI.</p>
+        <figure class="term" aria-label="forkit terminal output">
+          <div class="term-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+<!-- terminal:start -->
+<pre class="term-body"><code><span class="t-bold">forkit</span> <span class="t-dim">·</span> test/e2e/base-arbitrum-across.vitest.ts
+  <span class="t-cyan">⛓</span> <span class="t-bold">Arbitrum One (42161)</span><span class="t-dim"> · </span>block 509,730,857<span class="t-dim"> · </span>arb1.arbitrum.io<span class="t-dim"> · </span><span class="t-green">cache hit (43 reads)</span><span class="t-dim"> · </span><span class="t-dim">booted in 192 ms</span>
+  <span class="t-cyan">⛓</span> <span class="t-bold">Base (8453)</span><span class="t-dim"> · </span>block 51,907,866<span class="t-dim"> · </span>mainnet.base.org<span class="t-dim"> · </span><span class="t-green">cache hit (42 reads)</span><span class="t-dim"> · </span><span class="t-dim">booted in 213 ms</span>
+  <span class="t-green">✓</span> Base USDC → Arbitrum via simulated Across: recipient paid, fee accounting matches the quote  <span class="t-dim">3 txs · 244,593 gas · 647 ms</span>
+        <span class="t-dim">balance change</span>   <span class="t-dim">USDC(base) (Base)</span>  <span class="t-dim">USDC(arb) (Arbitrum One)</span>   <span class="t-dim">ETH (Base)</span>  <span class="t-dim">ETH (Arbitrum One)</span>
+        alice                       <span class="t-red">-1,000</span>                            <span class="t-red">-0.0001248…</span>
+        SpokePool(base)             <span class="t-green">+1,000</span>
+        across relayer                                   <span class="t-red">-999.890778</span>                      <span class="t-red">-0.0001224…</span>
+        bob                                              <span class="t-green">+999.890778</span>
+        <span class="t-magenta">⇄</span> <span class="t-bold">across</span> <span class="t-dim">deposit</span> 8453:0xbf5a…1507:1<span class="t-dim"> · </span>Base → Arbitrum One<span class="t-dim"> · </span>fill 0x23f1…f16b<span class="t-dim"> · </span>fee 0.109222 USDC(arb)<span class="t-dim"> · </span><span class="t-green">settled 999.890778 USDC(arb)</span></code></pre>
+<!-- terminal:end -->
+          <figcaption>Real output: the Base → Arbitrum Across test from the repo, replayed offline.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <section id="explore">
+      <div class="wrap">
+        <h2>After the run: <code>forkit explore</code></h2>
+        <p class="sub">Run with <code>FORKIT_RECORD=1</code> and every test's transactions, decoded calls, call trees, events and balance moves are saved. <code>forkit explore</code> serves them as a local block explorer for your test run: offline, read-only, bundled in the package.</p>
+        <div class="shots">
+          <figure class="shot wide">
+            <img src="assets/explore-tx-1440.png" alt="forkit explore: a transaction view with the decoded deposit call, its call trace and events, linked to the fill on the destination chain" width="1440" height="900" loading="lazy">
+            <figcaption>A transaction: decoded call, call trace, events, and the cross-chain fill it led to.</figcaption>
+          </figure>
+          <figure class="shot">
+            <img src="assets/explore-1440.png" alt="forkit explore: a run overview listing tests, forks and cross-chain fills" width="1440" height="900" loading="lazy">
+            <figcaption>A run: tests, forks and cross-chain fills.</figcaption>
+          </figure>
+          <figure class="shot phone">
+            <img src="assets/explore-test-390.png" alt="forkit explore on a phone: one test's timeline" width="390" height="844" loading="lazy">
+            <figcaption>One test's timeline, at 390&nbsp;px.</figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section id="cross-chain" class="band">
+      <div class="wrap split">
+        <div class="prose">
+          <h2>Cross-chain, without a live relayer</h2>
+          <p>Fork Base and Arbitrum side by side. alice deposits into Base's real Across SpokePool; forkit's simulated relayer fills it through Arbitrum's real SpokePool, and you assert on what bob received.</p>
+          <ul class="ticks">
+            <li>Simulators for Across and Relay, plus <code>bridge.custom</code>.</li>
+            <li>Quote APIs recorded and replayed, pinned to the fork block.</li>
+            <li>An ERC-4337 bundler (alto) on the fork: <code>@condensate/forkit/4337</code>.</li>
+          </ul>
+        </div>
+        <figure class="code">
+          <figcaption>across.fork.test.ts (abridged)</figcaption>
+<pre><code><span class="f">describeFork</span>(<span class="s">"Across: Base USDC → Arbitrum"</span>, [
+  { chain: base, blockNumber: BASE_BLOCK },
+  { chain: arbitrum, blockNumber: ARB_BLOCK },
+], (f) =&gt; {
+  <span class="k">const</span> arb = f.<span class="f">on</span>(arbitrum);
+
+  <span class="f">itFork</span>(<span class="s">"bob receives the output on Arbitrum"</span>, <span class="k">async</span> () =&gt; {
+    <span class="k">const</span> relayer = bridge.<span class="f">across</span>(f); <span class="c">// watches Base from here on</span>
+    <span class="k">await</span> <span class="f">fundAlice</span>();
+    <span class="k">await</span> f.<span class="f">expectBalanceChange</span>(USDC_BASE, alice, -INPUT, deposit);
+
+    <span class="c">// Fill every pending deposit on its destination fork.</span>
+    <span class="k">const</span> [fill] = <span class="k">await</span> arb.<span class="f">expectBalanceChange</span>(USDC_ARB, bob, OUTPUT, () =&gt;
+      relayer.<span class="f">settle</span>(),
+    );
+    <span class="f">expect</span>(fill?.details).<span class="f">toMatchObject</span>({ fee: across.<span class="f">fee</span>(INPUT, FEE) });
+  });
+});</code></pre>
+        </figure>
+      </div>
+    </section>
+
+    <section id="links">
+      <div class="wrap">
+        <h2>Read more</h2>
+        <ul class="cards">
+          <li><a href="https://github.com/condensate-dev/forkit/blob/main/docs/README.md"><strong>The forkit book</strong><span>Getting started per runner, guides, reference.</span></a></li>
+          <li><a href="https://github.com/condensate-dev/forkit/blob/main/docs/reference/cheatcodes.md"><strong>Foundry → forkit</strong><span>Every cheatcode and forge feature, mapped.</span></a></li>
+          <li><a href="https://github.com/condensate-dev/forkit/tree/main/examples"><strong>Examples</strong><span>vitest, bun:test and jest projects that replay offline.</span></a></li>
+          <li><a href="https://github.com/condensate-dev/forkit/blob/main/docs/landscape.md"><strong>Landscape</strong><span>forkit next to tevm, prool, viem test actions, Hardhat and forge.</span></a></li>
+        </ul>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap foot-row">
+      <span>forkit · <a href="https://condensate.dev/">Condensate</a></span>
+      <span><a href="https://github.com/condensate-dev/forkit">GitHub</a> · <a href="https://github.com/condensate-dev/forkit/blob/main/CHANGELOG.md">Changelog</a></span>
+    </div>
+  </footer>
+</body>
+</html>
