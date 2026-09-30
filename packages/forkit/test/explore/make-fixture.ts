@@ -37,7 +37,9 @@ for (const worker of clean.workers)
   worker.argv = worker.argv.map((a) => a.replace(/^.*\/node_modules\//, ""));
 const out = join(pkg, "test/fixtures/explore/showcase.json");
 mkdirSync(join(pkg, "test/fixtures/explore"), { recursive: true });
-writeFileSync(out, `${JSON.stringify(clean, null, 1)}\n`);
+writeFileSync(out, `${JSON.stringify(clean, null, 2)}\n`);
+// In the repo's format, so `biome check` (the lint gate) passes on a fresh recording.
+spawnSync("npx", ["biome", "format", "--write", out], { cwd: pkg, stdio: "inherit" });
 rmSync(scratch, { recursive: true, force: true });
 console.log(
   `wrote ${out}: ${run.tests.length} tests, ${run.txs.length} txs, ${run.fills.length} fills (${readFileSync(out).length} bytes)`,
