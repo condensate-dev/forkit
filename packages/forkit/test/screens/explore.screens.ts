@@ -203,6 +203,7 @@ describe("reading a run", () => {
     await expect
       .poll(() => page.url())
       .toContain(`/tx/${encodeURIComponent(depositTx()?.id ?? "")}`);
+    await expect.poll(() => page.locator(".page-head h1").innerText()).toBe("deposit");
 
     await page.keyboard.press("/");
     await page.keyboard.type("swaps 1,000");

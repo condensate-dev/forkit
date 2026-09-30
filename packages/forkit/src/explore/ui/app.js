@@ -106,7 +106,8 @@ async function render() {
   let view;
   setActiveNav(undefined);
   hideTip();
-  closeSearch();
+  // A search the reader is already typing (a fast "/" after the last jump) stays open.
+  if (document.activeElement !== searchInput) closeSearch();
   try {
     if (parts.length === 0) {
       runList = await getJson("/api/runs");
@@ -220,7 +221,7 @@ function choose(i) {
   go(resultHref(result));
 }
 
-searchInput.addEventListener("input", () => {
+function runSearch() {
   const q = searchInput.value.trim();
   if (q === "") return closeSearch();
   if (current) results = search(current, q);
@@ -232,7 +233,9 @@ searchInput.addEventListener("input", () => {
   highlighted = results.length > 0 ? 0 : -1;
   paintResults();
   announce(`${results.length} result${results.length === 1 ? "" : "s"}`);
-});
+}
+
+searchInput.addEventListener("input", runSearch);
 
 searchInput.addEventListener("keydown", (event) => {
   if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -243,6 +246,7 @@ searchInput.addEventListener("keydown", (event) => {
     paintResults();
   } else if (event.key === "Enter") {
     event.preventDefault();
+    if (results.length === 0) runSearch();
     choose(highlighted >= 0 ? highlighted : 0);
   } else if (event.key === "Escape") {
     closeSearch();
