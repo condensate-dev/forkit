@@ -232,7 +232,12 @@ mark {
 }
 .crumbs a {
   color: var(--muted);
-  flex-shrink: 1;
+  /* Middle crumbs give way first; "Runs" and the page you are on keep their room. */
+  flex-shrink: 4;
+  min-width: 3ch;
+}
+.crumbs a:first-child {
+  flex: none;
 }
 .crumbs a:hover {
   color: var(--ink);
@@ -1642,6 +1647,12 @@ button.toggle.is-open .icon {
 
 /* ------------------------------------------------------------------------------------------ */
 /* Narrower screens */
+
+@media (max-width: 1280px) {
+  .search {
+    flex-basis: 280px;
+  }
+}
 
 @media (max-width: 1100px) {
   .grid,
