@@ -505,6 +505,35 @@ describe("RunRecorder", () => {
     });
   });
 
+  test("on an offline fork it reads no token metadata: the recording would not have it", async () => {
+    const fork = fakeFork();
+    const metadata = ["symbol()", "decimals()", "name()"].map((f) => toFunctionSelector(f));
+    const asked: string[] = [];
+    const request: RawRequest = (args) => {
+      const data = (args.params?.[0] as { data?: string } | undefined)?.data;
+      if (args.method === "eth_call" && data !== undefined) asked.push(data.slice(0, 10));
+      return fork.request(args);
+    };
+    const recorder = new RunRecorder({ runId: "unit", write: false, request: () => request });
+    const [boot, ...rest] = events(1, 0);
+    if (boot?.type !== "fork:boot") throw new Error("events() starts with a fork:boot");
+    const cache = { path: "/c/1/100.json", hits: 9, misses: 0, entries: 9, missesByMethod: {} };
+    recorder.handle({ ...boot, cache: { ...cache, mode: "offline" } });
+    for (const event of rest) recorder.handle(event);
+    await observersSettled();
+    expect(asked.filter((selector) => metadata.includes(selector as Hex))).toEqual([]);
+    expect(recorder.part.tokens).toEqual({});
+    // The transaction's own state is still read: its receipt, trace and balances.
+    expect(fork.calls).toEqual(expect.arrayContaining(["debug_traceTransaction", "eth_call"]));
+    expect(recorder.part.txs[0]?.balanceChanges.length).toBeGreaterThan(0);
+
+    // A fork booted later on the same URL, with a writable cache, reads it again.
+    recorder.handle({ ...boot, cache: { ...cache, mode: "readwrite" } });
+    for (const event of events(2, 100).slice(1)) recorder.handle(event);
+    await observersSettled();
+    expect(asked.filter((selector) => metadata.includes(selector as Hex))).not.toEqual([]);
+  });
+
   test("a fork that fails every read leaves notes, not errors", async () => {
     const recorder = new RunRecorder({
       runId: "unit",

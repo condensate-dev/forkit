@@ -17,6 +17,8 @@ anvil forks lazily. Each account and storage slot a test touches is fetched from
 
 `FORKIT_CACHE_DIR` or the `cacheDir` option moves the recordings.
 
+In `offline` mode a miss fails twice. The request fails: anvil answers it with an error that names the method, its params and the recording. And stopping the fork (the end of a `describeFork`) throws `ForkCacheMissError`, which lists every request that missed. The second failure is the one you cannot lose: anvil fetches state for its own reasons, a bundler retries, and the code under test may catch the error. A test that expects a revert does not pass on a miss either: `expectRevert` goes by the node's JSON-RPC error code, and a miss is not a revert (see [assertions](assertions-and-traces.md#expectrevert-and-failed-requests)).
+
 Unpinned forks are never cached, and they warn, because they are not reproducible.
 
 The recordings work across anvil versions, because the cache keys reads by block number, not by the block hash that anvil 1.8 uses. Either form of an account read (`eth_getAccountInfo`, or the balance/nonce/code triple) is answered from the other.

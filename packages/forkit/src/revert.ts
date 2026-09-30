@@ -61,25 +61,65 @@ export function revertDataOf(error: unknown): Hex | undefined {
   return undefined;
 }
 
-/** Whether an error is an EVM revert, as opposed to e.g. a network or signing failure. */
-export function isRevertError(error: unknown): boolean {
-  if (revertDataOf(error) !== undefined) return true;
-  const seen = new Set<unknown>();
+/** Every error in `error`'s cause chain, outermost first. */
+function causes(error: unknown): object[] {
+  const chain: object[] = [];
   let current: unknown = error;
-  while (typeof current === "object" && current !== null && !seen.has(current)) {
-    seen.add(current);
-    const { name, message, code } = current as {
-      name?: unknown;
-      message?: unknown;
-      code?: unknown;
-    };
-    if (name === "ContractFunctionRevertedError" || name === "ExecutionRevertedError") return true;
-    if (code === 3) return true;
-    if (typeof message === "string" && /execution reverted|\breverted\b/i.test(message))
-      return true;
+  while (typeof current === "object" && current !== null && !chain.includes(current)) {
+    chain.push(current);
     current = (current as { cause?: unknown }).cause;
   }
-  return false;
+  return chain;
+}
+
+/**
+ * What the JSON-RPC errors in `error`'s cause chain say: `revert` when the EVM reverted (code 3;
+ * geth answers a revert with no data with -32000 "execution reverted"), `failure` for any other
+ * code, `undefined` when the chain carries no JSON-RPC code.
+ *
+ * The code is the node's own verdict; viem's error names are not. viem also calls anvil's internal
+ * errors (-32603, e.g. "failed to get storage" when the fork cannot fetch state, or misses the
+ * offline fork cache) a `ContractFunctionRevertedError`.
+ */
+export function rpcErrorVerdict(error: unknown): "revert" | "failure" | undefined {
+  let verdict: "revert" | undefined;
+  for (const link of causes(error)) {
+    const { code, message, details } = link as {
+      code?: unknown;
+      message?: unknown;
+      details?: unknown;
+    };
+    // -1 is viem's placeholder for an error it could not classify (UnknownRpcError): look deeper.
+    if (typeof code !== "number" || code === -1) continue;
+    // viem keeps the node's own message in `details`; a raw JSON-RPC error has it in `message`.
+    const text = typeof details === "string" ? details : message;
+    const reverted =
+      code === 3 ||
+      (code === -32000 && typeof text === "string" && /^execution reverted$/i.test(text.trim()));
+    if (!reverted) return "failure";
+    verdict = "revert";
+  }
+  return verdict;
+}
+
+/**
+ * Whether an error is an EVM revert, as opposed to the RPC or the fork failing: a network error,
+ * a rate limit, or anvil's -32603 when the fork cannot fetch state (an offline fork cache miss).
+ * Revert data settles it, then the JSON-RPC code (3 is a revert, any other code is not), whatever
+ * viem named the error. Only an error that carries neither is judged by its name and message.
+ */
+export function isRevertError(error: unknown): boolean {
+  if (revertDataOf(error) !== undefined) return true;
+  const verdict = rpcErrorVerdict(error);
+  if (verdict !== undefined) return verdict === "revert";
+  return causes(error).some((link) => {
+    const { name, message } = link as { name?: unknown; message?: unknown };
+    return (
+      name === "ContractFunctionRevertedError" ||
+      name === "ExecutionRevertedError" ||
+      (typeof message === "string" && /execution reverted|\breverted\b/i.test(message))
+    );
+  });
 }
 
 /** Decode revert data: `Error(string)`, `Panic(uint256)`, or a custom error from `abi` / known ABIs. */

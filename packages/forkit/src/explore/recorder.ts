@@ -157,6 +157,11 @@ export class RunRecorder {
   readonly #request: (rpcUrl: string) => RawRequest;
   readonly #clients = new Map<string, RawRequest>();
   readonly #tokenReads = new Map<string, Promise<void>>();
+  /**
+   * Forks on an offline cache, by URL. Their recording holds only what the tests read, so reading
+   * token metadata there would miss it, and fail the run for a read no test made.
+   */
+  readonly #offline = new Set<string>();
   #current: string | undefined;
   #txCount = 0;
   #labels = "{}";
@@ -300,6 +305,8 @@ export class RunRecorder {
         return;
       }
       case "fork:boot":
+        if (event.cache?.mode === "offline") this.#offline.add(event.rpcUrl);
+        else this.#offline.delete(event.rpcUrl);
         this.#write([
           {
             kind: "fork",
@@ -354,9 +361,10 @@ export class RunRecorder {
         };
         this.#write([{ kind: "tx", record: tx }]);
         const request = this.#request(event.rpcUrl);
+        const readTokens = !this.#offline.has(event.rpcUrl);
         this.#track(async () => {
           const enriched = sent
-            ? await this.#enrichMined(request, tx, event.hash)
+            ? await this.#enrichMined(request, tx, event.hash, readTokens)
             : await this.#enrichReverted(request, tx, event.value);
           this.#write([...this.#syncLabels(), { kind: "tx", record: enriched }]);
         });
@@ -376,7 +384,7 @@ export class RunRecorder {
             },
           },
         ]);
-        if (token !== "native") {
+        if (token !== "native" && !this.#offline.has(event.rpcUrl)) {
           const request = this.#request(event.rpcUrl);
           this.#track(() => this.#readTokens(request, event.chainId, [token]));
         }
@@ -457,7 +465,12 @@ export class RunRecorder {
     }
   }
 
-  async #enrichMined(request: RawRequest, tx: TxRecord, hash: Hex): Promise<TxRecord> {
+  async #enrichMined(
+    request: RawRequest,
+    tx: TxRecord,
+    hash: Hex,
+    readTokens: boolean,
+  ): Promise<TxRecord> {
     const out: TxRecord = { ...tx, logs: [], balanceChanges: [] };
     const notes: string[] = [];
     let receipt: Receipt | null = null;
@@ -520,11 +533,13 @@ export class RunRecorder {
     if (receipt !== null) {
       out.balanceChanges = balanceChanges(frame, receipt.logs, tx.from, fee);
       await this.#readBalances(request, out.balanceChanges, receipt.blockNumber);
-      await this.#readTokens(
-        request,
-        tx.chainId,
-        out.balanceChanges.map((c) => c.token),
-      );
+      if (readTokens) {
+        await this.#readTokens(
+          request,
+          tx.chainId,
+          out.balanceChanges.map((c) => c.token),
+        );
+      }
     }
     if (notes.length > 0) out.notes = notes;
     return out;

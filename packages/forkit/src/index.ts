@@ -27,6 +27,8 @@ export {
   AnvilNotFoundError,
   DealError,
   ForkBootError,
+  type ForkCacheMiss,
+  ForkCacheMissError,
   ForkitAssertionError,
   ForkitError,
   NotImplementedError,

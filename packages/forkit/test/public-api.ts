@@ -8,4 +8,5 @@ export const PUBLIC_FUNCTIONS = [
   "registerAbi",
   "formatTrace",
   "decodeRevert",
+  "ForkCacheMissError",
 ] as const;

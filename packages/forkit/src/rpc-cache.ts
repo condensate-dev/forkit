@@ -9,12 +9,14 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { dirname, join, resolve } from "node:path";
+import { type ForkCacheMiss, ForkCacheMissError } from "./errors.ts";
 import { redactUrl } from "./rpc.ts";
 
 /**
  * - `readwrite`: serve hits, fetch and record misses (default).
  * - `readonly`: serve hits, fetch misses, never write (CI that shares a restored cache).
- * - `offline`: serve hits, fail misses loudly; no network at all.
+ * - `offline`: serve hits, fail misses loudly; no network at all. A miss fails the request, and
+ *   `close()` rejects with a {@link ForkCacheMissError} that lists every miss.
  * - `off`: no proxy; anvil talks to the upstream directly.
  */
 export type CacheMode = "readwrite" | "readonly" | "offline" | "off";
@@ -45,7 +47,10 @@ export interface RpcCacheStats {
 export interface RpcCache {
   readonly url: string;
   stats(): RpcCacheStats;
-  /** Stop serving and write new entries to disk. */
+  /**
+   * Stop serving and write new entries to disk. Offline, it then rejects with a
+   * {@link ForkCacheMissError} if any request missed the recording.
+   */
   close(): Promise<void>;
 }
 
@@ -56,7 +61,6 @@ export interface RpcCacheOptions {
   mode: Exclude<CacheMode, "off">;
   dir: string;
   port: number;
-  onWarn: (message: string) => void;
 }
 
 interface CacheFile {
@@ -338,9 +342,9 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
   for (const result of entries.values()) learnHash(result);
   let hits = 0;
   let misses = 0;
-  let offlineMisses = 0;
   const missesByMethod: Record<string, number> = {};
-  const offlineMissesByMethod: Record<string, number> = {};
+  /** Offline misses by request (retries of one request count once), in the order they came. */
+  const offlineMisses = new Map<string, { method: string; params: unknown[]; count: number }>();
 
   async function answer(request: JsonRpcRequest): Promise<JsonRpcResponse> {
     const id = request.id ?? null;
@@ -387,14 +391,17 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
     }
     if (options.mode === "offline") {
       if (HASH_LOOKUPS.has(request.method)) return { jsonrpc: "2.0", id, result: null };
-      offlineMisses++;
-      offlineMissesByMethod[request.method] = (offlineMissesByMethod[request.method] ?? 0) + 1;
+      const params = request.params ?? [];
+      const missKey = key ?? `${request.method}:${JSON.stringify(params).toLowerCase()}`;
+      const miss = offlineMisses.get(missKey) ?? { method: request.method, params, count: 0 };
+      miss.count++;
+      offlineMisses.set(missKey, miss);
       return {
         jsonrpc: "2.0",
         id,
         error: {
           code: -32000,
-          message: `forkit: offline and ${request.method} is not in the fork cache (${path}). Run once with FORKIT_CACHE=readwrite and network access to record it.`,
+          message: `forkit: offline and ${request.method} ${JSON.stringify(params)} is not in the fork cache (${path}). Run once with FORKIT_CACHE=readwrite and network access to record it.`,
         },
       };
     }
@@ -485,13 +492,12 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
             entries: { ...onDisk.entries, ...Object.fromEntries(fresh) },
           });
         }
-        if (offlineMisses > 0) {
-          options.onWarn(
-            `forkit: ${offlineMisses} request(s) missed the offline fork cache ${path} (${Object.entries(
-              offlineMissesByMethod,
-            )
-              .map(([method, n]) => `${method} ×${n}`)
-              .join(", ")}); record them with FORKIT_CACHE=readwrite.`,
+        // A warning here would go unseen (test runners swallow a passing file's console), and a
+        // miss can pass unnoticed: anvil, a bundler or the code under test may catch the failed
+        // request. So the run fails, naming each request that missed.
+        if (offlineMisses.size > 0) {
+          throw new ForkCacheMissError(
+            [...offlineMisses.values()].map((miss): ForkCacheMiss => ({ path, ...miss })),
           );
         }
       })();

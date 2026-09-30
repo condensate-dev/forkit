@@ -10,7 +10,7 @@ import {
   rawRequest,
 } from "./client.ts";
 import { type DealOptions, dealErc20 } from "./deal.ts";
-import { ForkBootError, ForkitError } from "./errors.ts";
+import { ForkBootError, ForkCacheMissError, ForkitError } from "./errors.ts";
 import {
   type CheatEvent,
   emitForkitEvent,
@@ -141,6 +141,23 @@ function killHard(instance: AnvilInstance): void {
   }
 }
 
+/** What `promise` rejected with, or `undefined` once it resolves. */
+function failureOf(promise: Promise<unknown> | undefined): Promise<unknown> {
+  return (promise ?? Promise.resolve()).then(
+    () => undefined,
+    (error: unknown) => error,
+  );
+}
+
+/**
+ * A boot failure. When stopping what did boot failed too (an offline fork cache that missed
+ * the fork's first reads), the message says that as well: it is usually why the boot failed.
+ */
+function bootError(message: string, cause: unknown, stopFailure: unknown): ForkBootError {
+  const also = stopFailure instanceof Error ? `\n${stopFailure.message}` : "";
+  return new ForkBootError(`${message}${also}`, cause === undefined ? undefined : { cause });
+}
+
 /**
  * The forks booted by one `fork()` call. Every handle in a group can reach the others with
  * `on(chain)`, and stopping any of them stops them all.
@@ -159,9 +176,17 @@ class ForkGroup {
     this.#stoppers.push(stopSelf);
   }
 
-  /** Idempotent: each member memoizes its own stop. */
+  /**
+   * Idempotent: each member memoizes its own stop. Every member stops even when another one
+   * fails, and the offline cache misses of every chain come back as one error.
+   */
   async stop(): Promise<void> {
-    await Promise.all(this.#stoppers.map((stopSelf) => stopSelf()));
+    const results = await Promise.allSettled(this.#stoppers.map((stopSelf) => stopSelf()));
+    const failures = results.flatMap((r) => (r.status === "rejected" ? [r.reason as unknown] : []));
+    if (failures.length > 1 && failures.every((f) => f instanceof ForkCacheMissError)) {
+      throw new ForkCacheMissError(failures.flatMap((f) => (f as ForkCacheMissError).misses));
+    }
+    if (failures.length > 0) throw failures[0];
   }
 }
 
@@ -422,7 +447,6 @@ async function forkOne<TChain extends Chain>(
           mode: cacheSettings.mode,
           dir: cacheSettings.dir,
           port: await freePort(),
-          onWarn: warn,
         });
 
   const port = await freePort();
@@ -445,9 +469,11 @@ async function forkOne<TChain extends Chain>(
     );
   } catch (error) {
     killHard(instance);
-    await cache?.close();
-    if (error instanceof ForkBootError) throw error;
-    throw new ForkBootError(`forkit: anvil failed to fork ${where}`, { cause: error });
+    const stopFailure = await failureOf(cache?.close());
+    if (error instanceof ForkBootError) {
+      throw stopFailure === undefined ? error : bootError(error.message, error.cause, stopFailure);
+    }
+    throw bootError(`forkit: anvil failed to fork ${where}`, error, stopFailure);
   }
 
   const rpcUrl = `http://127.0.0.1:${port}`;
@@ -472,15 +498,15 @@ async function forkOne<TChain extends Chain>(
     settings.warn,
   );
   const servedChainId = await handle.client.getChainId().catch(async (error: unknown) => {
-    await handle.stop();
-    throw new ForkBootError(`forkit: anvil started but does not answer on ${rpcUrl}`, {
-      cause: error,
-    });
+    const stopFailure = await failureOf(handle.stop());
+    throw bootError(`forkit: anvil started but does not answer on ${rpcUrl}`, error, stopFailure);
   });
   if (servedChainId !== chain.id) {
-    await handle.stop();
-    throw new ForkBootError(
+    const stopFailure = await failureOf(handle.stop());
+    throw bootError(
       `forkit: ${redactUrl(rpc.url)} serves chain ${servedChainId}, but the fork asked for ${chain.name} (${chain.id}).`,
+      undefined,
+      stopFailure,
     );
   }
   const cacheStats = handle.cacheStats();
@@ -583,7 +609,8 @@ export async function fork(target: ForkTarget | readonly ForkTarget[]): Promise<
   const booted = await Promise.allSettled(targets.map((t, slot) => forkOne(t, group, slot)));
   const failed = booted.find((r): r is PromiseRejectedResult => r.status === "rejected");
   if (failed !== undefined) {
-    await group.stop();
+    // The failed chain's error already names what its own cache missed; it is the one to throw.
+    await failureOf(group.stop());
     throw failed.reason;
   }
   return (booted[0] as PromiseFulfilledResult<Fork>).value;

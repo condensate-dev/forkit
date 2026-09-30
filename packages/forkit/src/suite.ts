@@ -176,9 +176,13 @@ export function createForkSuite<TChain extends Chain>(
     (shared === undefined ? bootMs : (shared.leaseTimeoutMs ?? DEFAULT_LEASE_TIMEOUT_MS)) +
       HOOK_SLACK_MS,
   );
+  // stop() throws ForkCacheMissError when an offline fork missed its recording: the suite fails.
   hooks.afterAll(async () => {
-    await current?.stop();
-    current = undefined;
+    try {
+      await current?.stop();
+    } finally {
+      current = undefined;
+    }
   }, stopMs + HOOK_SLACK_MS);
   if (options.isolate !== false) {
     hooks.beforeEach(async () => {

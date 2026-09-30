@@ -27,9 +27,10 @@ import { getBalance, readContract } from "viem/actions";
 import type { PrankClient } from "../client.ts";
 import { ForkitError } from "../errors.ts";
 import { formatAddress } from "../labels.ts";
+import { isRevertError } from "../revert.ts";
 import type { Fork } from "../types.ts";
 import { fiatTokenAdminAbi, noReturnErc20Abi } from "./abi.ts";
-import { isEvmRevert, optional } from "./read.ts";
+import { optional } from "./read.ts";
 
 /**
  * Check a token call the way OpenZeppelin's SafeERC20 does, with `eth_call` (a mined
@@ -78,7 +79,7 @@ async function accepts(c: PrankClient, token: Address, data: Hex): Promise<boole
     await checkTokenCall(c, token, data, "forceApprove");
     return true;
   } catch (error) {
-    if (error instanceof ForkitError || isEvmRevert(error)) return false;
+    if (error instanceof ForkitError || isRevertError(error)) return false;
     throw error;
   }
 }
