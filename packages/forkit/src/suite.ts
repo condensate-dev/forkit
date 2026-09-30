@@ -4,7 +4,14 @@ import type { NATIVE } from "./assertions.ts";
 import type { ForkClient, PrankClient } from "./client.ts";
 import type { DealOptions } from "./deal.ts";
 import { ForkitError } from "./errors.ts";
-import { DEFAULT_BOOT_TIMEOUT_MS, DEFAULT_STOP_TIMEOUT_MS, fork, toForkOptions } from "./fork.ts";
+import {
+  DEFAULT_BOOT_TIMEOUT_MS,
+  DEFAULT_STOP_TIMEOUT_MS,
+  fork,
+  isolationRevert,
+  isolationSnapshot,
+  toForkOptions,
+} from "./fork.ts";
 import type { RpcCacheStats } from "./rpc-cache.ts";
 import { type AttachOptions, attachSharedFork, DEFAULT_LEASE_TIMEOUT_MS } from "./shared.ts";
 import type { Fork, ForkOptions, ForkTarget, GasSource, SnapshotId } from "./types.ts";
@@ -177,13 +184,15 @@ export function createForkSuite<TChain extends Chain>(
     hooks.beforeEach(async () => {
       if (current === undefined) return;
       snapshots = await Promise.all(
-        current.forks.map(async (f): Promise<[Fork, SnapshotId]> => [f, await f.snapshot()]),
+        current.forks.map(
+          async (f): Promise<[Fork, SnapshotId]> => [f, await isolationSnapshot(f)],
+        ),
       );
     }, EACH_HOOK_TIMEOUT_MS);
     hooks.afterEach(async () => {
       const taken = snapshots;
       snapshots = [];
-      await Promise.all(taken.map(([f, id]) => f.revertTo(id)));
+      await Promise.all(taken.map(([f, id]) => isolationRevert(f, id)));
     }, EACH_HOOK_TIMEOUT_MS);
   }
   return handle;

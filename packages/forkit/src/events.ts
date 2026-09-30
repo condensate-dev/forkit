@@ -159,6 +159,28 @@ export interface DealEvent extends Base {
   amount: bigint;
 }
 
+/**
+ * A cheatcode other than `deal`: a prank began or ended, time or blocks moved, or a snapshot was
+ * taken or reverted to. The per-test isolation snapshot is not one: only the test's own calls are.
+ */
+export interface CheatEvent extends Base {
+  type: "cheat";
+  chainId: number;
+  rpcUrl: string;
+  cheat: "prank" | "stopPrank" | "warp" | "roll" | "snapshot" | "revert";
+  /** `prank`, `stopPrank`: the impersonated account. */
+  account?: Address;
+  /** `warp`: seconds added. */
+  seconds?: bigint;
+  /** `roll`: blocks mined. */
+  blocks?: bigint;
+  /** `snapshot`, `revert`: the snapshot id. */
+  snapshotId?: string;
+  /** `warp`, `roll`: the latest block's number and timestamp afterwards, when read. */
+  blockNumber?: bigint;
+  timestamp?: bigint;
+}
+
 export type ForkitEvent =
   | TestStartEvent
   | TestEndEvent
@@ -169,7 +191,8 @@ export type ForkitEvent =
   | BridgeFillEvent
   | GasSnapshotEvent
   | HttpEvent
-  | DealEvent;
+  | DealEvent
+  | CheatEvent;
 
 type Listener = (event: ForkitEvent) => void;
 const listeners = new Set<Listener>();
