@@ -1,4 +1,7 @@
 {
   "extends": "../../tsconfig.base.json",
-  "include": ["src", "test", "*.config.ts"]
+  "include": ["src", "test", "*.config.ts"],
+  // The explorer's browser modules (src/explore/ui) are plain JavaScript; the unit tests import
+  // their pure parts. allowJs lets TypeScript infer their types (it does not check them).
+  "compilerOptions": { "allowJs": true }
 }
