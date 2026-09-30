@@ -177,7 +177,7 @@ To run in CI with no RPC:
     FORKIT_CACHE: offline
 ```
 
-In `offline` mode, a request that is not in the recording fails the test and names the method and the cache file. After you change a pinned block or add a test that reads new state, record again with network access and the default `readwrite` mode.
+In `offline` mode, a request that is not in the recording fails and names the method, its params and the cache file. The suite fails too: stopping the fork throws `ForkCacheMissError` with every request that missed, even one the code under test caught. After you change a pinned block or add a test that reads new state, record again with network access and the default `readwrite` mode.
 
 - Run tests from the same directory locally and in CI, or set `cacheDir` / `FORKIT_CACHE_DIR`, because the cache path is relative to the working directory.
 - Only pinned forks are cached. Without `blockNumber`, forkit forks the live head and warns that the run is not reproducible.

@@ -4,8 +4,11 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, expect, test } from "vitest";
 import { freePort } from "../../src/anvil.ts";
+import { ForkCacheMissError, ForkitError } from "../../src/errors.ts";
 import {
   blockHeaderHash,
+  type CacheMode,
+  cacheFilePath,
   cacheKey,
   deriveAccountRead,
   isCacheable,
@@ -169,7 +172,6 @@ describe("upstream errors", () => {
       mode: "readwrite",
       dir,
       port: await freePort(),
-      onWarn: () => {},
     });
     try {
       const started = Date.now();
@@ -190,35 +192,120 @@ describe("upstream errors", () => {
   });
 });
 
-describe("offline misses", () => {
-  test("the warning names the methods that missed", async () => {
-    const dir = mkdtempSync(join(tmpdir(), "forkit-cache-offline-"));
-    const warnings: string[] = [];
-    const cache = await startRpcCache({
-      upstream: "http://127.0.0.1:9",
-      chainId: 1,
-      blockNumber: 100n,
-      mode: "offline",
-      dir,
-      port: await freePort(),
-      onWarn: (message) => warnings.push(message),
+/** A cache proxy recording to `dir`, over `upstream` (by default port 9, where nothing listens). */
+async function proxy(
+  mode: Exclude<CacheMode, "off">,
+  dir: string,
+  upstream = "http://127.0.0.1:9",
+) {
+  const cache = await startRpcCache({
+    upstream,
+    chainId: 1,
+    blockNumber: 100n,
+    mode,
+    dir,
+    port: await freePort(),
+  });
+  let id = 0;
+  const ask = async (method: string, params: unknown[]) => {
+    const response = await fetch(cache.url, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ jsonrpc: "2.0", id: ++id, method, params }),
     });
-    const ask = (id: number, method: string, params: unknown[]) =>
-      fetch(cache.url, {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ jsonrpc: "2.0", id, method, params }),
-      });
+    return (await response.json()) as { result?: unknown; error?: { message: string } };
+  };
+  return { cache, ask };
+}
+
+describe("offline misses", () => {
+  const address = "0x0000000000000000000000000000000000000001";
+
+  test("a miss fails the request, naming the method, its params and the recording", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "forkit-cache-offline-"));
+    const { cache, ask } = await proxy("offline", dir);
     try {
-      const address = "0x0000000000000000000000000000000000000001";
-      await ask(1, "eth_getBalance", [address, "0x64"]);
-      await ask(2, "eth_getBalance", [address, "0x64"]);
-      await ask(3, "eth_getCode", [address, "0x64"]);
+      const answer = await ask("eth_getStorageAt", [address, "0x2", "0x64"]);
+      expect(answer.result).toBeUndefined();
+      expect(answer.error?.message).toContain(
+        `offline and eth_getStorageAt ["${address}","0x2","0x64"] is not in the fork cache (${cacheFilePath(dir, 1, 100n)})`,
+      );
     } finally {
-      await cache.close();
+      await cache.close().catch(() => {});
       rmSync(dir, { recursive: true, force: true });
     }
-    expect(warnings).toEqual([expect.stringMatching(/3 request\(s\) missed/)]);
-    expect(warnings[0]).toContain("(eth_getBalance ×2, eth_getCode ×1)");
+  });
+
+  test("close() rejects with every request that missed, once each, however often it was asked", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "forkit-cache-offline-"));
+    const { cache, ask } = await proxy("offline", dir);
+    await ask("eth_getBalance", [address, "0x64"]);
+    await ask("eth_getBalance", [address, "0x64"]);
+    await ask("eth_getCode", [address, "0x64"]);
+    // A hash lookup offline answers null, as the upstream does for a hash it never saw: no miss.
+    expect((await ask("eth_getTransactionReceipt", [`0x${"ab".repeat(32)}`])).result).toBeNull();
+    const failure = await cache.close().then(
+      () => undefined,
+      (error: unknown) => error,
+    );
+    rmSync(dir, { recursive: true, force: true });
+
+    expect(failure).toBeInstanceOf(ForkCacheMissError);
+    expect(failure).toBeInstanceOf(ForkitError);
+    const path = cacheFilePath(dir, 1, 100n);
+    expect((failure as ForkCacheMissError).misses).toEqual([
+      { path, method: "eth_getBalance", params: [address, "0x64"], count: 2 },
+      { path, method: "eth_getCode", params: [address, "0x64"], count: 1 },
+    ]);
+    const message = (failure as Error).message;
+    expect(message).toMatch(/^forkit: 2 request\(s\) missed the offline fork cache/);
+    expect(message).toContain("FORKIT_CACHE=readwrite");
+    expect(message).toContain(`\n  ${path}\n`);
+    expect(message).toContain(`    eth_getBalance ["${address}","0x64"] (×2)`);
+    expect(message).toContain(`    eth_getCode ["${address}","0x64"]`);
+    // close() is idempotent, and so is its verdict.
+    await expect(cache.close()).rejects.toBe(failure);
+  });
+
+  test("a replay that finds everything closes cleanly", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "forkit-cache-offline-"));
+    const upstream = createServer((req, res) => {
+      let body = "";
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+      req.on("end", () => {
+        const { id } = JSON.parse(body) as { id: number };
+        res.writeHead(200, { "content-type": "application/json" });
+        res.end(JSON.stringify({ jsonrpc: "2.0", id, result: "0x2a" }));
+      });
+    });
+    await new Promise<void>((ok) => upstream.listen(0, "127.0.0.1", () => ok()));
+    const { port } = upstream.address() as { port: number };
+    try {
+      const recording = await proxy("readwrite", dir, `http://127.0.0.1:${port}`);
+      expect((await recording.ask("eth_getBalance", [address, "0x64"])).result).toBe("0x2a");
+      await recording.cache.close();
+
+      const replay = await proxy("offline", dir);
+      expect((await replay.ask("eth_getBalance", [address, "0x64"])).result).toBe("0x2a");
+      await replay.cache.close();
+      expect(replay.cache.stats()).toMatchObject({ hits: 1, misses: 0 });
+    } finally {
+      upstream.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("the error lists at most 20 requests, and says how many more there are", () => {
+    const misses = Array.from({ length: 23 }, (_, i) => ({
+      path: "/c/1/100.json",
+      method: "eth_getStorageAt",
+      params: [address, `0x${i.toString(16)}`, "0x64"],
+      count: 1,
+    }));
+    const { message } = new ForkCacheMissError(misses);
+    expect(message.match(/eth_getStorageAt/g)).toHaveLength(20);
+    expect(message).toContain("… and 3 more (FORKIT_DEBUG=1 logs every miss)");
   });
 });

@@ -6,8 +6,8 @@ anvil is not on `PATH`. Install foundry (`curl -L https://foundry.paradigm.xyz |
 **`anvil did not become ready within …ms`.**
 The public RPC is slow or rate limited. Set `FORKIT_RPC_URL_<chainId>` to a paid endpoint, raise `bootTimeoutMs`, or record the fork once and replay it with `FORKIT_CACHE=offline`.
 
-**`offline and eth_… is not in the fork cache`.**
-The test touched state the recording doesn't have. Re-record: run once with network and `FORKIT_CACHE=readwrite` (the default). If it happens on every run, something in the test isn't deterministic: a random key, a `Date.now()`-based value or deadline, an unpinned block, an ERC-4337 nonce key left at viem's default, or wall-clock block times on an Ethereum fork under anvil 1.8. See [making replays deterministic](guides/fork-cache-and-ci.md#making-replays-deterministic).
+**`ForkCacheMissError`, or `offline and eth_… is not in the fork cache`.**
+The test touched state the recording doesn't have. `ForkCacheMissError` comes when the fork stops, and lists every request that missed with its params, including ones anvil made on its own or the code under test caught. Re-record: run once with network and `FORKIT_CACHE=readwrite` (the default). If it happens on every run, something in the test isn't deterministic: a random key, a `Date.now()`-based value or deadline, an unpinned block, an ERC-4337 nonce key left at viem's default, or wall-clock block times on an Ethereum fork under anvil 1.8. See [making replays deterministic](guides/fork-cache-and-ci.md#making-replays-deterministic).
 
 **`failed to create genesis` / `Resource not found` right at boot.**
 The recording came from a different upstream at the same block number, e.g. a throwaway local anvil. Delete that chain's recording, or point `cacheDir` somewhere else for local-upstream tests.

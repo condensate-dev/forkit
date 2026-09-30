@@ -46,6 +46,7 @@ Assertions, framework-agnostic and returning rich diffs:
 - **deal verification.** After `anvil_dealERC20`, read `balanceOf` back. Throw a clear error for rebasing or derived-balance tokens and for anvil builds too old to have the method (tell the user to run `foundryup`).
 - **RPC resolution.** Use an explicit `forkUrl`, else an env override per chain id, else the viem chain's default RPC. Recommend a paid RPC with a pinned block so runs are reproducible, and support anvil's RPC cache directory.
 - **Pinned blocks.** Warn when a suite runs unpinned against a live head, because it isn't reproducible.
+- **Offline misses fail, and are never reverts.** Offline, a request the recording has no answer for fails, and stopping the fork throws with every miss (method, params, recording): anvil, a bundler or the code under test can swallow the failed request, and a test runner hides a passing file's warnings. anvil reports a failed fork read as -32603, which viem labels a revert, so reverts are decided by the JSON-RPC code (3), never by viem's error names.
 
 ## Better than the original (productionization)
 

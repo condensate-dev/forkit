@@ -18,6 +18,8 @@ export interface ForkOptions<TChain extends Chain = Chain> {
    * to `<cacheDir>/<chainId>/<block>.json` and replays it on later runs, so warm runs make no
    * network calls. Default `FORKIT_CACHE` or `readwrite`; use `offline` in CI with a committed
    * or restored cache, `off` to talk to the upstream directly. Unpinned forks are never cached.
+   * Offline, a request the recording does not have fails, and so does {@link Fork.stop}, with a
+   * `ForkCacheMissError` listing every miss.
    */
   cache?: CacheMode;
   /** Cache directory. Default `FORKIT_CACHE_DIR` or `.forkit-cache` in the working directory. */
@@ -123,6 +125,10 @@ export interface Fork<TChain extends Chain = Chain> {
   revertTo(id: SnapshotId): Promise<void>;
   /** The handle for another chain of the same `fork([...])` call. Throws for a chain it does not fork. */
   on<TOther extends Chain>(chain: TOther): Fork<TOther>;
-  /** Stop every anvil process behind this handle, on every chain. Idempotent. */
+  /**
+   * Stop every anvil process behind this handle, on every chain. Idempotent. With an offline fork
+   * cache that missed, it stops everything, then rejects with a `ForkCacheMissError` that lists
+   * each request the recording did not have.
+   */
   stop(): Promise<void>;
 }
