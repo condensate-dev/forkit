@@ -2,7 +2,7 @@
  * `FORKIT_RECORD=1` end to end on real anvil: run a small two-file fork suite (test/explore/suite)
  * in a child vitest, so two worker processes record, then read the merged run record.
  */
-import { spawnSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import { mkdtempSync, readdirSync, rmSync } from "node:fs";
 import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
@@ -17,11 +17,36 @@ const vitestBin = join(
   dirname(createRequire(import.meta.url).resolve("vitest/package.json")),
   "vitest.mjs",
 );
+/** The child takes a few seconds; one still running after this is stuck. */
+const CHILD_TIMEOUT_MS = 60_000;
 const dir = mkdtempSync(join(tmpdir(), "forkit-record-"));
 let upstream: Awaited<ReturnType<typeof startUpstream>>;
 let run: RunRecord;
 let exitCode: number | null;
 let output: string;
+
+/**
+ * Run the suite in a child vitest, asynchronously. Its forks read from the upstream anvil, which
+ * this process spawned, and anvil logs every request to a stdout that only this event loop
+ * drains. A synchronous spawn stops the draining: on Linux the socket behind anvil's stdout fills
+ * after a couple of hundred lines, anvil blocks mid-request, and every fork waiting on it hangs.
+ */
+function runSuite(
+  env: NodeJS.ProcessEnv,
+): Promise<{ code: number | null; killed: boolean; output: string }> {
+  const args = [vitestBin, "run", "--config", join(SUITE, "vitest.config.ts"), "--root", SUITE];
+  // Verbose: each test is printed as it ends, so a killed child's output shows where it stopped.
+  args.push("--reporter", "verbose");
+  return new Promise((ok) => {
+    execFile(process.execPath, args, { env, timeout: CHILD_TIMEOUT_MS }, (error, stdout, stderr) =>
+      ok({
+        code: error === null ? 0 : typeof error.code === "number" ? error.code : null,
+        killed: error?.killed === true,
+        output: `${stdout}\n${stderr}`,
+      }),
+    );
+  });
+}
 
 beforeAll(async () => {
   upstream = await startUpstream();
@@ -34,21 +59,18 @@ beforeAll(async () => {
   delete env.FORKIT_RUN_ID;
   delete env.VITEST_WORKER_ID;
   delete env.VITEST_POOL_ID;
-  const child = spawnSync(
-    process.execPath,
-    [vitestBin, "run", "--config", join(SUITE, "vitest.config.ts"), "--root", SUITE],
-    {
-      env,
-      encoding: "utf8",
-      timeout: 90_000,
-    },
-  );
-  exitCode = child.status;
-  output = `${child.stdout}\n${child.stderr}`;
+  const child = await runSuite(env);
+  exitCode = child.code;
+  output = child.output;
+  // A killed child leaves a partial record: fail here, once, instead of in every test below.
+  expect(
+    child.killed,
+    `the child vitest was still running after ${CHILD_TIMEOUT_MS}ms and was killed. Its output:\n${output}`,
+  ).toBe(false);
   const runs = listRuns(dir);
   expect(runs, output).toHaveLength(1);
   run = readRun(dir, runs[0]?.id as string) as RunRecord;
-}, 120_000);
+}, CHILD_TIMEOUT_MS + 30_000);
 
 afterAll(async () => {
   await upstream?.stop();
