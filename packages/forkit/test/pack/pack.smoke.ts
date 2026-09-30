@@ -155,6 +155,7 @@ import { type Fork, expectBalanceChange, fork, NATIVE } from "@condensate/forkit
 import { describeFork, itFork } from "@condensate/forkit/vitest";
 import { bridge } from "@condensate/forkit/bridges";
 import { bundler } from "@condensate/forkit/4337";
+import { forceApprove, PERMIT2, type SignedPermit, signPermit, testAccount } from "@condensate/forkit/payments";
 import { formatRun } from "@condensate/forkit/reporter";
 export async function consumer(alice: Address): Promise<bigint> {
   const f: Fork<typeof base> = await fork({ chain: base, blockNumber: 1n });
@@ -164,6 +165,12 @@ export async function consumer(alice: Address): Promise<bigint> {
   void [describeFork, itFork, bridge, bundler, formatRun];
   await f.stop();
   return block;
+}
+export async function payments(f: Fork<typeof base>, token: Address): Promise<SignedPermit> {
+  const owner = testAccount("alice");
+  const { reset }: { reset: boolean } = await forceApprove(f, { token, owner: owner.address, spender: PERMIT2, amount: 1n });
+  void reset;
+  return signPermit(f.client, { token, owner, spender: PERMIT2, value: 1n, deadline: 1n });
 }
 `,
   );

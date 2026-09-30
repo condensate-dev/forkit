@@ -29,6 +29,11 @@ A replay can only serve what a previous run asked for, so every run must ask the
 - **Derive keys and addresses from fixed strings**, never randomly.
 - **Use absolute deadlines and timestamps.** An offset counted from the fork's wall clock changes on every run.
 - **Pin ERC-4337 nonce keys** (`getNonce({ key: 0n })`). viem's default key is `Date.now()`.
+- **Pin block times on Ethereum forks.** anvil 1.8 runs the EIP-4788 beacon-roots system call on every block it mines, and that call touches storage slot `timestamp % 8191` of the beacon-roots contract, which anvil first reads from the fork. anvil stamps blocks with the wall clock, so every run reads a different slot and the replay misses. Mine at a fixed interval instead, set once before the per-test snapshots (anvil keeps it across `evm_revert`):
+
+  ```ts
+  beforeAll(() => f.client.setBlockTimestampInterval({ interval: 12 }));
+  ```
 - **Re-record after changing a pin**, or after adding a test that touches new state: run once with network and `FORKIT_CACHE=readwrite` (the default).
 
 ## CI

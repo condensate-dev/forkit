@@ -66,6 +66,7 @@ The same `describeFork` / `itFork` pair ships for [vitest](docs/getting-started/
 - **Multi-chain**: `fork([base, arbitrum])` boots the chains in parallel, and `f.on(chain)` selects one. See the [guide](docs/guides/multi-chain.md).
 - **Cross-chain routes**: Across and Relay relayer simulators and `bridge.custom`, plus quote-API record/replay pinned to the fork block. See the [guide](docs/guides/cross-chain.md).
 - **ERC-4337**: `bundler(f)` runs alto against the fork, so user operations from real smart accounts land. See the [guide](docs/guides/erc-4337.md).
+- **Stablecoin payments**: `@condensate/forkit/payments` signs EIP-2612 permits, EIP-3009 authorizations and Permit2 transfers against the real tokens with deterministic test keys, handles USDT's `approve` and missing return value and USDC's blacklist and pause, and asserts nonces and allowances. See the [guide](docs/guides/payments.md).
 - **Gas snapshots and shared forks**: `forge snapshot`-style gas files checked in CI, and one fork shared by every file. See [gas snapshots](docs/guides/gas-snapshots.md) and [shared forks](docs/guides/shared-forks.md).
 
 ## Examples

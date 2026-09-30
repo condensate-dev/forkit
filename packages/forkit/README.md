@@ -37,6 +37,7 @@ describeFork("USDC on Base", { chain: base, blockNumber: 51_800_000n }, (f) => {
 | `@condensate/forkit/vitest`, `/bun`, `/jest`, `/node` | `describeFork` / `itFork` per runner |
 | `@condensate/forkit/http`, `/bridges` | quote-API record/replay; Across, Relay and custom bridge simulators |
 | `@condensate/forkit/4337` | an ERC-4337 bundler (alto) on a fork |
+| `@condensate/forkit/payments` | EIP-2612, EIP-3009 and Permit2 signatures, USDT and USDC quirks, payment assertions |
 | `@condensate/forkit/reporter` | terminal output |
 | `@condensate/forkit/explore` and the `forkit` command | run records and the post-test explorer |
 
