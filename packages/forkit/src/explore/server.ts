@@ -2,10 +2,10 @@
  * The `forkit explore` server: a read-only web UI over run records, on 127.0.0.1 only. The UI is
  * static files shipped in this package (`ui/`); it needs no network and loads nothing remote.
  */
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type ServerResponse } from "node:http";
 import type { AddressInfo } from "node:net";
-import { basename } from "node:path";
+import { basename, extname, join, relative, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { stringify } from "./json.ts";
 import type { RunRecord, RunSummary } from "./schema.ts";
@@ -29,16 +29,35 @@ export interface ExploreServer {
   close(): Promise<void>;
 }
 
-const UI_DIR = new URL("./ui/", import.meta.url);
+const UI_DIR = fileURLToPath(new URL("./ui/", import.meta.url));
 
-/** The static files, by URL path. Nothing else under ui/ is served. */
-const ASSETS: Readonly<Record<string, { file: string; type: string }>> = {
-  "/": { file: "index.html", type: "text/html; charset=utf-8" },
-  "/index.html": { file: "index.html", type: "text/html; charset=utf-8" },
-  "/app.js": { file: "app.js", type: "text/javascript; charset=utf-8" },
-  "/app.css": { file: "app.css", type: "text/css; charset=utf-8" },
-  "/favicon.svg": { file: "favicon.svg", type: "image/svg+xml" },
+const TYPES: Readonly<Record<string, string>> = {
+  ".html": "text/html; charset=utf-8",
+  ".js": "text/javascript; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".svg": "image/svg+xml",
 };
+
+/**
+ * The static files, by URL path: every file of a known type under ui/, listed once at startup.
+ * A request is looked up in this map, never joined onto a path, so nothing else can be served.
+ */
+function uiAssets(): ReadonlyMap<string, { file: string; type: string }> {
+  const assets = new Map<string, { file: string; type: string }>();
+  const walk = (dir: string) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const file = join(dir, entry.name);
+      if (entry.isDirectory()) walk(file);
+      const type = TYPES[extname(entry.name)];
+      if (!entry.isFile() || type === undefined) continue;
+      assets.set(`/${relative(UI_DIR, file).split(sep).join("/")}`, { file, type });
+    }
+  };
+  walk(UI_DIR);
+  const index = assets.get("/index.html");
+  if (index !== undefined) assets.set("/", index);
+  return assets;
+}
 
 const SECURITY_HEADERS = {
   "content-security-policy":
@@ -108,6 +127,7 @@ export async function startExploreServer(
     return dir === undefined ? undefined : readRun(dir, id);
   };
 
+  const assets = uiAssets();
   let port = 0;
   const handle = (req: IncomingMessage, res: ServerResponse) => {
     const head = req.method === "HEAD";
@@ -128,9 +148,9 @@ export async function startExploreServer(
     }
     const path = new URL(req.url ?? "/", "http://localhost").pathname;
     try {
-      const asset = ASSETS[path];
+      const asset = assets.get(path);
       if (asset !== undefined) {
-        send(res, 200, asset.type, readFileSync(fileURLToPath(new URL(asset.file, UI_DIR))), head);
+        send(res, 200, asset.type, readFileSync(asset.file), head);
         return;
       }
       if (path === "/api/runs") {

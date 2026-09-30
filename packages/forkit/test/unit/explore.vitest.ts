@@ -754,17 +754,41 @@ describe("explore server", () => {
       expect(html).not.toMatch(/https?:\/\//);
       for (const [path, type] of [
         ["/app.js", "text/javascript"],
+        ["/lib/model.js", "text/javascript"],
+        ["/lib/dom.js", "text/javascript"],
+        ["/views/tx.js", "text/javascript"],
         ["/app.css", "text/css"],
         ["/favicon.svg", "image/svg+xml"],
+        ["/favicon-dark.svg", "image/svg+xml"],
       ] as const) {
         const asset = await get(path);
         expect(asset.status, path).toBe(200);
         expect(asset.headers.get("content-type")).toContain(type);
         // Nothing remote: the only URL allowed is SVG's namespace, which is never fetched.
-        const text = (await asset.text()).replaceAll('xmlns="http://www.w3.org/2000/svg"', "");
+        const text = (await asset.text()).replaceAll('"http://www.w3.org/2000/svg"', "");
         expect(text).not.toMatch(/https?:\/\/(?!127\.0\.0\.1)[a-z]/i);
       }
       expect((await get("/server.ts")).status).toBe(404);
+      // Only files under ui/ are served, by exact path: no traversal, no directories.
+      expect((await get("/../server.ts")).status).toBe(404);
+      expect((await get("/lib/%2e%2e/%2e%2e/server.ts")).status).toBe(404);
+      expect((await get("/lib/")).status).toBe(404);
+      // Every module the page imports is served (a missing one would blank the UI).
+      const imports = [...html.matchAll(/src="([^"]+)"/g)].map((m) => m[1] as string);
+      const queue = [...imports];
+      const seen = new Set<string>();
+      while (queue.length > 0) {
+        const path = queue.shift() as string;
+        if (seen.has(path)) continue;
+        seen.add(path);
+        const module = await get(path);
+        expect(module.status, path).toBe(200);
+        const text = await module.text();
+        for (const m of text.matchAll(/from "(\.{1,2}\/[^"]+)"/g)) {
+          queue.push(new URL(m[1] as string, new URL(path, server.url)).pathname);
+        }
+      }
+      expect(seen.size).toBeGreaterThan(5);
       expect((await get("/api/runs", { method: "POST" })).status).toBe(405);
       expect((await get("/api/runs", { method: "DELETE" })).status).toBe(405);
       // fetch cannot set Host; node:http can, as a DNS-rebinding page's request would arrive.
