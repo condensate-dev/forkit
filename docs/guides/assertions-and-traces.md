@@ -37,6 +37,12 @@ A mismatch reads like this, followed by the trace:
 expected Error("Vault: zero deposit"), got InsufficientBalance(alice (0x0000…11cE), 0, 1)
 ```
 
+### expectRevert and failed requests
+
+A revert is what the node says it is: revert data, or JSON-RPC error code 3 (geth's -32000 `execution reverted` too). Any other code means the request failed, and `expectRevert` throws `expected a revert, but the call failed another way: …` with the node's message. That covers anvil's -32603 when the fork cannot fetch state, such as a miss in the [offline fork cache](fork-cache-and-ci.md), a rate limit, and a bad parameter. It holds even when viem calls the error a `ContractFunctionRevertedError`, as it does for a -32603 in a read or a gas estimate.
+
+An exceptional halt (out of gas, the `INVALID` opcode) is not a revert either: anvil reports it with its own code (-32603 on anvil 1.7, -32003 on 1.8). To expect one, assert on the rejection itself, e.g. `await expect(write).rejects.toThrow(/OutOfGas/)`. A transaction mined with status `reverted` (explicit `gas`) always counts, however it failed.
+
 ## Traces on failure
 
 When `sendTransaction`, `writeContract` or `deployContract` on a fork client reverts, forkit replays the call with `debug_traceCall` and appends the decoded call tree to the error. The trace is also available as `traceOf(error)`:

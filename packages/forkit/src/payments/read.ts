@@ -1,7 +1,9 @@
 /**
  * Telling a contract's answer apart from a failed request: a call that reverts, or answers
- * nothing decodable, versus an RPC that is down or a fork that cannot fetch state.
+ * nothing decodable, versus an RPC that is down or a fork that cannot fetch state. The revert
+ * side is core's {@link isRevertError}, which trusts the JSON-RPC code over viem's error names.
  */
+import { isRevertError, rpcErrorVerdict } from "../revert.ts";
 
 /**
  * viem's errors for a call that ran but answered nothing decodable: no data (an EOA, or a
@@ -10,63 +12,28 @@
 const UNDECODABLE =
   /^(AbiDecoding\w*Error|ContractFunctionZeroDataError|InvalidBytesBooleanError|PositionOutOfBoundsError|SliceOffsetOutOfBoundsError)$/;
 
-/** Every error in `error`'s cause chain, outermost first. */
-function causes(error: unknown): object[] {
-  const chain: object[] = [];
+/** Whether an error in `error`'s cause chain is one of viem's {@link UNDECODABLE} errors. */
+function isUndecodable(error: unknown): boolean {
+  const seen = new Set<unknown>();
   let current: unknown = error;
-  while (typeof current === "object" && current !== null && !chain.includes(current)) {
-    chain.push(current);
+  while (typeof current === "object" && current !== null && !seen.has(current)) {
+    seen.add(current);
+    const { name } = current as { name?: unknown };
+    if (typeof name === "string" && UNDECODABLE.test(name)) return true;
     current = (current as { cause?: unknown }).cause;
   }
-  return chain;
-}
-
-/**
- * What the JSON-RPC errors in the cause chain say: `revert` when the EVM reverted (code 3; geth
- * answers a revert with no data with -32000 "execution reverted"), `failure` for any other code,
- * `undefined` when there is none.
- *
- * viem's `ContractFunctionRevertedError` alone is not enough: viem also reports anvil's internal
- * errors (-32603, e.g. "failed to get storage" when the fork cannot fetch state, or misses the
- * offline cache) as reverts.
- */
-function rpcVerdict(error: unknown): "revert" | "failure" | undefined {
-  let verdict: "revert" | undefined;
-  for (const link of causes(error)) {
-    const { code, message, details } = link as {
-      code?: unknown;
-      message?: unknown;
-      details?: unknown;
-    };
-    // -1 is viem's placeholder for an error it could not classify (UnknownRpcError): look deeper.
-    if (typeof code !== "number" || code === -1) continue;
-    // viem keeps the node's own message in `details`; a raw JSON-RPC error has it in `message`.
-    const text = typeof details === "string" ? details : message;
-    const reverted =
-      code === 3 ||
-      (code === -32000 && typeof text === "string" && /^execution reverted$/i.test(text.trim()));
-    if (!reverted) return "failure";
-    verdict = "revert";
-  }
-  return verdict;
-}
-
-/** Whether `error` is the EVM reverting the call, and not the RPC or the fork failing. */
-export function isEvmRevert(error: unknown): boolean {
-  return rpcVerdict(error) === "revert";
+  return false;
 }
 
 /**
  * Whether `error` means the contract does not implement the function it was called with: the
- * call reverted, or it answered nothing decodable.
+ * call reverted, or it answered nothing decodable. A request the node failed (a JSON-RPC error
+ * other than a revert, such as an offline fork cache miss) is neither.
  */
 export function isMissingFunction(error: unknown): boolean {
-  const verdict = rpcVerdict(error);
-  if (verdict !== undefined) return verdict === "revert";
-  return causes(error).some((link) => {
-    const { name } = link as { name?: unknown };
-    return typeof name === "string" && UNDECODABLE.test(name);
-  });
+  if (isRevertError(error)) return true;
+  if (rpcErrorVerdict(error) !== undefined) return false;
+  return isUndecodable(error);
 }
 
 /**

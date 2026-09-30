@@ -54,7 +54,7 @@ import {
   testAddress,
   tokenDomain,
 } from "../../src/payments/index.ts";
-import { isEvmRevert, isMissingFunction } from "../../src/payments/read.ts";
+import { isMissingFunction } from "../../src/payments/read.ts";
 
 const CHAIN_ID = 8453;
 const TOKEN: Address = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
@@ -527,6 +527,7 @@ describe("tokenDomain", () => {
 });
 
 describe("isMissingFunction", () => {
+  // Reverts are core's isRevertError (test/unit/assertions.vitest.ts pins that classification).
   test("EVM reverts and undecodable answers count; RPC failures do not", () => {
     const rpc = (code: number, message: string) =>
       new RpcRequestError({ body: {}, error: { code, message }, url: "http://x" });
@@ -540,10 +541,14 @@ describe("isMissingFunction", () => {
       isMissingFunction(Object.assign(new Error("x"), { name: "ContractFunctionZeroDataError" })),
     ).toBe(true);
     expect(isMissingFunction(new Error("fetch failed"))).toBe(false);
-    expect(isEvmRevert(rpc(3, "execution reverted"))).toBe(true);
-    expect(isEvmRevert(rpc(-32603, "failed to get storage"))).toBe(false);
+    // An undecodable answer behind a failed request is still the request failing.
     expect(
-      isEvmRevert(Object.assign(new Error("x"), { name: "ContractFunctionZeroDataError" })),
+      isMissingFunction(
+        Object.assign(new Error("x"), {
+          name: "ContractFunctionZeroDataError",
+          cause: rpc(-32603, "failed to get storage"),
+        }),
+      ),
     ).toBe(false);
   });
 });

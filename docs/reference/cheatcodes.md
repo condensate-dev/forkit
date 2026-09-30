@@ -172,7 +172,7 @@ Source: [writing tests](https://getfoundry.sh/forge/writing-tests) ("`setUp()` r
 
 | Foundry | forkit | Note |
 |---|---|---|
-| `vm.expectRevert()` | `await expectRevert(promise)` | Any revert. Resolves to the decoded revert (`kind`, `reason`, `errorName`, `args`, ...). |
+| `vm.expectRevert()` | `await expectRevert(promise)` | Any revert. Resolves to the decoded revert (`kind`, `reason`, `errorName`, `args`, ...). An exceptional halt (out of gas, `INVALID`) or a failed request, such as an offline fork cache miss, is not a revert: see [failed requests](../guides/assertions-and-traces.md#expectrevert-and-failed-requests). |
 | `vm.expectRevert("reason")` | `await expectRevert(promise, "reason")` | Exact match against `Error(string)`. |
 | `vm.expectRevert(Err.selector)` | `expectRevert(promise, "Err(address,uint256)")` or `expectRevert(promise, "0x1234abcd")` | Compares only the selector, whatever the arguments, like `vm.expectPartialRevert`. |
 | `vm.expectPartialRevert(Err.selector)` | the same | |
