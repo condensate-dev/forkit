@@ -4,8 +4,8 @@ import shots from "../generated/shots.json";
 const VIEWS = [
   {
     file: "explore-tx-1440.png",
-    alt: "forkit explore showing a transaction: its decoded call, call trace, events and the cross-chain fill it led to",
-    caption: "A transaction: decoded call, call trace, events, and the cross-chain fill it led to.",
+    alt: "forkit explore showing a swap's call tree: each call decoded, with a gas bar, the events it emitted in place, and an inspector for the selected call",
+    caption: "A transaction: decoded call tree, gas per call, events in place, and an inspector.",
   },
   {
     file: "explore-1440.png",
