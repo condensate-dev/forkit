@@ -51,6 +51,13 @@ describe("decodeRevert", () => {
     expect(describeRevert(decodeRevert(nope))).toBe(`Nope(${formatAddress(alice)}, 7)`);
   });
 
+  test("an argument-less custom error (selector only) decodes by name", () => {
+    const bare = parseAbi(["error InvalidNonce()"]);
+    const data = encodeErrorResult({ abi: bare, errorName: "InvalidNonce" });
+    expect(decodeRevert(data)).toMatchObject({ kind: "custom", selector: data });
+    expect(decodeRevert(data, bare)).toMatchObject({ errorName: "InvalidNonce", args: [] });
+  });
+
   test("revertOf digs the data out of a nested cause chain", () => {
     const error = new Error("outer", {
       cause: new Error("mid", { cause: { data: { data: reason("deep") } } }),

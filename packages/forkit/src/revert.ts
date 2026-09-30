@@ -88,7 +88,9 @@ export function decodeRevert(data: Hex | undefined, abi?: Abi): DecodedRevert {
   if (data === "0x") return { kind: "empty", data };
   if (size(data) < 4) return { kind: "custom", data };
   const selector = slice(data, 0, 4).toLowerCase() as Hex;
-  const body = slice(data, 4);
+  // An argument-less custom error (e.g. `InvalidNonce()`) is just the 4-byte selector, and
+  // viem's slice throws on an offset equal to the size.
+  const body: Hex = size(data) > 4 ? slice(data, 4) : "0x";
   try {
     if (selector === ERROR_STRING) {
       const [reason] = decodeAbiParameters([{ type: "string" }], body);

@@ -97,6 +97,18 @@ Sources: [vm.deal](https://getfoundry.sh/reference/cheatcodes/deal), [forge-std 
 
 Sources: [prank](https://getfoundry.sh/reference/cheatcodes/prank), [startPrank](https://getfoundry.sh/reference/cheatcodes/start-prank).
 
+## Keys and signatures
+
+| Foundry | forkit | Note |
+|---|---|---|
+| `makeAddrAndKey(name)` (forge-std) | `testAccount(name)` from `@condensate/forkit/payments` | A viem private-key account whose key is hashed from `name`, labelled `name`. forkit hashes in a prefix, so its keys differ from forge-std's for the same name. |
+| `makeAddr(name)` (forge-std) | `testAddress(name)` | Labelled `name`. Unlike forge-std's, no one holds its key. |
+| `vm.addr(privateKey)` | `privateKeyToAccount(privateKey).address` (viem) | |
+| `vm.sign(privateKey, digest)` | `await account.sign({ hash: digest })` (viem) | Returns the 65-byte signature; viem's `parseSignature` splits it into `r`, `s` and `v`. For EIP-712 messages, `account.signTypedData(...)`. |
+| (no equivalent) | `signPermit`, `signTransferWithAuthorization`, `signPermitTransferFrom`, `signPermitSingle` | EIP-2612, EIP-3009 and Permit2 signatures, with the domain and nonce read from the forked token. See [stablecoin payments](../guides/payments.md). |
+
+Sources: [makeAddrAndKey](https://getfoundry.sh/reference/forge-std/make-addr-and-key), [makeAddr](https://getfoundry.sh/reference/forge-std/make-addr), [addr](https://getfoundry.sh/reference/cheatcodes/addr), [sign](https://getfoundry.sh/reference/cheatcodes/sign).
+
 ## Time and blocks
 
 > **forkit's `warp` and `roll` are relative.** `vm.warp(t)` sets `block.timestamp` to `t`, and `vm.roll(n)` sets `block.number` to `n`. `f.warp(seconds)` moves time forward by `seconds`, and `f.roll(blocks)` mines `blocks` more blocks. `f.warp(3_600)` is forge-std's `skip(3600)`, not `vm.warp(3600)`.

@@ -14,7 +14,10 @@
     "bun",
     "node-test",
     "ethereum",
-    "erc-4337"
+    "erc-4337",
+    "eip-2612",
+    "eip-3009",
+    "permit2"
   ],
   "repository": {
     "type": "git",
@@ -62,6 +65,10 @@
     "./4337": {
       "types": "./dist/4337/index.d.ts",
       "default": "./dist/4337/index.js"
+    },
+    "./payments": {
+      "types": "./dist/payments/index.d.ts",
+      "default": "./dist/payments/index.js"
     },
     "./explore": {
       "types": "./dist/explore/index.d.ts",
