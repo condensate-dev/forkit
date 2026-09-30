@@ -1,5 +1,5 @@
 /**
- * Explorer screenshots for site/forkit, run by site/tools/build-assets.ts:
+ * Explorer screenshots for the site (site/public/explore), run by site/tools/build-assets.ts:
  * `bun test/site/shots.ts <out dir>`. Viewport-sized (not full-page) captures of the showcase
  * run record, so each one reads as a single screen on the page.
  */

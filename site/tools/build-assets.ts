@@ -1,12 +1,12 @@
 /**
- * Regenerate the generated parts of site/forkit: `bun site/tools/build-assets.ts`.
+ * Regenerate the site's generated assets: `bun site/tools/build-assets.ts`.
  *
  * 1. Explorer screenshots: packages/forkit/test/site/shots.ts captures three views of the
- *    committed showcase run record (Playwright's Chromium, 2x) into site/forkit/assets, then each
- *    <img>'s width and height are set from the PNG, in CSS pixels.
+ *    committed showcase run record (Playwright's Chromium, 2x) into site/public/explore, and
+ *    their sizes in CSS pixels go to site/src/generated/shots.json for the <img> tags.
  * 2. Terminal output: runs the Base → Arbitrum Across e2e offline (FORKIT_CACHE=offline, the
  *    committed recording) with forkit's reporter and FORCE_COLOR=1, turns the report's ANSI
- *    colours into spans, and inlines it between the terminal markers in index.html.
+ *    colours into spans, and writes site/src/generated/terminal.html.
  *
  * Needs anvil on PATH and `npx playwright install chromium` in packages/forkit.
  */
@@ -16,8 +16,8 @@ import { join, resolve } from "node:path";
 
 const ROOT = resolve(import.meta.dirname, "../..");
 const PKG = join(ROOT, "packages/forkit");
-const SITE = join(ROOT, "site/forkit");
-const INDEX = join(SITE, "index.html");
+const SHOTS_DIR = join(ROOT, "site/public/explore");
+const GENERATED = join(ROOT, "site/src/generated");
 const SHOTS = ["explore-tx-1440.png", "explore-1440.png", "explore-test-390.png"];
 
 function run(command: string, args: string[], env: Record<string, string>): string {
@@ -76,14 +76,13 @@ export function ansiToHtml(text: string): string {
 }
 
 // 1. Explorer screenshots, captured at 2x.
-run("bun", ["test/site/shots.ts", join(SITE, "assets")], {});
-let html = readFileSync(INDEX, "utf8");
+run("bun", ["test/site/shots.ts", SHOTS_DIR], {});
+const sizes: Record<string, { width: number; height: number }> = {};
 for (const name of SHOTS) {
-  const { width, height } = pngSize(join(SITE, "assets", name));
-  const tag = new RegExp(`(<img src="assets/${name}"[^>]*?)width="\\d+" height="\\d+"`);
-  if (!tag.test(html)) throw new Error(`index.html has no <img> for ${name}`);
-  html = html.replace(tag, `$1width="${width / 2}" height="${height / 2}"`);
+  const { width, height } = pngSize(join(SHOTS_DIR, name));
+  sizes[name] = { width: width / 2, height: height / 2 };
 }
+writeFileSync(join(GENERATED, "shots.json"), `${JSON.stringify(sizes, null, 2)}\n`);
 
 // 2. Terminal output, from the first "forkit ·" line of the report to its end.
 const output = run("npx", ["vitest", "run", "--config", join(PKG, "test/site/vitest.config.ts")], {
@@ -97,8 +96,8 @@ if (start === -1) throw new Error("the reporter printed no forkit block");
 let end = lines.length;
 while (end > start && plain(lines[end - 1] ?? "").trim() === "") end--;
 const report = lines.slice(start, end).join("\n");
-const block = `<!-- terminal:start -->\n<pre class="term-body"><code>${ansiToHtml(report)}</code></pre>\n<!-- terminal:end -->`;
-html = html.replace(/<!-- terminal:start -->[\s\S]*?<!-- terminal:end -->/, block);
-
-writeFileSync(INDEX, html);
-console.log(`site/forkit: ${SHOTS.length} screenshots, ${end - start} lines of terminal output.`);
+writeFileSync(
+  join(GENERATED, "terminal.html"),
+  `<pre class="term-body"><code>${ansiToHtml(report)}</code></pre>\n`,
+);
+console.log(`site: ${SHOTS.length} screenshots, ${end - start} lines of terminal output.`);

@@ -7,6 +7,7 @@ All notable changes to `@condensate/forkit`. The format follows [Keep a Changelo
 Everything below is slated for **1.0.0** (`packages/forkit/package.json` carries that version). Not published: the package stays `private` and unlicensed until those are decided.
 
 ### Changed
+- **condensate.dev/forkit is a Vocs docs site** (`site/`, replacing the static `site/forkit/` page). The forkit book becomes the sidebar docs (synced from `docs/` at build time), with ⌘K search, light and dark themes, and a home page in the viem/Reth pattern: the forkit lockup over Condensate's forked-vapor WebGL shader, an npm/pnpm/bun install box, feature cards, the USDC quickstart, real terminal output and explorer screenshots. It builds static under `/forkit/` (`bun run site:build` → `site/dist`), with an offline link check and 390/1440 light/dark screenshots in CI. Not deployed from this repo.
 - **Ships compiled JavaScript** (release readiness): `@condensate/forkit` now builds to `dist/` (ESM, `.d.ts`, source maps), and `exports` and the `forkit` bin point there. Before this, the package exported its TypeScript sources, which works inside this workspace but not from `node_modules`: Node refuses to strip types there, so node:test and jest could not import an installed forkit. `bun run test:pack` (a CI job) packs the package, installs it into a fresh project and checks all four runners, every subpath, a strict `nodenext` TypeScript consumer and the `forkit` bin.
 
 ### Added

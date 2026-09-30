@@ -1,0 +1,75 @@
+---
+# Vocs 2's landing-page setup: no sidebar or outline, full width.
+layout: minimal
+content:
+  width: full
+showAskAi: false
+title: forkit
+description: Foundry-style fork tests for TypeScript. Real anvil forks, deal, prank, warp, snapshots and assertions, in vitest, bun:test, jest or node:test.
+---
+
+import "../components/home.css";
+import { Explorer } from "../components/Explorer.tsx";
+import { Features } from "../components/Features.tsx";
+import { Hero } from "../components/Hero.tsx";
+import { Terminal } from "../components/Terminal.tsx";
+
+<Hero />
+
+<div className="fk-home">
+
+<Features />
+
+<section className="fk-section">
+
+## Overview
+
+One `describeFork` boots an anvil that forks Base at a pinned block. Every `itFork` starts from the same snapshot and is reverted afterwards. `f.deal` sets an exact ERC-20 balance and reads it back, `f.prank` impersonates any address with no private key, and `f.expectBalanceChange` fails unless the balance moved by exactly that much.
+
+```ts [usdc.fork.test.ts]
+import { erc20Abi, parseEther, parseUnits } from "viem";
+import { base } from "viem/chains";
+import { describeFork, itFork } from "@condensate/forkit/vitest";
+
+const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // USDC on Base
+const alice = "0x778dd60929c5b6f928aeab807fec6986f6ea3d82";
+const bob = "0x4a3bcc777d2982e91fc24c678af32f7119c48883";
+
+describeFork("USDC on Base", { chain: base, blockNumber: 51_800_000n }, (f) => {
+  itFork("alice pays bob", async () => {
+    await f.deal(USDC, alice, parseUnits("1000", 6));
+    await f.dealNative(alice, parseEther("1")); // for gas
+    await f.expectBalanceChange(USDC, bob, parseUnits("250", 6), () =>
+      f.prank(alice, (c) =>
+        c.writeContract({ address: USDC, abi: erc20Abi, functionName: "transfer", args: [bob, parseUnits("250", 6)] }),
+      ),
+    );
+  });
+});
+```
+
+Record once, replay offline: the fork cache saves every RPC answer at the pinned block, so CI needs no RPC and no key. See [the fork cache](/docs/guides/fork-cache-and-ci).
+
+</section>
+
+<section className="fk-section">
+
+## Readable output, in any runner
+
+Boot lines, per-test transactions and gas, signed balance changes per labelled address, bridge fills, decoded traces on failure and a gas snapshot diff. Honours `NO_COLOR`; plain text in CI. See [terminal output](/docs/guides/terminal-output).
+
+<Terminal />
+
+</section>
+
+<section className="fk-section">
+
+## After the run: `forkit explore`
+
+Run with `FORKIT_RECORD=1` and every test's transactions, decoded calls, call trees, events and balance moves are saved. `forkit explore` serves them as a local, offline block explorer for your test run. See [the explorer](/docs/guides/explore).
+
+<Explorer />
+
+</section>
+
+</div>

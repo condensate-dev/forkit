@@ -4,3 +4,8 @@ dist
 # Run records (forkit explore) and explorer screenshots: never commit them.
 .forkit/
 forkit-screens/
+# The Vocs site (site/): build output, Vocs' cache, and the docs pages generated from docs/.
+site/dist/
+site/.vocs/
+site/src/pages/docs/
+site/src/pages.gen.ts

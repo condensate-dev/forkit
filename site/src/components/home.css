@@ -1,0 +1,413 @@
+/*
+ * forkit home page. Neutral and high contrast; the one colour is seam violet, Vocs' accent
+ * (--vocs-color-accent: #5a2ee6 light, #a394ff dark). Colours use light-dark(), so they follow
+ * Vocs' theme switch (it sets color-scheme on <html>). Every text colour here was checked for
+ * WCAG AA (4.5:1) against its background: see site/README.md.
+ */
+:root {
+  --fk-ink: light-dark(#0c0e11, #f2f3f5);
+  --fk-muted: light-dark(#4a5260, #aeb3be);
+  --fk-line: light-dark(#e3e5ea, #262a31);
+  --fk-surface: light-dark(#f7f8fa, #14171c);
+  --fk-accent: var(--vocs-color-accent);
+  --fk-term-bg: light-dark(#f6f7f9, #0b0d10);
+  --fk-term-ink: light-dark(#1b1f24, #e6e8ec);
+  --fk-mono: var(--vocs-font-family-mono, ui-monospace, SFMono-Regular, Menlo, monospace);
+}
+
+.fk-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/*
+ * Hero: copy on the left, the vapor-fork artwork on the right (viem's Colosseum, Reth's crab).
+ * On narrow screens the artwork is a band above the copy.
+ */
+.fk-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+  align-items: center;
+  gap: 2rem;
+  max-width: 76rem;
+  margin: 0 auto;
+  padding: 4.5rem 1.5rem 3rem;
+}
+.fk-hero-copy {
+  order: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1.5rem;
+  text-align: left;
+}
+.fk-hero-art {
+  order: 2;
+  position: relative;
+  aspect-ratio: 5 / 4;
+  width: 100%;
+}
+.fk-hero-tagline {
+  font-weight: 500;
+  color: var(--fk-ink);
+}
+.fk-hero-buttons.fk-hero-buttons {
+  justify-content: flex-start;
+}
+@media (max-width: 960px) {
+  .fk-hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.5rem;
+    padding-top: 1rem;
+  }
+  .fk-hero-art {
+    order: 0;
+    aspect-ratio: auto;
+    height: clamp(180px, 42vw, 320px);
+    margin: 0 -1.5rem;
+    width: calc(100% + 3rem);
+  }
+}
+
+/* The artwork: the shader fills its panel and feathers into the page on every side. */
+.fk-vapor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-image: radial-gradient(
+    ellipse 50% 50% at 50% 50%,
+    #000 42%,
+    rgb(0 0 0 / 0.6) 70%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    ellipse 50% 50% at 50% 50%,
+    #000 42%,
+    rgb(0 0 0 / 0.6) 70%,
+    transparent 100%
+  );
+}
+.fk-vapor canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.fk-vapor.is-static {
+  background: radial-gradient(
+    ellipse 60% 55% at 55% 50%,
+    light-dark(#c7ccd6, #36405a) 0%,
+    light-dark(#e8eaef, #1f2533) 45%,
+    transparent 75%
+  );
+}
+.fk-vapor.is-static canvas {
+  display: none;
+}
+
+/* Etched, not washed out: more contrast on the light ground, more lift on the dark one. */
+:root[data-vocs-theme="light"] .fk-vapor canvas {
+  filter: contrast(1.35) saturate(1.1);
+}
+:root[data-vocs-theme="dark"] .fk-vapor canvas {
+  filter: brightness(1.25) contrast(1.15);
+}
+
+.fk-wordmark {
+  margin: 0;
+  line-height: 0;
+}
+.fk-wordmark img {
+  height: clamp(56px, 11vw, 104px);
+  width: auto;
+}
+/* Vocs sets data-vocs-theme on <html> before first paint and on every toggle. */
+.fk-dark {
+  display: none;
+}
+:root[data-vocs-theme="dark"] .fk-light {
+  display: none;
+}
+:root[data-vocs-theme="dark"] .fk-dark {
+  display: inline;
+}
+
+/* Install box: npm / pnpm / bun. */
+.fk-install {
+  width: min(100%, 30rem);
+  border: 1px solid var(--fk-line);
+  border-radius: 12px;
+  background: light-dark(rgb(255 255 255 / 0.85), rgb(20 23 28 / 0.85));
+  backdrop-filter: blur(6px);
+  text-align: left;
+  overflow: hidden;
+}
+.fk-install-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 6px 6px 0;
+  border-bottom: 1px solid var(--fk-line);
+}
+.fk-install-tab {
+  font: 500 13px / 1 var(--fk-mono);
+  color: var(--fk-muted);
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+.fk-install-tab[aria-selected="true"] {
+  color: var(--fk-ink);
+  border-bottom-color: var(--fk-accent);
+}
+.fk-install-tab:focus-visible,
+.fk-install-copy:focus-visible {
+  outline: 2px solid var(--fk-accent);
+  outline-offset: 2px;
+}
+.fk-install-command {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+}
+.fk-install-command code {
+  flex: 1;
+  font: 14px / 1.4 var(--fk-mono);
+  color: var(--fk-ink);
+  overflow-x: auto;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .fk-install-command code {
+    font-size: 12.5px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+}
+.fk-install-prompt {
+  color: var(--fk-muted);
+  user-select: none;
+}
+.fk-install-copy {
+  font: 500 12px / 1 var(--fk-mono);
+  color: var(--fk-muted);
+  background: var(--fk-surface);
+  border: 1px solid var(--fk-line);
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+/* Badges: static, local, no shields.io. */
+.fk-badges {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.fk-badge {
+  display: inline-flex;
+  font: 12px / 1 var(--fk-mono);
+  border: 1px solid var(--fk-line);
+  border-radius: 6px;
+  overflow: hidden;
+  text-decoration: none;
+}
+.fk-badge-key {
+  color: var(--fk-muted);
+  background: var(--fk-surface);
+  padding: 5px 7px;
+}
+.fk-badge-value {
+  color: var(--fk-ink);
+  background: light-dark(#eef1f4, #1a1d22);
+  padding: 5px 7px;
+}
+a.fk-badge:hover .fk-badge-value {
+  color: var(--fk-accent);
+}
+.fk-hero .fk-badges {
+  justify-content: flex-start;
+}
+
+/* Sections below the hero. */
+.fk-home {
+  max-width: 72rem;
+  margin: 0 auto;
+  padding: 0 1.5rem 5rem;
+}
+.fk-section {
+  margin-top: 4.5rem;
+}
+.fk-section > h2 {
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.75rem;
+}
+.fk-section > p {
+  color: var(--fk-muted);
+  max-width: 46rem;
+  line-height: 1.65;
+}
+
+.fk-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  gap: 1rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.fk-feature {
+  border: 1px solid var(--fk-line);
+  border-radius: 12px;
+  padding: 1.25rem 1.25rem 1.1rem;
+  background: var(--fk-surface);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.fk-feature h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: var(--fk-ink);
+}
+.fk-feature p {
+  margin: 0;
+  flex: 1;
+  color: var(--fk-muted);
+  font-size: 0.925rem;
+  line-height: 1.55;
+}
+.fk-feature a {
+  color: var(--fk-accent);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+}
+.fk-feature a:hover {
+  text-decoration: underline;
+}
+
+/* Terminal: the reporter's real output. */
+.fk-terminal {
+  margin: 1.5rem 0 0;
+}
+.fk-terminal-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px;
+  border: 1px solid var(--fk-line);
+  border-bottom: 0;
+  border-radius: 12px 12px 0 0;
+  background: var(--fk-surface);
+}
+.fk-terminal-bar span {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--fk-line);
+}
+.fk-terminal-bar em {
+  margin-left: 8px;
+  font: 12px / 1 var(--fk-mono);
+  font-style: normal;
+  color: var(--fk-muted);
+}
+.fk-terminal-body pre {
+  margin: 0;
+  padding: 16px 18px;
+  overflow-x: auto;
+  background: var(--fk-term-bg);
+  color: var(--fk-term-ink);
+  border: 1px solid var(--fk-line);
+  border-radius: 0 0 12px 12px;
+  font: 12.5px / 1.6 var(--fk-mono);
+}
+.fk-terminal figcaption,
+.fk-shot figcaption {
+  margin-top: 0.6rem;
+  color: var(--fk-muted);
+  font-size: 0.875rem;
+}
+.t-bold {
+  font-weight: 700;
+}
+.t-dim {
+  color: light-dark(#5b6170, #8b92a0);
+}
+.t-red {
+  color: light-dark(#b42318, #f97066);
+}
+.t-green {
+  color: light-dark(#146c43, #4ade80);
+}
+.t-yellow {
+  color: light-dark(#8a5a00, #facc15);
+}
+.t-cyan {
+  color: light-dark(#0b6e86, #22d3ee);
+}
+.t-magenta {
+  color: light-dark(#9b2c9b, #e879f9);
+}
+
+/* Explorer screenshots: two wide views, then the phone view beside its caption. */
+.fk-explorer {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  margin-top: 1.5rem;
+}
+.fk-shot {
+  margin: 0;
+}
+.fk-shot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid var(--fk-line);
+  border-radius: 10px;
+}
+.fk-shot-phone {
+  grid-column: 1 / -1;
+  justify-self: center;
+  max-width: 18rem;
+}
+@media (max-width: 720px) {
+  .fk-explorer {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Footer slot (every page). */
+.fk-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--fk-muted);
+}
+.fk-footer a {
+  color: var(--fk-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-color: var(--fk-line);
+}
+.fk-footer a:hover {
+  text-decoration-color: var(--fk-accent);
+}
+.fk-footer-links {
+  display: inline-flex;
+  gap: 0.5rem;
+}

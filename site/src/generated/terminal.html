@@ -1,0 +1,10 @@
+<pre class="term-body"><code><span class="t-bold">forkit</span> <span class="t-dim">·</span> test/e2e/base-arbitrum-across.vitest.ts
+  <span class="t-cyan">⛓</span> <span class="t-bold">Base (8453)</span><span class="t-dim"> · </span>block 51,907,866<span class="t-dim"> · </span>mainnet.base.org<span class="t-dim"> · </span><span class="t-green">cache hit (43 reads)</span><span class="t-dim"> · </span><span class="t-dim">booted in 82 ms</span>
+  <span class="t-cyan">⛓</span> <span class="t-bold">Arbitrum One (42161)</span><span class="t-dim"> · </span>block 509,730,857<span class="t-dim"> · </span>arb1.arbitrum.io<span class="t-dim"> · </span><span class="t-green">cache hit (43 reads)</span><span class="t-dim"> · </span><span class="t-dim">booted in 78 ms</span>
+  <span class="t-green">✓</span> Base USDC → Arbitrum via simulated Across: recipient paid, fee accounting matches the quote  <span class="t-dim">3 txs · 244,593 gas · 177 ms</span>
+        <span class="t-dim">balance change</span>   <span class="t-dim">USDC(base) (Base)</span>  <span class="t-dim">USDC(arb) (Arbitrum One)</span>   <span class="t-dim">ETH (Base)</span>  <span class="t-dim">ETH (Arbitrum One)</span>
+        alice                       <span class="t-red">-1,000</span>                            <span class="t-red">-0.0001248…</span>
+        SpokePool(base)             <span class="t-green">+1,000</span>
+        across relayer                                   <span class="t-red">-999.890778</span>                      <span class="t-red">-0.0001224…</span>
+        bob                                              <span class="t-green">+999.890778</span>
+        <span class="t-magenta">⇄</span> <span class="t-bold">across</span> <span class="t-dim">deposit</span> 8453:0xbf5a…1507:1<span class="t-dim"> · </span>Base → Arbitrum One<span class="t-dim"> · </span>fill 0x23f1…f16b<span class="t-dim"> · </span>fee 0.109222 USDC(arb)<span class="t-dim"> · </span><span class="t-green">settled 999.890778 USDC(arb)</span></code></pre>

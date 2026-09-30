@@ -16,7 +16,12 @@
     "test:e2e": "bun run --filter '*' test:e2e",
     "test:screens": "bun run --filter '*' test:screens",
     "test:examples": "bun run --filter './examples/*' test",
-    "test:pack": "bun run --filter './packages/*' test:pack"
+    "test:pack": "bun run --filter './packages/*' test:pack",
+    "site:install": "cd site && bun install --frozen-lockfile",
+    "site:dev": "bun run site:install && cd site && bun tools/sync-docs.ts && ./node_modules/.bin/vocs dev",
+    "site:build": "bun site/tools/build.ts",
+    "site:check": "bun site/tools/check-links.ts",
+    "site:typecheck": "bun run site:install && cd site && bun tools/sync-docs.ts && ./node_modules/.bin/tsc -p tsconfig.json"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",

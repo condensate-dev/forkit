@@ -51,10 +51,29 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bun run test:pack
 
+  site:
+    # The Vocs docs site (site/): static build under /forkit/ straight from the clone, an offline
+    # link check of everything the built pages reference, and a typecheck. Not deployed from here.
+    name: site build + link check
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      # From the clean clone: site:build installs site/'s own dependencies itself.
+      - run: bun run site:build
+      - run: bun run site:check
+      - run: bun run site:typecheck
+
   screens:
-    # forkit explore's UI in headless Chromium at 390 and 1440 px, over a committed run record.
-    # The PNGs are an artifact for review; they are never committed.
-    name: explorer screenshots
+    # forkit explore's UI, and the built site (home and a docs page, light and dark), in headless
+    # Chromium at 390 and 1440 px. The PNGs are an artifact for review; they are never committed.
+    name: explorer + site screenshots
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -68,13 +87,14 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: npx playwright install --with-deps chromium
         working-directory: packages/forkit
+      - run: bun run site:build
       - run: bun run test:screens
         env:
           FORKIT_SCREENS_DIR: ${{ runner.temp }}/forkit-screens
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: explorer-screenshots
+          name: screenshots
           path: ${{ runner.temp }}/forkit-screens
           retention-days: 14
 

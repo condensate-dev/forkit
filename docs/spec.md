@@ -136,3 +136,5 @@ It must be offline, need no external services, and ship as static assets inside 
 
 ### Milestone 10: condensate.dev/forkit page
 A single static page under `site/forkit/` (index.html plus assets): pitch, install, a 20-line quickstart, a "Foundry cheatcode → forkit" table, terminal-output and explorer screenshots, the cross-chain example, and links. It is built for a Cloudflare Pages subpath with no framework, and it must work under `/forkit/`. Do NOT deploy it. the maintainers deploy it to condensate.dev.
+
+**Update (2026-09-29):** the page is rebuilt as a [Vocs](https://vocs.dev) docs site in `site/`, the framework behind getfoundry.sh, viem.sh and reth.rs. The book becomes the sidebar docs and the landing page becomes the docs home. It is still static under `/forkit/`, and still not deployed from this repo. See `site/README.md`.
