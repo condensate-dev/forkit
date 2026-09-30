@@ -395,7 +395,10 @@ export async function bundler<TChain extends Chain>(
     lastMined = { number: mined.number, hash: mined.hash };
   };
 
-  /** Hold a receipt until alto has finished with its bundle, so a revert cannot strand it. */
+  /**
+   * Wait (bounded) until alto has finished with a user operation: included, reverted, failed,
+   * rejected, or not one it knows.
+   */
   const awaitIncluded = async (userOpHash: unknown) => {
     const deadline = Date.now() + INCLUDED_WAIT_MS;
     while (Date.now() < deadline) {
@@ -415,7 +418,18 @@ export async function bundler<TChain extends Chain>(
     async before(payload) {
       await clearIfReverted();
       if (containsSend(payload)) await prepareSend();
+      // Ask alto for a receipt once it is done with the operation, so it answers from its own
+      // record of the bundle. Asked earlier, it searches the logs of the `max-block-range` blocks
+      // (2,000) below the head, mostly before the fork block: the fork fetches those from the
+      // upstream, and the query (its range, the operation's hash) changes from run to run, so an
+      // offline fork cache could never replay it.
+      for (const r of requestsIn(payload)) {
+        if (r.method === "eth_getUserOperationReceipt" && Array.isArray(r.params)) {
+          await awaitIncluded(r.params[0]);
+        }
+      }
     },
+    // Hold a receipt until alto has finished with its bundle, so a revert cannot strand it.
     async after(payload, reply) {
       const receipts = new Map<unknown, unknown>();
       for (const r of requestsIn(payload)) {
