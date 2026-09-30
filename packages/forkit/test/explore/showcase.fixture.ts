@@ -151,6 +151,7 @@ describeFork(
     itFork("swaps 1,000 USDC for WETH through SwapRouter02", async () => {
       await f.dealNative(alice, parseEther("1"));
       await f.deal(USDC_BASE, alice, INPUT);
+      await f.warp(60);
       await f.prank(alice, async (c) => {
         await c.writeContract({
           address: USDC_BASE,
@@ -181,6 +182,14 @@ describeFork(
 
     itFork("each test starts from the pinned snapshot", async () => {
       const data = encodeFunctionData({ abi: erc20Abi, functionName: "balanceOf", args: [alice] });
+      expect(await f.client.call({ to: WETH, data })).toMatchObject({ data: pad("0x0") });
+      // And a test can take its own: deal, look, go back.
+      const id = await f.snapshot();
+      await f.deal(WETH, alice, parseEther("2"));
+      expect(await f.client.call({ to: WETH, data })).toMatchObject({
+        data: pad(toHex(parseEther("2"))),
+      });
+      await f.revertTo(id);
       expect(await f.client.call({ to: WETH, data })).toMatchObject({ data: pad("0x0") });
     });
   },

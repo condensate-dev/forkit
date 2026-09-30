@@ -2,45 +2,28 @@
   "version": 1,
   "id": "showcase",
   "cwd": "<forkit>",
-  "startedAt": 1790651809701,
-  "updatedAt": 1790651817504,
+  "startedAt": 1790771956227,
+  "updatedAt": 1790771958458,
   "workers": [
     {
-      "worker": "5270-f83f5e",
-      "pid": 5270,
+      "worker": "44998-066e22",
+      "pid": 44998,
       "argv": ["vitest/dist/workers/forks.js"],
-      "startedAt": 1790651809701,
-      "updatedAt": 1790651817504
+      "startedAt": 1790771956227,
+      "updatedAt": 1790771958458
     }
   ],
   "forks": [
     {
-      "worker": "5270-f83f5e",
-      "ts": 1790651811206,
-      "chainId": 42161,
-      "chainName": "Arbitrum One",
-      "nativeSymbol": "ETH",
-      "blockNumber": "509730857",
-      "upstream": "https://arb1.arbitrum.io/rpc",
-      "rpcUrl": "http://127.0.0.1:59932",
-      "bootMs": 991,
-      "cache": {
-        "mode": "readwrite",
-        "hits": 42,
-        "misses": 0,
-        "entries": 79
-      }
-    },
-    {
-      "worker": "5270-f83f5e",
-      "ts": 1790651811345,
+      "worker": "44998-066e22",
+      "ts": 1790771956410,
       "chainId": 8453,
       "chainName": "Base",
       "nativeSymbol": "ETH",
       "blockNumber": "51907866",
       "upstream": "https://mainnet.base.org/",
-      "rpcUrl": "http://127.0.0.1:59931",
-      "bootMs": 1242,
+      "rpcUrl": "http://127.0.0.1:62434",
+      "bootMs": 170,
       "cache": {
         "mode": "readwrite",
         "hits": 43,
@@ -49,15 +32,32 @@
       }
     },
     {
-      "worker": "5270-f83f5e",
-      "ts": 1790651816798,
+      "worker": "44998-066e22",
+      "ts": 1790771956415,
+      "chainId": 42161,
+      "chainName": "Arbitrum One",
+      "nativeSymbol": "ETH",
+      "blockNumber": "509730857",
+      "upstream": "https://arb1.arbitrum.io/rpc",
+      "rpcUrl": "http://127.0.0.1:62435",
+      "bootMs": 167,
+      "cache": {
+        "mode": "readwrite",
+        "hits": 43,
+        "misses": 0,
+        "entries": 79
+      }
+    },
+    {
+      "worker": "44998-066e22",
+      "ts": 1790771957632,
       "chainId": 8453,
       "chainName": "Base",
       "nativeSymbol": "ETH",
       "blockNumber": "51800000",
       "upstream": "https://mainnet.base.org/",
-      "rpcUrl": "http://127.0.0.1:60098",
-      "bootMs": 273,
+      "rpcUrl": "http://127.0.0.1:62545",
+      "bootMs": 97,
       "cache": {
         "mode": "readwrite",
         "hits": 43,
@@ -68,58 +68,60 @@
   ],
   "tests": [
     {
-      "key": "5270-f83f5e:1",
-      "worker": "5270-f83f5e",
+      "key": "44998-066e22:1",
+      "worker": "44998-066e22",
       "suite": "Base → Arbitrum via simulated Across",
       "name": "bridges 1,000 USDC to bob on Arbitrum",
       "status": "pass",
-      "startedAt": 1790651811458,
-      "durationMs": 4461
+      "startedAt": 1790771956434,
+      "durationMs": 808
     },
     {
-      "key": "5270-f83f5e:2",
-      "worker": "5270-f83f5e",
+      "key": "44998-066e22:2",
+      "worker": "44998-066e22",
       "suite": "Base → Arbitrum via simulated Across",
       "name": "a deposit above alice's balance reverts",
       "status": "pass",
-      "startedAt": 1790651815950,
-      "durationMs": 458
+      "startedAt": 1790771957254,
+      "durationMs": 217
     },
     {
-      "key": "5270-f83f5e:3",
-      "worker": "5270-f83f5e",
+      "key": "44998-066e22:3",
+      "worker": "44998-066e22",
       "suite": "Base → Arbitrum via simulated Across",
       "name": "fails on purpose: expects bob to receive the full input",
       "status": "fail",
-      "startedAt": 1790651816451,
-      "durationMs": 28,
-      "error": "the relay fee comes out of the output: expected 999890778n to be 1000000000n // Object.is equality"
+      "startedAt": 1790771957488,
+      "durationMs": 2,
+      "error": "the relay fee comes out of the output: expected 999890778n to be 1000000000n // Object.is equality",
+      "actual": "999890778",
+      "expected": "1000000000"
     },
     {
-      "key": "5270-f83f5e:4",
-      "worker": "5270-f83f5e",
+      "key": "44998-066e22:4",
+      "worker": "44998-066e22",
       "suite": "Base: swap USDC for WETH on Uniswap v3",
       "name": "swaps 1,000 USDC for WETH through SwapRouter02",
       "status": "pass",
-      "startedAt": 1790651816800,
-      "durationMs": 548
+      "startedAt": 1790771957634,
+      "durationMs": 573
     },
     {
-      "key": "5270-f83f5e:5",
-      "worker": "5270-f83f5e",
+      "key": "44998-066e22:5",
+      "worker": "44998-066e22",
       "suite": "Base: swap USDC for WETH on Uniswap v3",
       "name": "each test starts from the pinned snapshot",
       "status": "pass",
-      "startedAt": 1790651817493,
-      "durationMs": 11
+      "startedAt": 1790771958365,
+      "durationMs": 93
     }
   ],
   "txs": [
     {
-      "id": "5270-f83f5e:1",
-      "test": "5270-f83f5e:1",
-      "worker": "5270-f83f5e",
-      "ts": 1790651812306,
+      "id": "44998-066e22:1",
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771956571,
       "chainId": 8453,
       "kind": "writeContract",
       "hash": "0xb6c8cd5c2a2cbeb679320221e025053397e9a60206d35338ca9aad3d3a30eb59",
@@ -187,10 +189,10 @@
         }
       ],
       "blockNumber": "51907867",
-      "blockHash": "0xf6d0727e872fe87609a229b1787db94aaa51c072161601fbb1496f6065c5db46",
+      "blockHash": "0x4523b4e7d150bf9e351cd8619545ee5003d2e8e4607d7629873664b66363725a",
       "gasUsed": "55437",
       "effectiveGasPrice": "1004995283",
-      "blockTimestamp": 1790605080,
+      "blockTimestamp": 1790605079,
       "trace": {
         "type": "CALL",
         "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
@@ -253,17 +255,100 @@
                 "type": "bool",
                 "value": true
               }
+            ],
+            "logs": [
+              {
+                "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                "topics": [
+                  "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+                  "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+                  "0x00000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64"
+                ],
+                "data": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+                "position": 0,
+                "index": 0,
+                "event": {
+                  "name": "Approval",
+                  "signature": "Approval(address,address,uint256)",
+                  "args": [
+                    {
+                      "name": "owner",
+                      "type": "address",
+                      "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                    },
+                    {
+                      "name": "spender",
+                      "type": "address",
+                      "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+                    },
+                    {
+                      "name": "value",
+                      "type": "uint256",
+                      "value": "1000000000"
+                    }
+                  ]
+                }
+              }
             ]
           }
         ]
       },
-      "traceText": "[55437] USDC(base)::approve(SpokePool(base) (0x09ae…EC64), 1000000000)\n  ├─ [26673] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::approve(SpokePool(base) (0x09ae…EC64), 1000000000) [delegatecall]\n  │   └─ ← [Return] true\n  └─ ← [Return] true"
+      "traceText": "[55437] USDC(base)::approve(SpokePool(base) (0x09ae…EC64), 1000000000)\n  ├─ [26673] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::approve(SpokePool(base) (0x09ae…EC64), 1000000000) [delegatecall]\n  │   └─ ← [Return] true\n  └─ ← [Return] true",
+      "stateDiff": [
+        {
+          "address": "0x0000000000000000000000000000000000000000",
+          "storage": [],
+          "balance": {
+            "before": "17723730231424379769",
+            "after": "17723785668424379769"
+          }
+        },
+        {
+          "address": "0x4200000000000000000000000000000000000019",
+          "storage": [],
+          "balance": {
+            "before": "12491350698301459062",
+            "after": "12491350975224962733"
+          }
+        },
+        {
+          "address": "0x420000000000000000000000000000000000001a",
+          "storage": [],
+          "balance": {
+            "before": "1794001035475316760",
+            "after": "1794001050707590884"
+          }
+        },
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "storage": [],
+          "balance": {
+            "before": "1000000000000000000",
+            "after": "999944270844222205"
+          },
+          "nonce": {
+            "before": 0,
+            "after": 1
+          }
+        },
+        {
+          "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "storage": [
+            {
+              "slot": "0x4077bb0174722f0d10eb3dec8e2a7a9f71080f44c325e9a391e9e21558c5f98a",
+              "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "after": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+              "hint": "mapping(10)[alice][SpokePool(base)]"
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": "5270-f83f5e:2",
-      "test": "5270-f83f5e:1",
-      "worker": "5270-f83f5e",
-      "ts": 1790651813225,
+      "id": "44998-066e22:2",
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771956663,
       "chainId": 8453,
       "kind": "writeContract",
       "hash": "0xbf5ab0a784e5739de77201174c7aca7b9e91aacfc4689bc92c1713ae00581507",
@@ -475,10 +560,10 @@
         }
       ],
       "blockNumber": "51907868",
-      "blockHash": "0x3563865e0c0011753dbebed4022ce41270bad3d2400c117ae8c290aa27f61117",
+      "blockHash": "0x0b5aec40f72473a9d35a49e7830548169b06498f36059b05f3aaa3304db776a3",
       "gasUsed": "68804",
       "effectiveGasPrice": "1004975319",
-      "blockTimestamp": 1790605081,
+      "blockTimestamp": 1790605079,
       "trace": {
         "type": "CALL",
         "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
@@ -699,21 +784,211 @@
                         "type": "bool",
                         "value": true
                       }
+                    ],
+                    "logs": [
+                      {
+                        "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                        "topics": [
+                          "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+                          "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+                          "0x00000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64"
+                        ],
+                        "data": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+                        "position": 0,
+                        "index": 0,
+                        "event": {
+                          "name": "Transfer",
+                          "signature": "Transfer(address,address,uint256)",
+                          "args": [
+                            {
+                              "name": "from",
+                              "type": "address",
+                              "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                            },
+                            {
+                              "name": "to",
+                              "type": "address",
+                              "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+                            },
+                            {
+                              "name": "value",
+                              "type": "uint256",
+                              "value": "1000000000"
+                            }
+                          ]
+                        }
+                      }
                     ]
                   }
                 ]
+              }
+            ],
+            "logs": [
+              {
+                "address": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+                "topics": [
+                  "0x32ed1a409ef04c7b0227189c3a103dc5ac10e775a15b785dcc510201f7c25ad3",
+                  "0x000000000000000000000000000000000000000000000000000000000000a4b1",
+                  "0x00000000000000000000000000000000000000000000000000000000005f929c",
+                  "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+                ],
+                "data": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000006aba7717000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba8527000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd00000000000000000000000000000000000000000000000000000000000001400000000000000000000000000000000000000000000000000000000000000000",
+                "position": 1,
+                "index": 1,
+                "event": {
+                  "name": "FundsDeposited",
+                  "signature": "FundsDeposited(bytes32,bytes32,uint256,uint256,uint256,uint256,uint32,uint32,uint32,bytes32,bytes32,bytes32,bytes)",
+                  "args": [
+                    {
+                      "name": "inputToken",
+                      "type": "bytes32",
+                      "value": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913"
+                    },
+                    {
+                      "name": "outputToken",
+                      "type": "bytes32",
+                      "value": "0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831"
+                    },
+                    {
+                      "name": "inputAmount",
+                      "type": "uint256",
+                      "value": "1000000000"
+                    },
+                    {
+                      "name": "outputAmount",
+                      "type": "uint256",
+                      "value": "999890778"
+                    },
+                    {
+                      "name": "destinationChainId",
+                      "type": "uint256",
+                      "value": "42161"
+                    },
+                    {
+                      "name": "depositId",
+                      "type": "uint256",
+                      "value": "6263452"
+                    },
+                    {
+                      "name": "quoteTimestamp",
+                      "type": "uint32",
+                      "value": 1790605079
+                    },
+                    {
+                      "name": "fillDeadline",
+                      "type": "uint32",
+                      "value": 1790612279
+                    },
+                    {
+                      "name": "exclusivityDeadline",
+                      "type": "uint32",
+                      "value": 1790608679
+                    },
+                    {
+                      "name": "depositor",
+                      "type": "bytes32",
+                      "value": "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+                    },
+                    {
+                      "name": "recipient",
+                      "type": "bytes32",
+                      "value": "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+                    },
+                    {
+                      "name": "exclusiveRelayer",
+                      "type": "bytes32",
+                      "value": "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+                    },
+                    {
+                      "name": "message",
+                      "type": "bytes",
+                      "value": "0x"
+                    }
+                  ]
+                }
               }
             ]
           }
         ]
       },
-      "traceText": "[68804] SpokePool(base)::deposit(0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, 1000000000, 999890778, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, 1790605079, 1790612279, 1790608679, 0x)\n  ├─ [52036] 0xf23C6C04A2B88e8651FE99bbDccbB5C9D306e6B0::deposit(0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, 1000000000, 999890778, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, 1790605079, 1790612279, 1790608679, 0x) [delegatecall]\n  │   ├─ [29328] USDC(base)::transferFrom(alice (0x4D13…4273), SpokePool(base) (0x09ae…EC64), 1000000000)\n  │   │   ├─ [22154] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::transferFrom(alice (0x4D13…4273), SpokePool(base) (0x09ae…EC64), 1000000000) [delegatecall]\n  │   │   │   └─ ← [Return] true\n  │   │   └─ ← [Return] true\n  │   └─ ← [Stop]\n  └─ ← [Stop]"
+      "traceText": "[68804] SpokePool(base)::deposit(0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, 1000000000, 999890778, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, 1790605079, 1790612279, 1790608679, 0x)\n  ├─ [52036] 0xf23C6C04A2B88e8651FE99bbDccbB5C9D306e6B0::deposit(0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, 1000000000, 999890778, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, 1790605079, 1790612279, 1790608679, 0x) [delegatecall]\n  │   ├─ [29328] USDC(base)::transferFrom(alice (0x4D13…4273), SpokePool(base) (0x09ae…EC64), 1000000000)\n  │   │   ├─ [22154] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::transferFrom(alice (0x4D13…4273), SpokePool(base) (0x09ae…EC64), 1000000000) [delegatecall]\n  │   │   │   └─ ← [Return] true\n  │   │   └─ ← [Return] true\n  │   └─ ← [Stop]\n  └─ ← [Stop]",
+      "stateDiff": [
+        {
+          "address": "0x0000000000000000000000000000000000000000",
+          "storage": [],
+          "balance": {
+            "before": "17723785668424379769",
+            "after": "17723854472424379769"
+          }
+        },
+        {
+          "address": "0x09aea4b2242abc8bb4bb78d537a67a245a7bec64",
+          "storage": [
+            {
+              "slot": "0x000000000000000000000000000000000000000000000000000000000000086b",
+              "before": "0x00000000005f929c00000e104200000000000000000000000000000000000006",
+              "after": "0x00000000005f929d00000e104200000000000000000000000000000000000006"
+            }
+          ]
+        },
+        {
+          "address": "0x4200000000000000000000000000000000000019",
+          "storage": [],
+          "balance": {
+            "before": "12491350975224962733",
+            "after": "12491351317546811209"
+          }
+        },
+        {
+          "address": "0x420000000000000000000000000000000000001a",
+          "storage": [],
+          "balance": {
+            "before": "1794001050707590884",
+            "after": "1794001077094672601"
+          }
+        },
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "storage": [],
+          "balance": {
+            "before": "999944270844222205",
+            "after": "999875098135292012"
+          },
+          "nonce": {
+            "before": 1,
+            "after": 2
+          }
+        },
+        {
+          "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "storage": [
+            {
+              "slot": "0x4077bb0174722f0d10eb3dec8e2a7a9f71080f44c325e9a391e9e21558c5f98a",
+              "before": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+              "after": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "hint": "mapping(10)[alice][SpokePool(base)]"
+            },
+            {
+              "slot": "0x4d7ab7c30fe33106c9a0cc1178ea201a0eaff090020028162e2b53a03a2a4489",
+              "before": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+              "after": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "hint": "mapping(9)[alice]"
+            },
+            {
+              "slot": "0x75e0df184018553511c7c70db252ae5b4d33cf93af9d3905e17a31814cc5caa8",
+              "before": "0x0000000000000000000000000000000000000000000000000000002752a928bc",
+              "after": "0x000000000000000000000000000000000000000000000000000000278e43f2bc",
+              "hint": "mapping(9)[SpokePool(base)]"
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": "5270-f83f5e:3",
-      "test": "5270-f83f5e:1",
-      "worker": "5270-f83f5e",
-      "ts": 1790651815860,
+      "id": "44998-066e22:3",
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771957077,
       "chainId": 42161,
       "kind": "writeContract",
       "hash": "0x23f1793715597f840803c5c32d190fcd5a8b71a3f8a3bc17215a2bff479cf16b",
@@ -870,10 +1145,10 @@
         }
       ],
       "blockNumber": "509730858",
-      "blockHash": "0xde0b8fe5ae07892f68efc0abe6aa5aebb4ad5e8c091d2ced133d80ad9c89bdbb",
+      "blockHash": "0x42f9f2711ce9c5b0ed36c08dc9845d57f565db3fcbd29483240191a761318bf4",
       "gasUsed": "120352",
       "effectiveGasPrice": "1017517501",
-      "blockTimestamp": 1790605103,
+      "blockTimestamp": 1790605100,
       "trace": {
         "type": "CALL",
         "from": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd",
@@ -1126,21 +1401,124 @@
                         "type": "bool",
                         "value": true
                       }
+                    ],
+                    "logs": [
+                      {
+                        "address": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+                        "topics": [
+                          "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+                          "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd",
+                          "0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f"
+                        ],
+                        "data": "0x000000000000000000000000000000000000000000000000000000003b991f5a",
+                        "position": 0,
+                        "index": 1,
+                        "event": {
+                          "name": "Transfer",
+                          "signature": "Transfer(address,address,uint256)",
+                          "args": [
+                            {
+                              "name": "from",
+                              "type": "address",
+                              "value": "0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD"
+                            },
+                            {
+                              "name": "to",
+                              "type": "address",
+                              "value": "0xdF2d4A804D7E35526e777Bce433F3f244d756A4F"
+                            },
+                            {
+                              "name": "value",
+                              "type": "uint256",
+                              "value": "999890778"
+                            }
+                          ]
+                        }
+                      }
                     ]
                   }
                 ]
+              }
+            ],
+            "logs": [
+              {
+                "address": "0xe35e9842fceaca96570b734083f4a58e8f7c5f2a",
+                "topics": [
+                  "0x44b559f101f8fbcc8a0ea43fa91a05a729a5ea6e14a7c75aa750374690137208",
+                  "0x0000000000000000000000000000000000000000000000000000000000002105",
+                  "0x00000000000000000000000000000000000000000000000000000000005f929c",
+                  "0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+                ],
+                "data": "0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831000000000000000000000000000000000000000000000000000000003b9aca00000000000000000000000000000000000000000000000000000000003b991f5a000000000000000000000000000000000000000000000000000000000000a4b1000000000000000000000000000000000000000000000000000000006aba9337000000000000000000000000000000000000000000000000000000006aba8527000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000003b991f5a0000000000000000000000000000000000000000000000000000000000000000",
+                "position": 0,
+                "index": 0
               }
             ]
           }
         ]
       },
-      "traceText": "[120352] SpokePool(arb)::fillRelay({ depositor: 0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, recipient: 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, exclusiveRelayer: 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, inputToken: 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, outputToken: 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, inputAmount: 1000000000, outputAmount: 999890778, originChainId: 8453, depositId: 6263452, fillDeadline: 1790612279, exclusivityDeadline: 1790608679, message: 0x }, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd)\n  ├─ [93318] 0xcfCDA84333431BCC9155f2368B8362F0d1dfF8c9::fillRelay({ depositor: 0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, recipient: 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, exclusiveRelayer: 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, inputToken: 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, outputToken: 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, inputAmount: 1000000000, outputAmount: 999890778, originChainId: 8453, depositId: 6263452, fillDeadline: 1790612279, exclusivityDeadline: 1790608679, message: 0x }, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd) [delegatecall]\n  │   ├─ [48428] USDC(arb)::transferFrom(0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD, bob (0xdF2d…6A4F), 999890778)\n  │   │   ├─ [41254] 0x86E721b43d4ECFa71119Dd38c0f938A75Fdb57B3::transferFrom(0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD, bob (0xdF2d…6A4F), 999890778) [delegatecall]\n  │   │   │   └─ ← [Return] true\n  │   │   └─ ← [Return] true\n  │   └─ ← [Stop]\n  └─ ← [Stop]"
+      "traceText": "[120352] SpokePool(arb)::fillRelay({ depositor: 0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, recipient: 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, exclusiveRelayer: 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, inputToken: 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, outputToken: 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, inputAmount: 1000000000, outputAmount: 999890778, originChainId: 8453, depositId: 6263452, fillDeadline: 1790612279, exclusivityDeadline: 1790608679, message: 0x }, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd)\n  ├─ [93318] 0xcfCDA84333431BCC9155f2368B8362F0d1dfF8c9::fillRelay({ depositor: 0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273, recipient: 0x000000000000000000000000df2d4a804d7e35526e777bce433f3f244d756a4f, exclusiveRelayer: 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd, inputToken: 0x000000000000000000000000833589fcd6edb6e08f4c7c32d4f71b54bda02913, outputToken: 0x000000000000000000000000af88d065e77c8cc2239327c5edb3a432268e5831, inputAmount: 1000000000, outputAmount: 999890778, originChainId: 8453, depositId: 6263452, fillDeadline: 1790612279, exclusivityDeadline: 1790608679, message: 0x }, 42161, 0x000000000000000000000000394311a6aaa0d8e3411d8b62de4578d41322d1bd) [delegatecall]\n  │   ├─ [48428] USDC(arb)::transferFrom(0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD, bob (0xdF2d…6A4F), 999890778)\n  │   │   ├─ [41254] 0x86E721b43d4ECFa71119Dd38c0f938A75Fdb57B3::transferFrom(0x394311A6Aaa0D8E3411D8b62DE4578D41322d1bD, bob (0xdF2d…6A4F), 999890778) [delegatecall]\n  │   │   │   └─ ← [Return] true\n  │   │   └─ ← [Return] true\n  │   └─ ← [Stop]\n  └─ ← [Stop]",
+      "stateDiff": [
+        {
+          "address": "0x0000000000000000000000000000000000000000",
+          "storage": [],
+          "balance": {
+            "before": "25995562094697417475",
+            "after": "25995682446697417475"
+          }
+        },
+        {
+          "address": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd",
+          "storage": [],
+          "balance": {
+            "before": "10000000000000000000",
+            "after": "9999877539733719648"
+          },
+          "nonce": {
+            "before": 225060,
+            "after": 225061
+          }
+        },
+        {
+          "address": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
+          "storage": [
+            {
+              "slot": "0x0718c8b893ca6474a28a1307e8f5a0b4402b1abc739f30923ea2a499a51f3a2c",
+              "before": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffaf69b3adb856",
+              "after": "0xffffffffffffffffffffffffffffffffffffffffffffffffffffaf69781498fc",
+              "hint": "mapping(10)[0x3943…d1bd][SpokePool(arb)]"
+            },
+            {
+              "slot": "0x33106be32c33013a0c1246b4dfbb99b45e6dd1af7e075280791f90a09ff48838",
+              "before": "0x00000000000000000000000000000000000000000000000000000006df75a580",
+              "after": "0x00000000000000000000000000000000000000000000000000000006a3dc8626",
+              "hint": "mapping(9)[0x3943…d1bd]"
+            },
+            {
+              "slot": "0x8a5c7f72731a51308fd5f84bb37a17b9454bdc160e4867cb9273f5073019bdca",
+              "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "after": "0x000000000000000000000000000000000000000000000000000000003b991f5a",
+              "hint": "mapping(9)[bob]"
+            }
+          ]
+        },
+        {
+          "address": "0xe35e9842fceaca96570b734083f4a58e8f7c5f2a",
+          "storage": [
+            {
+              "slot": "0xb22796ec27eb77571e6ab4d3cd43cef944301a607134bfe7c3eed20a93675c31",
+              "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "after": "0x0000000000000000000000000000000000000000000000000000000000000002"
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": "5270-f83f5e:4",
-      "test": "5270-f83f5e:2",
-      "worker": "5270-f83f5e",
-      "ts": 1790651816338,
+      "id": "44998-066e22:4",
+      "test": "44998-066e22:2",
+      "worker": "44998-066e22",
+      "ts": 1790771957355,
       "chainId": 8453,
       "kind": "writeContract",
       "hash": "0xe1bdd90721994124113520426a5b4ff4e8379549312cdb20958160baa20d9685",
@@ -1208,10 +1586,10 @@
         }
       ],
       "blockNumber": "51907867",
-      "blockHash": "0xf1619759a11b0f6111775ea881fb67c9e102c8979dadaf99a88e6fd4dcf854e6",
+      "blockHash": "0x6264bf52ede7255c83c36fd86107a17fe2681fcb4c7a3207dbd8c499c0e58889",
       "gasUsed": "55437",
       "effectiveGasPrice": "1004955439",
-      "blockTimestamp": 1790605080,
+      "blockTimestamp": 1790605079,
       "trace": {
         "type": "CALL",
         "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
@@ -1274,17 +1652,100 @@
                 "type": "bool",
                 "value": true
               }
+            ],
+            "logs": [
+              {
+                "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                "topics": [
+                  "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+                  "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+                  "0x00000000000000000000000009aea4b2242abc8bb4bb78d537a67a245a7bec64"
+                ],
+                "data": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+                "position": 0,
+                "index": 0,
+                "event": {
+                  "name": "Approval",
+                  "signature": "Approval(address,address,uint256)",
+                  "args": [
+                    {
+                      "name": "owner",
+                      "type": "address",
+                      "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                    },
+                    {
+                      "name": "spender",
+                      "type": "address",
+                      "value": "0x09aea4b2242abC8bb4BB78D537A67a245A7bEC64"
+                    },
+                    {
+                      "name": "value",
+                      "type": "uint256",
+                      "value": "1000000000"
+                    }
+                  ]
+                }
+              }
             ]
           }
         ]
       },
-      "traceText": "[55437] USDC(base)::approve(SpokePool(base) (0x09ae…EC64), 1000000000)\n  ├─ [26673] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::approve(SpokePool(base) (0x09ae…EC64), 1000000000) [delegatecall]\n  │   └─ ← [Return] true\n  └─ ← [Return] true"
+      "traceText": "[55437] USDC(base)::approve(SpokePool(base) (0x09ae…EC64), 1000000000)\n  ├─ [26673] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::approve(SpokePool(base) (0x09ae…EC64), 1000000000) [delegatecall]\n  │   └─ ← [Return] true\n  └─ ← [Return] true",
+      "stateDiff": [
+        {
+          "address": "0x0000000000000000000000000000000000000000",
+          "storage": [],
+          "balance": {
+            "before": "17723730231424379769",
+            "after": "17723785668424379769"
+          }
+        },
+        {
+          "address": "0x4200000000000000000000000000000000000019",
+          "storage": [],
+          "balance": {
+            "before": "12491350698301459062",
+            "after": "12491350973016130905"
+          }
+        },
+        {
+          "address": "0x420000000000000000000000000000000000001a",
+          "storage": [],
+          "balance": {
+            "before": "1794001035475316760",
+            "after": "1794001050707590884"
+          }
+        },
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "storage": [],
+          "balance": {
+            "before": "1000000000000000000",
+            "after": "999944273053054033"
+          },
+          "nonce": {
+            "before": 0,
+            "after": 1
+          }
+        },
+        {
+          "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "storage": [
+            {
+              "slot": "0x4077bb0174722f0d10eb3dec8e2a7a9f71080f44c325e9a391e9e21558c5f98a",
+              "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "after": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+              "hint": "mapping(10)[alice][SpokePool(base)]"
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": "5270-f83f5e:5",
-      "test": "5270-f83f5e:2",
-      "worker": "5270-f83f5e",
-      "ts": 1790651816403,
+      "id": "44998-066e22:5",
+      "test": "44998-066e22:2",
+      "worker": "44998-066e22",
+      "ts": 1790771957410,
       "chainId": 8453,
       "kind": "writeContract",
       "mined": false,
@@ -1591,13 +2052,13 @@
       "gasUsed": "63367"
     },
     {
-      "id": "5270-f83f5e:6",
-      "test": "5270-f83f5e:4",
-      "worker": "5270-f83f5e",
-      "ts": 1790651817226,
+      "id": "44998-066e22:6",
+      "test": "44998-066e22:4",
+      "worker": "44998-066e22",
+      "ts": 1790771957995,
       "chainId": 8453,
       "kind": "writeContract",
-      "hash": "0x900a5a734cd3e16256592bb5b7fb6725c33ccc73037687ddbe0b5a5ee77b8956",
+      "hash": "0xa75493afc7a43bfcfa5d71644465b36eb55567014a7fcbe5cfd3dfbcd21cfd2b",
       "mined": true,
       "status": "success",
       "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
@@ -1657,15 +2118,15 @@
         {
           "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
           "token": "native",
-          "delta": "-55713789845064",
-          "after": "999944285592417205"
+          "delta": "-55712682712737",
+          "after": "999944286699549532"
         }
       ],
-      "blockNumber": "51800001",
-      "blockHash": "0x3fdd153178a43276cc6be24f49060dc11f3a740bb0dd6199fb5639c7286364a7",
+      "blockNumber": "51800002",
+      "blockHash": "0x59742bea81c10830a6b59c23995bf4258091fca22485019e207612f9d4e9d47b",
       "gasUsed": "55437",
-      "effectiveGasPrice": "1004992872",
-      "blockTimestamp": 1790389348,
+      "effectiveGasPrice": "1004972901",
+      "blockTimestamp": 1790389407,
       "trace": {
         "type": "CALL",
         "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
@@ -1728,20 +2189,103 @@
                 "type": "bool",
                 "value": true
               }
+            ],
+            "logs": [
+              {
+                "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                "topics": [
+                  "0x8c5be1e5ebec7d5bd14f71427d1e84f3dd0314c0f7b2291e5b200ac8c7c3b925",
+                  "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+                  "0x0000000000000000000000002626664c2603336e57b271c5c0b26f421741e481"
+                ],
+                "data": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+                "position": 0,
+                "index": 0,
+                "event": {
+                  "name": "Approval",
+                  "signature": "Approval(address,address,uint256)",
+                  "args": [
+                    {
+                      "name": "owner",
+                      "type": "address",
+                      "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                    },
+                    {
+                      "name": "spender",
+                      "type": "address",
+                      "value": "0x2626664c2603336E57B271c5C0b26F421741e481"
+                    },
+                    {
+                      "name": "value",
+                      "type": "uint256",
+                      "value": "1000000000"
+                    }
+                  ]
+                }
+              }
             ]
           }
         ]
       },
-      "traceText": "[55437] USDC(base)::approve(SwapRouter02 (0x2626…e481), 1000000000)\n  ├─ [26673] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::approve(SwapRouter02 (0x2626…e481), 1000000000) [delegatecall]\n  │   └─ ← [Return] true\n  └─ ← [Return] true"
+      "traceText": "[55437] USDC(base)::approve(SwapRouter02 (0x2626…e481), 1000000000)\n  ├─ [26673] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::approve(SwapRouter02 (0x2626…e481), 1000000000) [delegatecall]\n  │   └─ ← [Return] true\n  └─ ← [Return] true",
+      "stateDiff": [
+        {
+          "address": "0x0000000000000000000000000000000000000000",
+          "storage": [],
+          "balance": {
+            "before": "17722630104254325597",
+            "after": "17722685541254325597"
+          }
+        },
+        {
+          "address": "0x4200000000000000000000000000000000000019",
+          "storage": [],
+          "balance": {
+            "before": "51363133186850694148",
+            "after": "51363133462533406885"
+          }
+        },
+        {
+          "address": "0x420000000000000000000000000000000000001a",
+          "storage": [],
+          "balance": {
+            "before": "1637858104897618749",
+            "after": "1637858105515356480"
+          }
+        },
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "storage": [],
+          "balance": {
+            "before": "1000000000000000000",
+            "after": "999944286699549532"
+          },
+          "nonce": {
+            "before": 0,
+            "after": 1
+          }
+        },
+        {
+          "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "storage": [
+            {
+              "slot": "0x9d0aa4efb914679b5dd6b8189ad47611984dff3a58e34c8ec464db00341bf34a",
+              "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "after": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+              "hint": "mapping(10)[alice][SwapRouter02]"
+            }
+          ]
+        }
+      ]
     },
     {
-      "id": "5270-f83f5e:7",
-      "test": "5270-f83f5e:4",
-      "worker": "5270-f83f5e",
-      "ts": 1790651817331,
+      "id": "44998-066e22:7",
+      "test": "44998-066e22:4",
+      "worker": "44998-066e22",
+      "ts": 1790771958158,
       "chainId": 8453,
       "kind": "writeContract",
-      "hash": "0x4b98410524a8fba7f2efcebe27badf68fa503ffa29c9e9e92955d10809dac705",
+      "hash": "0x8dd8e770eb00fa17b050f61be6e5cd6539dc4a26f736768f01495c0370650b69",
       "mined": true,
       "status": "success",
       "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
@@ -1873,8 +2417,8 @@
         {
           "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
           "token": "native",
-          "delta": "-129954052999498",
-          "after": "999814330921679976"
+          "delta": "-129951480745086",
+          "after": "999814334601066715"
         },
         {
           "address": "0xd0b53d9277642d899df5c87a3966a349a798f224",
@@ -1901,11 +2445,11 @@
           "after": "4617464477655"
         }
       ],
-      "blockNumber": "51800002",
-      "blockHash": "0x599404dd87111d9c03f9d131a80b290e253ac10b9a4ec1b826fb373310d6b784",
+      "blockNumber": "51800003",
+      "blockHash": "0x05413d94695f48a7605f18deb05820022f7cb35310b345af2c91264dfaf8c20a",
       "gasUsed": "129311",
-      "effectiveGasPrice": "1004972918",
-      "blockTimestamp": 1790389348,
+      "effectiveGasPrice": "1004953026",
+      "blockTimestamp": 1790389408,
       "trace": {
         "type": "CALL",
         "from": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
@@ -2007,6 +2551,40 @@
                     "name": "",
                     "type": "bool",
                     "value": true
+                  }
+                ],
+                "logs": [
+                  {
+                    "address": "0x4200000000000000000000000000000000000006",
+                    "topics": [
+                      "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+                      "0x000000000000000000000000d0b53d9277642d899df5c87a3966a349a798f224",
+                      "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+                    ],
+                    "data": "0x0000000000000000000000000000000000000000000000000525e2bc6d57e882",
+                    "position": 0,
+                    "index": 0,
+                    "event": {
+                      "name": "Transfer",
+                      "signature": "Transfer(address,address,uint256)",
+                      "args": [
+                        {
+                          "name": "from",
+                          "type": "address",
+                          "value": "0xd0b53D9277642d899DF5C87A3966A349A798F224"
+                        },
+                        {
+                          "name": "to",
+                          "type": "address",
+                          "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                        },
+                        {
+                          "name": "value",
+                          "type": "uint256",
+                          "value": "370951843244140674"
+                        }
+                      ]
+                    }
                   }
                 ]
               },
@@ -2145,6 +2723,40 @@
                             "type": "bool",
                             "value": true
                           }
+                        ],
+                        "logs": [
+                          {
+                            "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+                            "topics": [
+                              "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef",
+                              "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+                              "0x000000000000000000000000d0b53d9277642d899df5c87a3966a349a798f224"
+                            ],
+                            "data": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+                            "position": 0,
+                            "index": 1,
+                            "event": {
+                              "name": "Transfer",
+                              "signature": "Transfer(address,address,uint256)",
+                              "args": [
+                                {
+                                  "name": "from",
+                                  "type": "address",
+                                  "value": "0x4D135d933ca1Ec2d37ECbeCd8a0d65fD5c8d4273"
+                                },
+                                {
+                                  "name": "to",
+                                  "type": "address",
+                                  "value": "0xd0b53D9277642d899DF5C87A3966A349A798F224"
+                                },
+                                {
+                                  "name": "value",
+                                  "type": "uint256",
+                                  "value": "1000000000"
+                                }
+                              ]
+                            }
+                          }
                         ]
                       }
                     ]
@@ -2206,136 +2818,259 @@
                   }
                 ]
               }
+            ],
+            "logs": [
+              {
+                "address": "0xd0b53d9277642d899df5c87a3966a349a798f224",
+                "topics": [
+                  "0xc42079f94a6350d7e6235f29174924f928cc2ac818eb64fed8004e115fbcca67",
+                  "0x0000000000000000000000002626664c2603336e57b271c5c0b26f421741e481",
+                  "0x0000000000000000000000004d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+                ],
+                "data": "0xfffffffffffffffffffffffffffffffffffffffffffffffffada1d4392a8177e000000000000000000000000000000000000000000000000000000003b9aca000000000000000000000000000000000000000000000366dff5211949b1f8254a00000000000000000000000000000000000000000000000012103afdf40cef7ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffcfd2d",
+                "position": 4,
+                "index": 2
+              }
             ]
           }
         ]
       },
-      "traceText": "[129311] SwapRouter02::exactInputSingle({ tokenIn: USDC(base) (0x8335…2913), tokenOut: WETH (0x4200…0006), fee: 500, recipient: alice (0x4D13…4273), amountIn: 1000000000, amountOutMinimum: 0, sqrtPriceLimitX96: 0 })\n  ├─ [108962] 0xd0b53D9277642d899DF5C87A3966A349A798F224::0x128acb08(384 bytes)\n  │   ├─ [29701] WETH::transfer(alice (0x4D13…4273), 370951843244140674)\n  │   │   └─ ← [Return] true\n  │   ├─ [9750] USDC(base)::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [staticcall]\n  │   │   ├─ [2553] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [delegatecall]\n  │   │   │   └─ ← [Return] 4616464477655\n  │   │   └─ ← [Return] 4616464477655\n  │   ├─ [26935] SwapRouter02::0xfa461e33(320 bytes)\n  │   │   ├─ [22828] USDC(base)::transferFrom(alice (0x4D13…4273), 0xd0b53D9277642d899DF5C87A3966A349A798F224, 1000000000)\n  │   │   │   ├─ [22154] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::transferFrom(alice (0x4D13…4273), 0xd0b53D9277642d899DF5C87A3966A349A798F224, 1000000000) [delegatecall]\n  │   │   │   │   └─ ← [Return] true\n  │   │   │   └─ ← [Return] true\n  │   │   └─ ← [Stop]\n  │   ├─ [1250] USDC(base)::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [staticcall]\n  │   │   ├─ [553] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [delegatecall]\n  │   │   │   └─ ← [Return] 4617464477655\n  │   │   └─ ← [Return] 4617464477655\n  │   └─ ← [Return] 0xfffffffffffffffffffffffffffffffffffffffffffffffffada1d4392a8177e… (64 bytes)\n  └─ ← [Return] 370951843244140674"
+      "traceText": "[129311] SwapRouter02::exactInputSingle({ tokenIn: USDC(base) (0x8335…2913), tokenOut: WETH (0x4200…0006), fee: 500, recipient: alice (0x4D13…4273), amountIn: 1000000000, amountOutMinimum: 0, sqrtPriceLimitX96: 0 })\n  ├─ [108962] 0xd0b53D9277642d899DF5C87A3966A349A798F224::0x128acb08(384 bytes)\n  │   ├─ [29701] WETH::transfer(alice (0x4D13…4273), 370951843244140674)\n  │   │   └─ ← [Return] true\n  │   ├─ [9750] USDC(base)::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [staticcall]\n  │   │   ├─ [2553] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [delegatecall]\n  │   │   │   └─ ← [Return] 4616464477655\n  │   │   └─ ← [Return] 4616464477655\n  │   ├─ [26935] SwapRouter02::0xfa461e33(320 bytes)\n  │   │   ├─ [22828] USDC(base)::transferFrom(alice (0x4D13…4273), 0xd0b53D9277642d899DF5C87A3966A349A798F224, 1000000000)\n  │   │   │   ├─ [22154] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::transferFrom(alice (0x4D13…4273), 0xd0b53D9277642d899DF5C87A3966A349A798F224, 1000000000) [delegatecall]\n  │   │   │   │   └─ ← [Return] true\n  │   │   │   └─ ← [Return] true\n  │   │   └─ ← [Stop]\n  │   ├─ [1250] USDC(base)::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [staticcall]\n  │   │   ├─ [553] 0x2Ce6311ddAE708829bc0784C967b7d77D19FD779::balanceOf(0xd0b53D9277642d899DF5C87A3966A349A798F224) [delegatecall]\n  │   │   │   └─ ← [Return] 4617464477655\n  │   │   └─ ← [Return] 4617464477655\n  │   └─ ← [Return] 0xfffffffffffffffffffffffffffffffffffffffffffffffffada1d4392a8177e… (64 bytes)\n  └─ ← [Return] 370951843244140674",
+      "stateDiff": [
+        {
+          "address": "0x0000000000000000000000000000000000000000",
+          "storage": [],
+          "balance": {
+            "before": "17722685541254325597",
+            "after": "17722814852254325597"
+          }
+        },
+        {
+          "address": "0x4200000000000000000000000000000000000006",
+          "storage": [
+            {
+              "slot": "0x9ceb37242d9f8d401622fc73cdad6fe1d7cebc43ab39e8687cb34c4eebf5fc1d",
+              "before": "0x0000000000000000000000000000000000000000000000642d90ef1adf9aa838",
+              "after": "0x000000000000000000000000000000000000000000000064286b0c5e7242bfb6",
+              "hint": "mapping(3)[0xd0b5…f224]"
+            },
+            {
+              "slot": "0xe4edc79b49b2f63a7beb974ff5111e81b27298fc61f102a73ffc792757d3a053",
+              "before": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "after": "0x0000000000000000000000000000000000000000000000000525e2bc6d57e882",
+              "hint": "mapping(3)[alice]"
+            }
+          ]
+        },
+        {
+          "address": "0x4200000000000000000000000000000000000019",
+          "storage": [],
+          "balance": {
+            "before": "51363133462533406885",
+            "after": "51363134103014151971"
+          }
+        },
+        {
+          "address": "0x420000000000000000000000000000000000001a",
+          "storage": [],
+          "balance": {
+            "before": "1637858105515356480",
+            "after": "1637858106133094211"
+          }
+        },
+        {
+          "address": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+          "storage": [],
+          "balance": {
+            "before": "999944286699549532",
+            "after": "999814334601066715"
+          },
+          "nonce": {
+            "before": 1,
+            "after": 2
+          }
+        },
+        {
+          "address": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
+          "storage": [
+            {
+              "slot": "0x4d7ab7c30fe33106c9a0cc1178ea201a0eaff090020028162e2b53a03a2a4489",
+              "before": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+              "after": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "hint": "mapping(9)[alice]"
+            },
+            {
+              "slot": "0x9d0aa4efb914679b5dd6b8189ad47611984dff3a58e34c8ec464db00341bf34a",
+              "before": "0x000000000000000000000000000000000000000000000000000000003b9aca00",
+              "after": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "hint": "mapping(10)[alice][SwapRouter02]"
+            },
+            {
+              "slot": "0xe540b961dc59d806def8281aabc461c7a04317e16294a3cf576736ce7d04c4cd",
+              "before": "0x00000000000000000000000000000000000000000000000000000432dab9add7",
+              "after": "0x00000000000000000000000000000000000000000000000000000433165477d7",
+              "hint": "mapping(9)[0xd0b5…f224]"
+            }
+          ]
+        },
+        {
+          "address": "0xd0b53d9277642d899df5c87a3966a349a798f224",
+          "storage": [
+            {
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "before": "0x0001441388138800f5fcfd2d0000000000000000000366dca8d106ab5ec5b16b",
+              "after": "0x0001441388138800f5fcfd2d0000000000000000000366dff5211949b1f8254a",
+              "hint": "slot 0"
+            },
+            {
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000002",
+              "before": "0x000000000000000000000000000000000000830a7626f9818909ffbaa2e359f0",
+              "after": "0x000000000000000000000000000000000000830a767811b792ddfef0aac7d0ec",
+              "hint": "slot 2"
+            },
+            {
+              "slot": "0x0000000000000000000000000000000000000000000000000000000000000003",
+              "before": "0x00000000000000000000000000908d8d00000000000000000009972954139637",
+              "after": "0x000000000000000000000000009275d500000000000000000009972954139637",
+              "hint": "slot 3"
+            }
+          ]
+        }
+      ]
     }
   ],
   "blocks": [
     {
       "chainId": 8453,
       "number": "51907867",
-      "hash": "0xf6d0727e872fe87609a229b1787db94aaa51c072161601fbb1496f6065c5db46",
-      "timestamp": 1790605080,
-      "txs": ["5270-f83f5e:1"]
+      "hash": "0x4523b4e7d150bf9e351cd8619545ee5003d2e8e4607d7629873664b66363725a",
+      "timestamp": 1790605079,
+      "txs": ["44998-066e22:1"]
     },
     {
       "chainId": 8453,
       "number": "51907868",
-      "hash": "0x3563865e0c0011753dbebed4022ce41270bad3d2400c117ae8c290aa27f61117",
-      "timestamp": 1790605081,
-      "txs": ["5270-f83f5e:2"]
+      "hash": "0x0b5aec40f72473a9d35a49e7830548169b06498f36059b05f3aaa3304db776a3",
+      "timestamp": 1790605079,
+      "txs": ["44998-066e22:2"]
     },
     {
       "chainId": 42161,
       "number": "509730858",
-      "hash": "0xde0b8fe5ae07892f68efc0abe6aa5aebb4ad5e8c091d2ced133d80ad9c89bdbb",
-      "timestamp": 1790605103,
-      "txs": ["5270-f83f5e:3"]
+      "hash": "0x42f9f2711ce9c5b0ed36c08dc9845d57f565db3fcbd29483240191a761318bf4",
+      "timestamp": 1790605100,
+      "txs": ["44998-066e22:3"]
     },
     {
       "chainId": 8453,
       "number": "51907867",
-      "hash": "0xf1619759a11b0f6111775ea881fb67c9e102c8979dadaf99a88e6fd4dcf854e6",
-      "timestamp": 1790605080,
-      "txs": ["5270-f83f5e:4"]
-    },
-    {
-      "chainId": 8453,
-      "number": "51800001",
-      "hash": "0x3fdd153178a43276cc6be24f49060dc11f3a740bb0dd6199fb5639c7286364a7",
-      "timestamp": 1790389348,
-      "txs": ["5270-f83f5e:6"]
+      "hash": "0x6264bf52ede7255c83c36fd86107a17fe2681fcb4c7a3207dbd8c499c0e58889",
+      "timestamp": 1790605079,
+      "txs": ["44998-066e22:4"]
     },
     {
       "chainId": 8453,
       "number": "51800002",
-      "hash": "0x599404dd87111d9c03f9d131a80b290e253ac10b9a4ec1b826fb373310d6b784",
-      "timestamp": 1790389348,
-      "txs": ["5270-f83f5e:7"]
+      "hash": "0x59742bea81c10830a6b59c23995bf4258091fca22485019e207612f9d4e9d47b",
+      "timestamp": 1790389407,
+      "txs": ["44998-066e22:6"]
+    },
+    {
+      "chainId": 8453,
+      "number": "51800003",
+      "hash": "0x05413d94695f48a7605f18deb05820022f7cb35310b345af2c91264dfaf8c20a",
+      "timestamp": 1790389408,
+      "txs": ["44998-066e22:7"]
     }
   ],
   "deals": [
     {
-      "test": "5270-f83f5e:1",
-      "worker": "5270-f83f5e",
-      "ts": 1790651811919,
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771956468,
       "chainId": 8453,
       "token": "native",
       "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
       "amount": "1000000000000000000"
     },
     {
-      "test": "5270-f83f5e:1",
-      "worker": "5270-f83f5e",
-      "ts": 1790651812097,
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771956490,
       "chainId": 8453,
       "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
       "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
       "amount": "1000000000"
     },
     {
-      "test": "5270-f83f5e:1",
-      "worker": "5270-f83f5e",
-      "ts": 1790651813410,
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771956775,
       "chainId": 42161,
       "token": "0xaf88d065e77c8cc2239327c5edb3a432268e5831",
       "holder": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd",
       "amount": "29518833024"
     },
     {
-      "test": "5270-f83f5e:1",
-      "worker": "5270-f83f5e",
-      "ts": 1790651815704,
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771957046,
       "chainId": 42161,
       "token": "native",
       "holder": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd",
       "amount": "10000000000000000000"
     },
     {
-      "test": "5270-f83f5e:2",
-      "worker": "5270-f83f5e",
-      "ts": 1790651815962,
+      "test": "44998-066e22:2",
+      "worker": "44998-066e22",
+      "ts": 1790771957261,
       "chainId": 8453,
       "token": "native",
       "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
       "amount": "1000000000000000000"
     },
     {
-      "test": "5270-f83f5e:2",
-      "worker": "5270-f83f5e",
-      "ts": 1790651816034,
+      "test": "44998-066e22:2",
+      "worker": "44998-066e22",
+      "ts": 1790771957277,
       "chainId": 8453,
       "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
       "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
       "amount": "10000000"
     },
     {
-      "test": "5270-f83f5e:4",
-      "worker": "5270-f83f5e",
-      "ts": 1790651816920,
+      "test": "44998-066e22:4",
+      "worker": "44998-066e22",
+      "ts": 1790771957758,
       "chainId": 8453,
       "token": "native",
       "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
       "amount": "1000000000000000000"
     },
     {
-      "test": "5270-f83f5e:4",
-      "worker": "5270-f83f5e",
-      "ts": 1790651817008,
+      "test": "44998-066e22:4",
+      "worker": "44998-066e22",
+      "ts": 1790771957866,
       "chainId": 8453,
       "token": "0x833589fcd6edb6e08f4c7c32d4f71b54bda02913",
       "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
       "amount": "1000000000"
+    },
+    {
+      "test": "44998-066e22:5",
+      "worker": "44998-066e22",
+      "ts": 1790771958446,
+      "chainId": 8453,
+      "token": "0x4200000000000000000000000000000000000006",
+      "holder": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273",
+      "amount": "2000000000000000000"
     }
   ],
   "fills": [
     {
-      "test": "5270-f83f5e:1",
-      "worker": "5270-f83f5e",
-      "ts": 1790651815877,
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771957201,
       "bridge": "across",
       "depositId": "8453:0xbf5ab0a784e5739de77201174c7aca7b9e91aacfc4689bc92c1713ae00581507:1",
       "originChainId": 8453,
@@ -2356,27 +3091,27 @@
   ],
   "http": [
     {
-      "test": "5270-f83f5e:1",
-      "worker": "5270-f83f5e",
-      "ts": 1790651811468,
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771956457,
       "fixture": "across/base-arb-usdc",
       "method": "GET",
       "url": "https://app.across.to/api/suggested-fees?inputToken=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&outputToken=0xaf88d065e77c8cC2239327C5EDb3A432268e5831&originChainId=8453&destinationChainId=42161&amount=1000000000",
       "outcome": "hit"
     },
     {
-      "test": "5270-f83f5e:2",
-      "worker": "5270-f83f5e",
-      "ts": 1790651815952,
+      "test": "44998-066e22:2",
+      "worker": "44998-066e22",
+      "ts": 1790771957255,
       "fixture": "across/base-arb-usdc",
       "method": "GET",
       "url": "https://app.across.to/api/suggested-fees?inputToken=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&outputToken=0xaf88d065e77c8cC2239327C5EDb3A432268e5831&originChainId=8453&destinationChainId=42161&amount=1000000000",
       "outcome": "hit"
     },
     {
-      "test": "5270-f83f5e:3",
-      "worker": "5270-f83f5e",
-      "ts": 1790651816466,
+      "test": "44998-066e22:3",
+      "worker": "44998-066e22",
+      "ts": 1790771957489,
       "fixture": "across/base-arb-usdc",
       "method": "GET",
       "url": "https://app.across.to/api/suggested-fees?inputToken=0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913&outputToken=0xaf88d065e77c8cC2239327C5EDb3A432268e5831&originChainId=8453&destinationChainId=42161&amount=1000000000",
@@ -2385,13 +3120,105 @@
   ],
   "gas": [
     {
-      "test": "5270-f83f5e:4",
-      "worker": "5270-f83f5e",
-      "ts": 1790651817345,
+      "test": "44998-066e22:4",
+      "worker": "44998-066e22",
+      "ts": 1790771958204,
       "label": "uniswap exactInputSingle",
       "gas": "129311",
       "mode": "write",
       "file": "<scratch>/.gas-snapshot"
+    }
+  ],
+  "cheats": [
+    {
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771956528,
+      "chainId": 8453,
+      "cheat": "prank",
+      "account": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+    },
+    {
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771956700,
+      "chainId": 8453,
+      "cheat": "stopPrank",
+      "account": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+    },
+    {
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771957049,
+      "chainId": 42161,
+      "cheat": "prank",
+      "account": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+    },
+    {
+      "test": "44998-066e22:1",
+      "worker": "44998-066e22",
+      "ts": 1790771957198,
+      "chainId": 42161,
+      "cheat": "stopPrank",
+      "account": "0x394311a6aaa0d8e3411d8b62de4578d41322d1bd"
+    },
+    {
+      "test": "44998-066e22:2",
+      "worker": "44998-066e22",
+      "ts": 1790771957279,
+      "chainId": 8453,
+      "cheat": "prank",
+      "account": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+    },
+    {
+      "test": "44998-066e22:2",
+      "worker": "44998-066e22",
+      "ts": 1790771957429,
+      "chainId": 8453,
+      "cheat": "stopPrank",
+      "account": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+    },
+    {
+      "test": "44998-066e22:4",
+      "worker": "44998-066e22",
+      "ts": 1790771957875,
+      "chainId": 8453,
+      "cheat": "warp",
+      "seconds": "60",
+      "blockNumber": "51800001",
+      "timestamp": "1790389407"
+    },
+    {
+      "test": "44998-066e22:4",
+      "worker": "44998-066e22",
+      "ts": 1790771957877,
+      "chainId": 8453,
+      "cheat": "prank",
+      "account": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+    },
+    {
+      "test": "44998-066e22:4",
+      "worker": "44998-066e22",
+      "ts": 1790771958204,
+      "chainId": 8453,
+      "cheat": "stopPrank",
+      "account": "0x4d135d933ca1ec2d37ecbecd8a0d65fd5c8d4273"
+    },
+    {
+      "test": "44998-066e22:5",
+      "worker": "44998-066e22",
+      "ts": 1790771958376,
+      "chainId": 8453,
+      "cheat": "snapshot",
+      "snapshotId": "0x2"
+    },
+    {
+      "test": "44998-066e22:5",
+      "worker": "44998-066e22",
+      "ts": 1790771958454,
+      "chainId": 8453,
+      "cheat": "revert",
+      "snapshotId": "0x2"
     }
   ],
   "labels": {

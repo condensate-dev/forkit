@@ -31,7 +31,23 @@ export interface CallFrame {
   error?: string;
   revertReason?: string;
   calls?: CallFrame[];
+  /** With `withLog`: the frame's own events; `position` counts the subcalls before each. */
+  logs?: { address: Address; topics: Hex[]; data: Hex; position?: Hex; index?: Hex }[];
 }
+
+/** A `debug_trace*` tracer and its config. */
+export interface Tracer {
+  tracer: string;
+  tracerConfig?: Record<string, unknown>;
+}
+
+/** The call tree with each frame's events. */
+export const CALL_TRACER_WITH_LOGS: Tracer = {
+  tracer: "callTracer",
+  tracerConfig: { withLog: true },
+};
+/** Each touched account's state before and after (only what changed, in `post`). */
+export const PRESTATE_DIFF: Tracer = { tracer: "prestateTracer", tracerConfig: { diffMode: true } };
 
 /** A transaction request in JSON-RPC form, as `debug_traceCall` takes it. */
 export interface RpcCallRequest {
@@ -42,7 +58,7 @@ export interface RpcCallRequest {
   gas?: Hex;
 }
 
-const TRACER = { tracer: "callTracer" } as const;
+const TRACER: Tracer = { tracer: "callTracer" };
 
 /**
  * Trace a mined transaction. After `evm_revert`, anvil (1.8) cannot find transactions mined
@@ -68,12 +84,21 @@ function isNotFound(error: unknown): boolean {
   return false;
 }
 
-export async function traceTransaction(request: RawRequest, hash: Hex): Promise<CallFrame> {
+export function traceTransaction(request: RawRequest, hash: Hex): Promise<CallFrame> {
+  return traceTransactionWith<CallFrame>(request, hash, TRACER);
+}
+
+/** {@link traceTransaction} with another tracer (its result type is the caller's to name). */
+export async function traceTransactionWith<T>(
+  request: RawRequest,
+  hash: Hex,
+  tracer: Tracer,
+): Promise<T> {
   try {
     return (await request({
       method: "debug_traceTransaction",
-      params: [hash, TRACER],
-    })) as CallFrame;
+      params: [hash, tracer],
+    })) as T;
   } catch (error) {
     if (!isNotFound(error)) throw error;
     const tx = (await request({ method: "eth_getTransactionByHash", params: [hash] })) as {
@@ -86,7 +111,7 @@ export async function traceTransaction(request: RawRequest, hash: Hex): Promise<
     } | null;
     if (tx === null || tx.blockNumber === null) throw error;
     const parent = hexToBigInt(tx.blockNumber) - 1n;
-    return await traceCall(
+    return await traceCallWith<T>(
       request,
       {
         from: tx.from,
@@ -96,16 +121,27 @@ export async function traceTransaction(request: RawRequest, hash: Hex): Promise<
         gas: tx.gas,
       },
       numberToHex(parent < 0n ? 0n : parent),
+      tracer,
     );
   }
 }
 
-export async function traceCall(
+export function traceCall(
   request: RawRequest,
   call: RpcCallRequest,
   block: Hex | "latest" = "latest",
 ): Promise<CallFrame> {
-  return (await request({ method: "debug_traceCall", params: [call, block, TRACER] })) as CallFrame;
+  return traceCallWith<CallFrame>(request, call, block, TRACER);
+}
+
+/** {@link traceCall} with another tracer. */
+export async function traceCallWith<T>(
+  request: RawRequest,
+  call: RpcCallRequest,
+  block: Hex | "latest",
+  tracer: Tracer,
+): Promise<T> {
+  return (await request({ method: "debug_traceCall", params: [call, block, tracer] })) as T;
 }
 
 function describeCall(frame: CallFrame): string {

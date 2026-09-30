@@ -1,10 +1,10 @@
 # Post-test explorer: `forkit explore`
 
-A failing fork test usually leaves you with a revert reason and a stack trace. `forkit explore` shows you the whole run: every test, every transaction with its decoded call, call trace and events, and every balance that moved. It works like a block explorer, but it covers only what your tests did.
+A failing fork test usually leaves you with a revert reason and a stack trace. `forkit explore` shows you the whole run: every test with its failed assertion, every step of it (transactions, `deal`, `prank`, `warp`, snapshots), and every transaction with its decoded call tree, gas, events, token transfers and state changes. It works like a block explorer, but it covers only what your tests did, and it knows what a block explorer cannot: which test sent a transaction, as whom, and what it expected.
 
 It has two parts:
 
-1. **Run records.** With recording on, each test run writes `.forkit/runs/<id>.json`. The record holds the forks and their blocks, every transaction (target, calldata, decoded call, logs, gas, status and decoded call trace), labels, balance changes, bridge fills, HTTP replay hits and gas snapshots, grouped by test.
+1. **Run records.** With recording on, each test run writes `.forkit/runs/<id>.json`. The record holds the forks and their blocks, every transaction (target, calldata, decoded call, logs, gas, status, decoded call trace with each frame's events, and the state it changed), cheatcodes, labels, balance changes, bridge fills, HTTP replay hits and gas snapshots, grouped by test.
 2. **`forkit explore [run]`** serves a local, read-only web UI over those records. It binds to `127.0.0.1`, loads nothing from the network, and ships as static files inside the package.
 
 ## Record a run
@@ -47,17 +47,19 @@ As a setup file (vitest `setupFiles`, jest `setupFiles`), the module records the
 
 When `FORKIT_RUN_ID` is not set, every worker of one test-runner invocation still records into the same run. The first worker creates the id (`<UTC time>-<runner pid>`, e.g. `20260928T231455Z-91843`) and the others pick it up.
 
-Recording costs a few JSON-RPC calls per transaction (receipt, block, `debug_traceTransaction`, balance reads) against the local anvil. Each step is best effort: if a read fails, the record keeps a note and the test is unaffected.
+Recording costs a few JSON-RPC calls per transaction (receipt, block, two `debug_traceTransaction` calls, balance reads) against the local anvil. Each step is best effort: if a read fails, the record keeps a note and the test is unaffected.
 
 ### What is recorded
 
 | | Where it comes from |
 |---|---|
-| Tests | `itFork` tests: suite, name, pass/fail, duration and the failure message. Activity in `beforeAll`/`afterAll` hooks is grouped under "setup & teardown". |
+| Tests | `itFork` tests: suite, name, pass/fail, duration and the failure message, with the expected and actual values when the assertion error carries them. Activity in `beforeAll`/`afterAll` hooks is grouped under "setup & teardown". |
 | Forks | Every fork boot: chain, pinned block (or live head), masked upstream RPC, fork cache hits and misses, boot time. |
-| Transactions | Every `sendTransaction`, `writeContract` and `deployContract` on a fork client, including impersonated (`prank`) ones: from, to, value, calldata and the decoded call. Mined transactions also get their receipt (status, block, gas used, gas price, created contract), decoded events and a decoded call trace. Transactions that revert at gas estimation, so are never mined, get a `debug_traceCall` trace and the decoded revert reason. |
+| Transactions | Every `sendTransaction`, `writeContract` and `deployContract` on a fork client, including impersonated (`prank`) ones: from, to, value, calldata and the decoded call. Mined transactions also get their receipt (status, block, gas used, gas price, created contract), decoded events, a decoded call trace in which each frame carries the events it emitted (`callTracer` with `withLog`), and a state diff (the `prestateTracer` in diff mode). Transactions that revert at gas estimation, so are never mined, get a `debug_traceCall` trace and the decoded revert reason. |
 | Balance changes | Per transaction: native value moved in the call trace (reverted frames excluded), the gas fee, and ERC-20 `Transfer` events. For each change, the balance after the transaction's block, and the token's symbol, decimals and name. |
+| State diffs | Per mined transaction: every account it changed, with its balance, nonce, code size and each storage slot before and after. Slots get a best-effort name, such as `mapping(9)[alice]` or `mapping(10)[alice][SpokePool]`, found by hashing the run's labelled addresses and the transaction's own addresses with small slot numbers. |
 | Deals | `deal` and `dealNative`: the balance each one set. |
+| Cheats | `prank` (start and end), `warp`, `roll`, `snapshot` and `revertTo` made by the test, with the new block number and time after a `warp` or `roll`. The per-test isolation snapshot and revert are not recorded. |
 | Bridge fills | `bridge.across`, `bridge.relay` and `bridge.custom` fills: deposit, origin and destination chains, fill transactions and output. |
 | HTTP | `@condensate/forkit/http` requests: fixture set, redacted URL, and hit, recorded, passthrough or unmatched. |
 | Gas snapshots | `gasSnapshot` labels, gas, and the committed value. |
@@ -81,13 +83,29 @@ It prints the URL (`http://127.0.0.1:<free port>/…`) and serves until Ctrl-C. 
 
 ### Views
 
-- **Runs.** Every recorded run, newest first: result, tests, transactions, fills, chains and duration.
-- **Run.** Totals, then tests grouped by suite (transactions, gas, reverts and time for each), every transaction, the forks, cross-chain fills, labels, gas snapshots and HTTP replay hits.
-- **Test.** A timeline of the test: transactions and reverts, deals, bridge fills, HTTP hits and gas snapshots, each with its time offset and chain. Beside it, the net balance changes of the test's transactions per holder and token, signed, with each balance after. A failed test shows its failure message.
-- **Transaction.** Status, hash, chain, block and time, from and to, value, gas and fee. Then the decoded input (a tuple, `bytes32`-encoded addresses and labels are rendered for reading), the call trace as a collapsible tree with gas, decoded arguments, return values and revert reasons, the decoded events and the balance changes. The trace is also available exactly as `forge test -vvvv` prints it. If the transaction is a bridge deposit or fill, a panel links the origin deposit to its destination fill.
-- **Address.** The label and, per chain and token, the balance history: each deal that set it and each transaction that changed it, with the balance after. Then the transactions that involve the address.
+- **Runs.** Every recorded run, newest first: result, tests, transactions and chains.
+- **Run.** Totals (tests, transactions, gas and fees, forks and blocks, cheats, fills), then **failures first**: each failed test with its message and its expected and actual values, the differing characters marked. Then every test (failed ones on top), every transaction, the forks, cross-chain fills with their fee, gas snapshots, labels and HTTP replay hits.
+- **Test.** The timeline: every step in order, with its time offset and chain. Transactions and reverts show their decoded call and who sent them (`as alice` inside a `prank`); `deal`, `prank` and its end, `warp` (with the new time), `roll`, `snapshot` and `revertTo`, fills, HTTP hits and gas snapshots have their own rows. A failed test ends with its assertion, and a panel above shows expected against actual (a line diff for multi-line values). Beside it: net balance changes per holder and token, and gas by transaction.
+- **Transaction.** Status, hash, from and to (with copy buttons), value, gas and fee, block and time, its test, and the previous and next transaction of that test. A revert names the frame it started in. Then:
+  - **Call tree.** Collapsible and decoded: each frame's gas (with a bar), call type, target label, function and arguments, return values or revert reason, and the events it emitted at their place among its subcalls. Frames on the way to a revert open by default. Selecting a frame shows it in an inspector: from, to, value, gas and share of the transaction, arguments and returns as tables, its events, raw input and output. The trace is also available exactly as `forge test -vvvv` prints it.
+  - **Gas by call.** An icicle: one bar per frame, as wide as its gas, children inside their caller. Click one to select that frame.
+  - **Token transfers** as a flow (`alice → 1,000 USDC → SpokePool`), from ERC-20 `Transfer` events and ether moved in the trace, and **balance changes** with the balance before and after.
+  - **State changes.** Each changed account: its balance, nonce and code before and after, and its storage slots, named where possible and read as an address, a number or a token amount.
+  - **Events**, each linked to the frame that emitted it, and the decoded **input** with the raw calldata.
+  - **Cross-chain.** For a bridge deposit or fill, the deposit and its fill side by side, with the amounts in and out and the fee.
+  - **Copy as code.** Two snippets that reproduce the transaction: a forkit test that replays the test's steps on that chain (deals, warps, rolls, and each transaction as its sender) up to and including this one, and a viem call that sends the transaction on an anvil fork of the same block.
+- **Address.** The label and full address, then the balance of each token over the run as a step chart (hover or focus a point; each test boundary is marked, since every test starts from its snapshot), with every step as a table beneath. Then every transaction that touches the address (sent it, called it, or moved its balance) and the storage slots transactions changed on it.
 
-The search box takes an address, a transaction hash or a label.
+Addresses show their label everywhere and link to their address view.
+
+### Finding things
+
+- **Search** (`/`): a transaction hash (or its first characters), an address, a label, a token symbol, a test name or a function name. Arrow keys pick a result; Enter opens it.
+- **Keyboard:** `j` and `k` move through the page's list (runs, tests, timeline steps, call frames), Enter or `o` opens the selected row (or expands a frame), `h` and `l` collapse and expand in the call tree, `u` goes up a level, and `?` lists the keys.
+- **Deep links.** Every view is a URL, and so is every selection: `#/run/<id>/tx/<tx>?frame=0.1.2` opens a transaction with that call frame selected, `?step=4` a test with that timeline step selected, `?section=state` a transaction at its state changes. Copy the address bar to share one.
+- **Large runs.** Lists longer than a screenful (transactions, timeline steps, call frames) render only the rows in view, in their own scroll box, so a run with thousands of transactions opens as fast as a small one.
+
+The UI follows the system's light or dark setting. On a phone it keeps to the screen's width: wide tables and call trees scroll inside their own boxes.
 
 ## Where the files go
 
@@ -114,21 +132,31 @@ interface RunRecord {
   updatedAt: number;
   workers: { worker: string; pid: number; argv: string[]; startedAt: number; updatedAt: number }[];
   forks: { chainId; chainName; nativeSymbol; blockNumber?; upstream; rpcUrl; bootMs; cache? }[];
-  tests: { key; suite; name; status: "pass" | "fail" | "running"; startedAt; durationMs?; error? }[];
+  tests: {
+    key; suite; name; status: "pass" | "fail" | "running"; startedAt; durationMs?;
+    error?; expected?; actual?;
+  }[];
   txs: {
     id; test?; chainId; kind; hash?; mined; status: "success" | "reverted" | "unknown";
     from?; to?; data?; value?; call?; blockNumber?; blockHash?; blockTimestamp?;
     gasUsed?; effectiveGasPrice?; contractAddress?; logs; trace?; traceText?;
     error?; revert?; balanceChanges: { address; token; delta; after? }[]; notes?;
+    stateDiff?: {
+      address; balance?: { before; after }; nonce?: { before; after }; code?: { before; after };
+      storage: { slot; before; after; hint? }[];
+    }[];
   }[];
+  // trace frames: { type; from; to?; value?; gasUsed?; input; output?; error?; revert?; call?;
+  //   result?; calls?; logs?: { address; topics; data; position; index?; event? }[] }
   blocks: { chainId; number; hash; timestamp?; txs: string[] }[];
   deals, fills, http, gas: [...];           // each with test?, worker and ts
+  cheats?: { cheat; chainId; account?; seconds?; blocks?; snapshotId?; blockNumber?; timestamp? }[];
   labels: Record<string, string>;           // address → label
   tokens: Record<string, { symbol?; decimals?; name? }>; // "<chainId>:<address>"
 }
 ```
 
-Transaction ids (`<worker>:<n>`) are unique within a run. Hashes are not: a test that reverts to a snapshot and sends the same transaction again produces the same hash.
+`cheats` is absent in records from forkit versions before cheats were recorded; the explorer reads those records as before. Transaction ids (`<worker>:<n>`) are unique within a run. Hashes are not: a test that reverts to a snapshot and sends the same transaction again produces the same hash.
 
 ## Limitations
 
@@ -137,12 +165,12 @@ Transaction ids (`<worker>:<n>`) are unique within a run. Hashes are not: a test
 
 ## Screenshots
 
-The explorer's screenshot test renders a committed run record (`packages/forkit/test/fixtures/explore/showcase.json`) at 390 px and 1440 px in headless Chromium:
+The explorer's screenshot test renders a committed run record (`packages/forkit/test/fixtures/explore/showcase.json`) at 390, 1024 and 1440 px, light and dark, in headless Chromium:
 
 ```sh
 cd packages/forkit
 npx playwright install chromium    # once
-bun run test:screens               # PNGs in /tmp/forkit-m9-screens (FORKIT_SCREENS_DIR)
+bun run test:screens               # PNGs in /tmp/forkit-explore-screens (FORKIT_SCREENS_DIR)
 ```
 
-The test also fails if the UI requests anything off `127.0.0.1`, logs an error, or scrolls sideways at 390 px. `bun run explore:fixture` re-records the showcase run from `test/explore/showcase.fixture.ts`. It uses the e2e pins and fork recordings, and one of its tests fails on purpose.
+The test also fails if the UI requests anything off `127.0.0.1`, logs an error (a content security policy violation is one), or scrolls the page sideways at any width. It then drives the UI: keyboard navigation, search, frame deep links, copy as code, and a synthetic 5,000-transaction run that must render only the rows in view. The stylesheet's colour tokens are checked for WCAG AA contrast, light and dark, by `test/unit/explore-ui.vitest.ts`. `bun run explore:fixture` re-records the showcase run from `test/explore/showcase.fixture.ts`. It uses the e2e pins and fork recordings, and one of its tests fails on purpose.

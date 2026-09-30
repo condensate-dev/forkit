@@ -5,22 +5,57 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
     <title>forkit explore</title>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" media="(prefers-color-scheme: light)" />
+    <link rel="icon" href="/favicon-dark.svg" type="image/svg+xml" media="(prefers-color-scheme: dark)" />
     <link rel="stylesheet" href="/app.css" />
   </head>
   <body>
+    <a class="skip" href="#app">Skip to content</a>
     <header class="top">
       <div class="top-inner">
-        <a class="brand" href="#/"><span class="brand-mark" aria-hidden="true"></span>forkit<span class="brand-sub">explore</span></a>
+        <a class="brand" href="#/" aria-label="forkit explore: all runs">
+          <svg class="orb" viewBox="0 0 1280 1280" width="28" height="28" aria-hidden="true">
+            <defs><linearGradient id="cnd-seam" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a53afd"/><stop offset="0.18" stop-color="#8f36fd"/><stop offset="0.38" stop-color="#6636fb"/><stop offset="0.55" stop-color="#4148fb"/><stop offset="0.72" stop-color="#1284fc"/><stop offset="0.88" stop-color="#00edfc"/><stop offset="1" stop-color="#46fafd"/></linearGradient></defs>
+            <g fill="currentColor">
+              <path d="M348 237 C360 151 583 71 727 80 C895 79 1049 135 1030 196 C1018 234 936 279 846 321 C745 368 695 445 712 521 C699 481 682 446 653 424 C612 392 543 387 475 356 C401 323 342 291 348 237 Z"/>
+              <path d="M307 249 C326 242 339 270 352 302 C384 381 420 435 465 489 C519 551 552 602 553 656 C556 717 519 779 474 838 L369 976 C341 1017 305 1011 273 990 C178 928 111 812 111 670 C108 532 167 373 263 283 C280 266 296 253 307 249 Z"/>
+              <path d="M373 994 C468 918 557 848 658 800 C750 756 833 736 907 743 C999 748 1105 781 1133 821 C1172 877 1046 979 938 1043 C816 1117 632 1118 470 1099 C397 1090 311 1046 373 994 Z"/>
+            </g>
+            <path fill="url(#cnd-seam)" d="M348 237 C342 289 401 323 475 356 C543 387 612 392 653 424 C686 449 697 489 712 531 C733 587 774 634 831 665 C908 708 1022 726 1160 733 C1087 745 964 740 882 719 C813 701 766 673 731 636 C699 602 679 554 656 524 C621 478 570 451 507 420 C439 387 392 352 368 309 C352 280 345 254 348 237 Z"/>
+          </svg>
+          <span class="wordmark">forkit<span class="wordmark-sub">explore</span></span>
+        </a>
         <nav class="crumbs" id="crumbs" aria-label="Breadcrumbs"></nav>
-        <search class="search"><form id="search">
-          <input id="search-input" type="search" placeholder="Address or tx hash" aria-label="Search this run by address or transaction hash" autocomplete="off" spellcheck="false" />
-        </form></search>
+        <search class="search">
+          <form id="search">
+            <input id="search-input" type="search" placeholder="Search" aria-label="Search this run: transaction hash, address, label or test name" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="search-results" />
+            <kbd class="search-kbd" aria-hidden="true">/</kbd>
+            <div id="search-results" class="search-results" role="listbox" aria-label="Search results" hidden></div>
+          </form>
+        </search>
+        <button id="help-button" class="btn ghost help-button" type="button" aria-label="Keyboard shortcuts" title="Keyboard shortcuts (?)"></button>
       </div>
     </header>
-    <main id="app" class="page" aria-live="polite">
+    <main id="app" class="page" tabindex="-1">
       <p class="muted">Loading…</p>
     </main>
+    <div id="tip" class="tip" role="tooltip" hidden></div>
+    <div id="live" class="sr" aria-live="polite"></div>
+    <dialog id="help" class="dialog" aria-labelledby="help-title">
+      <div class="dialog-head">
+        <h2 id="help-title">Keyboard</h2>
+        <button type="button" class="btn ghost" data-close>Close</button>
+      </div>
+      <dl class="keys">
+        <div><dt><kbd>/</kbd></dt><dd>Search: a tx hash, address, label or test name</dd></div>
+        <div><dt><kbd>j</kbd> <kbd>k</kbd></dt><dd>Next and previous row: tests, timeline steps, call frames</dd></div>
+        <div><dt><kbd>↵</kbd> <kbd>o</kbd></dt><dd>Open the row, or expand and collapse a call frame</dd></div>
+        <div><dt><kbd>h</kbd> <kbd>l</kbd></dt><dd>Collapse and expand in the call tree</dd></div>
+        <div><dt><kbd>u</kbd></dt><dd>Up: back to the test, run or run list</dd></div>
+        <div><dt><kbd>?</kbd></dt><dd>This help</dd></div>
+      </dl>
+      <p class="faint small">Every view and selection is a link: copy the address bar to share it.</p>
+    </dialog>
     <script type="module" src="/app.js"></script>
   </body>
 </html>

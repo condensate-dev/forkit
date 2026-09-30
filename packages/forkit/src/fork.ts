@@ -11,7 +11,12 @@ import {
 } from "./client.ts";
 import { type DealOptions, dealErc20 } from "./deal.ts";
 import { ForkBootError, ForkitError } from "./errors.ts";
-import { emitForkitEvent, observersSettled } from "./events.ts";
+import {
+  type CheatEvent,
+  emitForkitEvent,
+  hasForkitListeners,
+  observersSettled,
+} from "./events.ts";
 import { autoRecord } from "./explore/auto.ts";
 import { type GasSnapshotSettings, recordGas, resolveGasSettings } from "./gas.ts";
 import { label } from "./labels.ts";
@@ -244,6 +249,7 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
     const depth = this.#pranks.get(key) ?? 0;
     if (depth === 0) await this.client.impersonateAccount({ address: account });
     this.#pranks.set(key, depth + 1);
+    this.#emitCheat({ cheat: "prank", account });
     let result: T;
     try {
       result = await fn(
@@ -259,6 +265,7 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
   }
 
   async #endPrank(key: string, account: Address): Promise<void> {
+    this.#emitCheat({ cheat: "stopPrank", account });
     const remaining = (this.#pranks.get(key) ?? 1) - 1;
     if (remaining > 0) {
       this.#pranks.set(key, remaining);
@@ -269,13 +276,37 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
   }
 
   async warp(seconds: bigint | number): Promise<void> {
-    await this.client.increaseTime({ seconds: toCount(seconds, "warp seconds") });
+    const count = toCount(seconds, "warp seconds");
+    await this.client.increaseTime({ seconds: count });
     await this.client.mine({ blocks: 1 });
+    this.#emitCheat({ cheat: "warp", seconds: BigInt(count), ...(await this.#head()) });
   }
 
   async roll(blocks: bigint | number): Promise<void> {
     const count = toCount(blocks, "roll blocks");
     if (count > 0) await this.client.mine({ blocks: count });
+    this.#emitCheat({ cheat: "roll", blocks: BigInt(count), ...(await this.#head()) });
+  }
+
+  /** The latest block's number and timestamp, for a cheat event (only while someone listens). */
+  async #head(): Promise<Pick<CheatEvent, "blockNumber" | "timestamp">> {
+    if (!hasForkitListeners()) return {};
+    try {
+      const block = await this.client.getBlock();
+      return { blockNumber: block.number, timestamp: block.timestamp };
+    } catch {
+      return {};
+    }
+  }
+
+  #emitCheat(event: Omit<CheatEvent, "type" | "ts" | "chainId" | "rpcUrl">): void {
+    emitForkitEvent({
+      type: "cheat",
+      ts: Date.now(),
+      chainId: this.chain.id,
+      rpcUrl: this.rpcUrl,
+      ...event,
+    });
   }
 
   label(address: Address, name: string): void {
@@ -302,10 +333,21 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
   }
 
   async snapshot(): Promise<SnapshotId> {
-    return await this.client.snapshot();
+    const id = await this.#snapshot();
+    this.#emitCheat({ cheat: "snapshot", snapshotId: id });
+    return id;
   }
 
   async revertTo(id: SnapshotId): Promise<void> {
+    await this.#revertTo(id);
+    this.#emitCheat({ cheat: "revert", snapshotId: id });
+  }
+
+  #snapshot(): Promise<SnapshotId> {
+    return this.client.snapshot();
+  }
+
+  async #revertTo(id: SnapshotId): Promise<void> {
     // Observers (a run record) read receipts and traces of what the revert is about to undo.
     await observersSettled();
     const ok = await rawRequest(this.client)({ method: "evm_revert", params: [id] });
@@ -314,6 +356,16 @@ class SingleFork<TChain extends Chain> implements Fork<TChain> {
         `forkit: anvil has no snapshot ${id}. A revert consumes the snapshot and every later one; take a new snapshot before reverting again.`,
       );
     }
+  }
+
+  /** A snapshot for per-test isolation: no run event, it is not the test's own cheat. */
+  static isolationSnapshot(fork: Fork): Promise<SnapshotId> {
+    return fork instanceof SingleFork ? fork.#snapshot() : fork.snapshot();
+  }
+
+  /** Revert a per-test isolation snapshot, with no run event. */
+  static isolationRevert(fork: Fork, id: SnapshotId): Promise<void> {
+    return fork instanceof SingleFork ? fork.#revertTo(id) : fork.revertTo(id);
   }
 
   on<TOther extends Chain>(chain: TOther): Fork<TOther> {
@@ -536,3 +588,11 @@ export async function fork(target: ForkTarget | readonly ForkTarget[]): Promise<
   }
   return (booted[0] as PromiseFulfilledResult<Fork>).value;
 }
+
+/** Snapshot every test's starting state without recording a cheat (see `describeFork`). */
+export const isolationSnapshot = (fork: Fork): Promise<SnapshotId> =>
+  SingleFork.isolationSnapshot(fork);
+
+/** Revert to a test's starting state without recording a cheat. */
+export const isolationRevert = (fork: Fork, id: SnapshotId): Promise<void> =>
+  SingleFork.isolationRevert(fork, id);

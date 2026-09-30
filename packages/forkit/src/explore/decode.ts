@@ -21,7 +21,7 @@ import { knownEvent, knownFunction } from "../labels.ts";
 import { decodeRevert, describeRevert } from "../revert.ts";
 import type { CallFrame } from "../trace.ts";
 import { toJson } from "./json.ts";
-import type { DecodedCall, DecodedParam, Json, LogRecord, TraceFrame } from "./schema.ts";
+import type { DecodedCall, DecodedParam, FrameLog, Json, LogRecord, TraceFrame } from "./schema.ts";
 
 type Values = readonly unknown[] | Record<string, unknown>;
 
@@ -145,12 +145,28 @@ export function revertText(frame: Pick<CallFrame, "output" | "error" | "revertRe
 const hexAmount = (value: Hex | undefined): string | undefined =>
   value === undefined ? undefined : hexToBigInt(value).toString();
 
-/** A `callTracer` frame, decoded, with its children. */
+/** A frame's own events (`callTracer` with `withLog`), decoded. */
+function frameLogs(frame: CallFrame): FrameLog[] {
+  return (frame.logs ?? []).map((log) => {
+    const event = decodeLog(log.topics ?? [], log.data ?? "0x");
+    return {
+      address: log.address.toLowerCase(),
+      topics: [...(log.topics ?? [])],
+      data: log.data ?? "0x",
+      position: log.position === undefined ? 0 : Number(hexToBigInt(log.position)),
+      ...(log.index === undefined ? {} : { index: Number(hexToBigInt(log.index)) }),
+      ...(event === undefined ? {} : { event }),
+    };
+  });
+}
+
+/** A `callTracer` frame, decoded, with its children (and its events, when traced with them). */
 export function decodeFrame(frame: CallFrame): TraceFrame {
   const call = decodeCall(frame.input);
   const result = frame.error === undefined ? decodeResult(frame.input, frame.output) : undefined;
   const value = hexAmount(frame.value);
   const gasUsed = hexAmount(frame.gasUsed);
+  const logs = frameLogs(frame);
   return {
     type: frame.type.toUpperCase(),
     from: frame.from.toLowerCase(),
@@ -165,5 +181,6 @@ export function decodeFrame(frame: CallFrame): TraceFrame {
     ...(frame.calls === undefined || frame.calls.length === 0
       ? {}
       : { calls: frame.calls.map(decodeFrame) }),
+    ...(logs.length === 0 ? {} : { logs }),
   };
 }
