@@ -102,6 +102,11 @@ test("records every test with its suite and outcome", () => {
   expect(byName["fails on purpose, so the record has a failure"]?.error).toContain(
     "bob starts empty",
   );
+  // The failed expectation's values, for the explorer's expected-vs-actual diff.
+  expect(byName["fails on purpose, so the record has a failure"]).toMatchObject({
+    actual: expect.any(String),
+    expected: expect.any(String),
+  });
 });
 
 test("mined transactions carry receipts, decoded calls, events, traces and balance changes", () => {
@@ -140,6 +145,22 @@ test("mined transactions carry receipts, decoded calls, events, traces and balan
     ),
   ).toBe(true);
   expect(run.deals.some((d) => d.token === "native" && d.test === test?.key)).toBe(true);
+  // Events at the frame that emitted them.
+  expect(
+    find((f) => (f.logs ?? []).some((l) => l.event?.name === "Deposited"), deposit?.trace),
+  ).toBeDefined();
+  // State before and after: the vault's ether, and alice's slot in its balances mapping.
+  const vaultDiff = deposit?.stateDiff?.find((a) => a.address === vault);
+  expect(vaultDiff?.balance).toEqual({ before: "0", after: "1000000000000000000" });
+  expect(
+    deposit?.stateDiff?.some((a) => a.storage.some((s) => /\[alice\]/.test(s.hint ?? ""))),
+  ).toBe(true);
+  // The prank around the deposit is on the timeline; the per-test isolation snapshot is not.
+  const cheats = (run.cheats ?? []).filter((c) => c.test === test?.key).map((c) => c.cheat);
+  expect(cheats).toEqual(["prank", "stopPrank"]);
+  expect((run.cheats ?? []).some((c) => c.cheat === "snapshot" || c.cheat === "revert")).toBe(
+    false,
+  );
 });
 
 test("a revert at estimation has a decoded trace and reason", () => {

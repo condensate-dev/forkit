@@ -21,10 +21,28 @@ import {
 import { type RawRequest, rawRequest } from "../client.ts";
 import { type ForkitEvent, observersSettled, onForkitEvent, trackObserverWork } from "../events.ts";
 import { allLabels } from "../labels.ts";
-import { type CallFrame, formatTrace, traceCall, traceTransaction } from "../trace.ts";
+import {
+  CALL_TRACER_WITH_LOGS,
+  type CallFrame,
+  formatTrace,
+  PRESTATE_DIFF,
+  traceCall,
+  traceCallWith,
+  traceTransaction,
+  traceTransactionWith,
+} from "../trace.ts";
 import { decodeCall, decodeFrame, logRecord, revertText } from "./decode.ts";
 import { toJson } from "./json.ts";
-import type { BalanceChange, RunPart, TokenInfo, TxRecord } from "./schema.ts";
+import type {
+  BalanceChange,
+  DecodedParam,
+  Json,
+  RunPart,
+  TokenInfo,
+  TraceFrame,
+  TxRecord,
+} from "./schema.ts";
+import { type PrestateDiff, SlotNamer, stateDiff } from "./state.ts";
 import {
   appendPart,
   applyLine,
@@ -145,6 +163,7 @@ export class RunRecorder {
   #wrote = false;
   #unsubscribe: (() => void) | undefined;
   #mergeTimer: ReturnType<typeof setTimeout> | undefined;
+  readonly #namer = new SlotNamer();
 
   constructor(options: RecorderOptions = {}) {
     this.dir = options.dir ?? recordDir();
@@ -273,6 +292,8 @@ export class RunRecorder {
               startedAt: started?.startedAt ?? event.ts - event.durationMs,
               durationMs: event.durationMs,
               ...(event.error === undefined ? {} : { error: event.error }),
+              ...(event.actual === undefined ? {} : { actual: event.actual }),
+              ...(event.expected === undefined ? {} : { expected: event.expected }),
             },
           },
         ]);
@@ -410,6 +431,26 @@ export class RunRecorder {
           },
         ]);
         return;
+      case "cheat":
+        this.#write([
+          {
+            kind: "cheat",
+            record: {
+              ...base,
+              chainId: event.chainId,
+              cheat: event.cheat,
+              ...(event.account === undefined ? {} : { account: event.account.toLowerCase() }),
+              ...(event.seconds === undefined ? {} : { seconds: event.seconds.toString() }),
+              ...(event.blocks === undefined ? {} : { blocks: event.blocks.toString() }),
+              ...(event.snapshotId === undefined ? {} : { snapshotId: event.snapshotId }),
+              ...(event.blockNumber === undefined
+                ? {}
+                : { blockNumber: event.blockNumber.toString() }),
+              ...(event.timestamp === undefined ? {} : { timestamp: event.timestamp.toString() }),
+            },
+          },
+        ]);
+        return;
       default:
         // An event type this recorder does not know yet (a newer forkit): nothing to record.
         return;
@@ -460,12 +501,21 @@ export class RunRecorder {
     }
     let frame: CallFrame | undefined;
     try {
-      frame = await traceTransaction(request, hash);
+      // With each frame's events; a node without `withLog` gets the plain call tree.
+      frame = await traceTransactionWith<CallFrame>(request, hash, CALL_TRACER_WITH_LOGS).catch(
+        () => traceTransaction(request, hash),
+      );
       out.trace = decodeFrame(frame);
       out.traceText = formatTrace(frame);
       if (frame.error !== undefined) out.revert = revertText(frame);
     } catch (error) {
       notes.push(`trace: ${messageOf(error)}`);
+    }
+    try {
+      const diff = await traceTransactionWith<PrestateDiff>(request, hash, PRESTATE_DIFF);
+      out.stateDiff = stateDiff(diff, this.#slotNamer(out));
+    } catch (error) {
+      notes.push(`state diff: ${messageOf(error)}`);
     }
     if (receipt !== null) {
       out.balanceChanges = balanceChanges(frame, receipt.logs, tx.from, fee);
@@ -487,12 +537,18 @@ export class RunRecorder {
   ): Promise<TxRecord> {
     const out: TxRecord = { ...tx };
     try {
-      const frame = await traceCall(request, {
+      const call = {
         ...(tx.from === undefined ? {} : { from: tx.from as Address }),
         ...(tx.to === undefined ? {} : { to: tx.to as Address }),
         ...(tx.data === undefined ? {} : { data: tx.data as Hex }),
         ...(value === undefined ? {} : { value: numberToHex(value) }),
-      });
+      };
+      const frame = await traceCallWith<CallFrame>(
+        request,
+        call,
+        "latest",
+        CALL_TRACER_WITH_LOGS,
+      ).catch(() => traceCall(request, call));
       out.trace = decodeFrame(frame);
       out.traceText ??= formatTrace(frame);
       if (frame.error !== undefined) out.revert = revertText(frame);
@@ -501,6 +557,47 @@ export class RunRecorder {
       out.notes = [`trace: ${messageOf(error)}`];
     }
     return out;
+  }
+
+  /**
+   * Names for storage slots: every labelled address, and every address in the transaction's
+   * trace, its decoded arguments and its events, hashed into mapping slots (see `SlotNamer`).
+   * One namer for the whole run.
+   */
+  #slotNamer(tx: TxRecord): SlotNamer {
+    const namer = this.#namer;
+    for (const [address, name] of Object.entries(allLabels())) namer.add(address, name);
+    const add = (address: string | undefined) => {
+      if (address !== undefined && /^0x[0-9a-fA-F]{40}$/.test(address)) namer.add(address);
+    };
+    const params = (list: readonly DecodedParam[] | undefined) => {
+      for (const param of list ?? []) addresses(param.type, param.value);
+    };
+    const addresses = (type: string, value: Json) => {
+      if (type === "address" && typeof value === "string") add(value);
+      else if (type === "bytes32" && typeof value === "string" && /^0x0{24}/.test(value))
+        add(`0x${value.slice(26)}`);
+      else if (Array.isArray(value)) {
+        for (const item of value) {
+          if (item !== null && typeof item === "object" && "type" in item && !Array.isArray(item))
+            addresses(String(item.type), (item as { value: Json }).value);
+          else addresses(type.replace(/\[\d*\]$/, ""), item);
+        }
+      }
+    };
+    const walk = (frame: TraceFrame) => {
+      add(frame.from);
+      add(frame.to);
+      params(frame.call?.args);
+      for (const log of frame.logs ?? []) params(log.event?.args);
+      for (const child of frame.calls ?? []) walk(child);
+    };
+    add(tx.from);
+    add(tx.to);
+    params(tx.call?.args);
+    for (const log of tx.logs) params(log.event?.args);
+    if (tx.trace !== undefined) walk(tx.trace);
+    return namer;
   }
 
   /** Each changed balance after the transaction's block. */

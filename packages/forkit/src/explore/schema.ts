@@ -48,6 +48,44 @@ export interface TraceFrame {
   /** Decoded return values, when the function is known. */
   result?: DecodedParam[];
   calls?: TraceFrame[];
+  /**
+   * The events this frame emitted itself (not its children's), in order. `position` is how many
+   * of `calls` ran before the event, so a UI can interleave events and subcalls.
+   */
+  logs?: FrameLog[];
+}
+
+/** An event emitted by one trace frame. */
+export interface FrameLog {
+  address: string;
+  topics: string[];
+  data: string;
+  position: number;
+  /** The log's index in the receipt, when the node gave it. */
+  index?: number;
+  event?: DecodedCall;
+}
+
+/** One storage slot a transaction wrote. Values are 32-byte hex words. */
+export interface SlotDiff {
+  slot: string;
+  before: string;
+  after: string;
+  /**
+   * What the slot most likely is, found by hashing addresses the run knows with small slot
+   * numbers: `balances[alice]` style, e.g. `mapping(9)[alice]` or `mapping(10)[alice][bob]`.
+   */
+  hint?: string;
+}
+
+/** What a transaction changed in one account, from the node's prestate tracer (diff mode). */
+export interface AccountDiff {
+  address: string;
+  balance?: { before: BigIntString; after: BigIntString };
+  nonce?: { before: number; after: number };
+  /** Code size in bytes before and after (a deployment, a self-destruct, an EIP-7702 delegation). */
+  code?: { before: number; after: number };
+  storage: SlotDiff[];
 }
 
 export interface LogRecord {
@@ -105,6 +143,8 @@ export interface TxRecord {
   /** Decoded revert reason, for a reverted transaction. */
   revert?: string;
   balanceChanges: BalanceChange[];
+  /** Every account the transaction changed: balance, nonce, code and storage, before and after. */
+  stateDiff?: AccountDiff[];
   /** What went wrong while reading the receipt or trace (best effort; the test is unaffected). */
   notes?: string[];
 }
@@ -132,6 +172,9 @@ export interface TestRecord {
   startedAt: number;
   durationMs?: number;
   error?: string;
+  /** A failed expectation's values, rendered, when the assertion error carried both. */
+  actual?: string;
+  expected?: string;
 }
 
 export interface DealRecord {
@@ -156,6 +199,21 @@ export interface FillRecord {
   txHashes: string[];
   outputAmount?: BigIntString;
   details?: Json;
+}
+
+/** A cheatcode other than `deal` (see `CheatEvent`); bigints as decimal strings. */
+export interface CheatRecord {
+  test?: string;
+  worker: string;
+  ts: number;
+  chainId: number;
+  cheat: "prank" | "stopPrank" | "warp" | "roll" | "snapshot" | "revert";
+  account?: string;
+  seconds?: BigIntString;
+  blocks?: BigIntString;
+  snapshotId?: string;
+  blockNumber?: BigIntString;
+  timestamp?: BigIntString;
 }
 
 export interface HttpRecord {
@@ -202,6 +260,7 @@ export interface RunPart {
   fills: FillRecord[];
   http: HttpRecord[];
   gas: GasRecord[];
+  cheats: CheatRecord[];
   /** Lowercase address to label. */
   labels: Record<string, string>;
   /** `<chainId>:<lowercase token address>` to its metadata. */
@@ -240,6 +299,8 @@ export interface RunRecord {
   fills: FillRecord[];
   http: HttpRecord[];
   gas: GasRecord[];
+  /** Absent in records from forkit before cheats were recorded. */
+  cheats?: CheatRecord[];
   labels: Record<string, string>;
   tokens: Record<string, TokenInfo>;
 }

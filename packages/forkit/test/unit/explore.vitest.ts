@@ -17,6 +17,7 @@ import {
   encodeAbiParameters,
   getAddress,
   type Hex,
+  keccak256,
   numberToHex,
   pad,
   toFunctionSelector,
@@ -28,6 +29,7 @@ import { stringify, toJson } from "../../src/explore/json.ts";
 import { balanceChanges, RunRecorder } from "../../src/explore/recorder.ts";
 import type { RunRecord } from "../../src/explore/schema.ts";
 import { startExploreServer } from "../../src/explore/server.ts";
+import { SlotNamer, stateDiff } from "../../src/explore/state.ts";
 import {
   listRuns,
   mergeRun,
@@ -59,6 +61,9 @@ const vault: Address = "0x2222222222222222222222222222222222222222";
 const TRANSFER = "0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef";
 const HASH = `0x${"ab".repeat(32)}` as Hex;
 const BLOCK_HASH = `0x${"cd".repeat(32)}` as Hex;
+/** Where Solidity keeps `mapping[key]` for a mapping declared at `slot`. */
+const mappingSlot = (key: Hex, slot: Hex): Hex => keccak256(`${pad(key)}${pad(slot).slice(2)}`);
+const word = (value: bigint): Hex => pad(numberToHex(value));
 const transferData = (to: Address, amount: bigint): Hex =>
   `${toFunctionSelector("transfer(address,uint256)")}${encodeAbiParameters(
     [{ type: "address" }, { type: "uint256" }],
@@ -165,7 +170,31 @@ function fakeFork(): { request: RawRequest; calls: string[] } {
         };
       case "eth_getBlockByHash":
         return { timestamp: numberToHex(1_700_000_000n) };
-      case "debug_traceTransaction":
+      case "debug_traceTransaction": {
+        const [, tracer] = params as [Hex, { tracer: string; tracerConfig?: object }];
+        if (tracer.tracer === "prestateTracer") {
+          // alice pays gas and 1.5 TKN from mapping(0); bob's balance slot is new.
+          return {
+            pre: {
+              [alice]: { balance: numberToHex(100_999n), nonce: 4 },
+              [token]: {
+                balance: "0x0",
+                nonce: 1,
+                code: "0x6000",
+                storage: { [mappingSlot(alice, "0x0")]: word(5_500_000n) },
+              },
+            },
+            post: {
+              [alice]: { balance: numberToHex(999n), nonce: 5 },
+              [token]: {
+                storage: {
+                  [mappingSlot(alice, "0x0")]: word(4_000_000n),
+                  [mappingSlot(bob, "0x0")]: word(1_500_000n),
+                },
+              },
+            },
+          };
+        }
         return {
           type: "CALL",
           from: alice,
@@ -173,7 +202,21 @@ function fakeFork(): { request: RawRequest; calls: string[] } {
           input: transferData(bob, 1_500_000n),
           output: pad("0x1"),
           gasUsed: numberToHex(30_000n),
+          ...(tracer.tracerConfig === undefined
+            ? {}
+            : {
+                logs: [
+                  {
+                    address: token,
+                    topics: [TRANSFER, pad(alice), pad(bob)],
+                    data: pad(numberToHex(1_500_000n)),
+                    position: "0x0",
+                    index: "0x0",
+                  },
+                ],
+              }),
         } satisfies CallFrame;
+      }
       case "debug_traceCall":
         return {
           type: "CALL",
@@ -219,6 +262,7 @@ function events(testId: number, ts: number): ForkitEvent[] {
     },
     { type: "test:start", ts: ts + 1, testId, suite: "Vault", name: `moves tokens ${testId}` },
     { type: "deal", ts: ts + 2, chainId: 1, rpcUrl: RPC, token, holder: alice, amount: 5_000_000n },
+    { type: "cheat", ts: ts + 2, chainId: 1, rpcUrl: RPC, cheat: "prank", account: alice },
     {
       type: "tx:sent",
       ts: ts + 3,
@@ -242,6 +286,17 @@ function events(testId: number, ts: number): ForkitEvent[] {
       data: "0xd0e30db0",
       value: 0n,
       message: "reverted: Vault: zero deposit",
+    },
+    { type: "cheat", ts: ts + 4, chainId: 1, rpcUrl: RPC, cheat: "stopPrank", account: alice },
+    {
+      type: "cheat",
+      ts: ts + 4,
+      chainId: 1,
+      rpcUrl: RPC,
+      cheat: "warp",
+      seconds: 86_400n,
+      blockNumber: 17n,
+      timestamp: 1_700_086_400n,
     },
     {
       type: "bridge:fill",
@@ -280,7 +335,7 @@ function events(testId: number, ts: number): ForkitEvent[] {
       name: `moves tokens ${testId}`,
       status: testId % 2 === 0 ? "fail" : "pass",
       durationMs: 7,
-      ...(testId % 2 === 0 ? { error: "expected 1 to be 2" } : {}),
+      ...(testId % 2 === 0 ? { error: "expected 1 to be 2", actual: "1", expected: "2" } : {}),
     },
   ];
 }
@@ -346,6 +401,41 @@ describe("RunRecorder", () => {
       result: [{ type: "bool", value: true }],
     });
     expect(mined?.traceText).toContain("::transfer(");
+    // The frame's own events, decoded, where they happened among its subcalls.
+    expect(mined?.trace?.logs).toEqual([
+      expect.objectContaining({
+        address: token,
+        position: 0,
+        index: 0,
+        event: expect.objectContaining({ name: "Transfer" }),
+      }),
+    ]);
+    // What changed, account by account, with storage slots named after the labelled holder.
+    expect(mined?.stateDiff).toEqual([
+      {
+        address: alice,
+        balance: { before: "100999", after: "999" },
+        nonce: { before: 4, after: 5 },
+        storage: [],
+      },
+      {
+        address: token,
+        storage: expect.arrayContaining([
+          {
+            slot: mappingSlot(alice, "0x0"),
+            before: word(5_500_000n),
+            after: word(4_000_000n),
+            hint: "mapping(0)[alice]",
+          },
+          {
+            slot: mappingSlot(bob, "0x0"),
+            before: word(0n),
+            after: word(1_500_000n),
+            hint: "mapping(0)[0x0000…0b0b]",
+          },
+        ]),
+      },
+    ]);
     expect(mined?.balanceChanges).toEqual(
       expect.arrayContaining([
         { address: alice, token: "native", delta: "-100000", after: "999" },
@@ -373,6 +463,17 @@ describe("RunRecorder", () => {
       }),
     ]);
     expect(part.http).toEqual([expect.objectContaining({ outcome: "hit", fixture: "quotes" })]);
+    expect(part.cheats).toEqual([
+      expect.objectContaining({ test: key, cheat: "prank", account: alice, ts: 1_002 }),
+      expect.objectContaining({ test: key, cheat: "stopPrank", account: alice }),
+      expect.objectContaining({
+        test: key,
+        cheat: "warp",
+        seconds: "86400",
+        blockNumber: "17",
+        timestamp: "1700086400",
+      }),
+    ]);
     expect(part.gas).toEqual([
       expect.objectContaining({ label: "transfer", gas: "50000", previous: "49000" }),
     ]);
@@ -421,6 +522,57 @@ describe("RunRecorder", () => {
   });
 });
 
+describe("state diffs", () => {
+  test("changed fields only: a zeroed slot, a new slot, a nonce; read-only state is not a change", () => {
+    const diff = stateDiff({
+      pre: {
+        [vault]: {
+          balance: "0x0",
+          nonce: 1,
+          code: "0x6000",
+          storage: { "0x2": word(9n), "0x3": word(4n) },
+        },
+        [alice]: { balance: numberToHex(10n), nonce: 0 },
+      },
+      post: {
+        [vault]: { storage: { "0x1": word(7n), "0x3": word(4n) } },
+        [alice]: { nonce: 1 },
+        [bob]: { balance: "0x5", code: "0x60016000" },
+      },
+    });
+    expect(diff).toEqual([
+      {
+        address: bob,
+        balance: { before: "0", after: "5" },
+        code: { before: 0, after: 4 },
+        storage: [],
+      },
+      { address: alice, nonce: { before: 0, after: 1 }, storage: [] },
+      {
+        address: vault,
+        storage: [
+          { slot: word(1n), before: word(0n), after: word(7n) },
+          { slot: word(2n), before: word(9n), after: word(0n) },
+        ],
+      },
+    ]);
+  });
+
+  test("names mapping slots, nested ones too, and small slots by number; labels given later win", () => {
+    const namer = new SlotNamer();
+    namer.add(alice, "alice");
+    namer.add(bob);
+    expect(namer.name(mappingSlot(alice, "0x9"))).toBe("mapping(9)[alice]");
+    expect(namer.name(mappingSlot(bob, mappingSlot(alice, "0xa")))).toBe(
+      "mapping(10)[alice][0x0000…0b0b]",
+    );
+    expect(namer.name(word(3n))).toBe("slot 3");
+    expect(namer.name(keccak256("0x1234"))).toBeUndefined();
+    namer.add(bob, "bob");
+    expect(namer.name(mappingSlot(bob, "0x0"))).toBe("mapping(0)[bob]");
+  });
+});
+
 describe("parts and merging", () => {
   /** Two workers of one run, each writing its own part. */
   async function recordTwoWorkers(dir: string): Promise<RunRecorder[]> {
@@ -447,7 +599,15 @@ describe("parts and merging", () => {
     expect(run.workers).toHaveLength(2);
     expect(run.tests.map((t) => t.name)).toEqual(["moves tokens 2", "moves tokens 1"]);
     expect(run.tests.map((t) => t.status)).toEqual(["fail", "pass"]);
-    expect(run.tests[0]?.error).toBe("expected 1 to be 2");
+    expect(run.tests[0]).toMatchObject({ error: "expected 1 to be 2", actual: "1", expected: "2" });
+    expect(run.cheats?.map((c) => c.cheat)).toEqual([
+      "prank",
+      "stopPrank",
+      "warp",
+      "prank",
+      "stopPrank",
+      "warp",
+    ]);
     expect(run.txs.map((t) => t.ts)).toEqual([1_003, 1_004, 2_003, 2_004]);
     expect(run.txs.every((t) => t.test !== undefined)).toBe(true);
     expect(new Set(run.txs.map((t) => t.id)).size).toBe(4);
@@ -501,6 +661,21 @@ describe("parts and merging", () => {
         chains: [{ chainId: 1, chainName: "Ethereum" }],
       }),
     ]);
+  });
+
+  test("a record from before cheats were recorded still merges and reads", () => {
+    const dir = scratch();
+    const recorder = new RunRecorder({ dir, runId: "older", enrich: false });
+    for (const event of events(1, 1_000)) recorder.handle(event);
+    const file = join(dir, "parts", "older", `${recorder.part.worker}.jsonl`);
+    const lines = readFileSync(file, "utf8")
+      .trim()
+      .split("\n")
+      .filter((l) => !l.includes('"kind":"cheat"'));
+    writeFileSync(file, `${lines.join("\n")}\n`);
+    const run = mergeRun(dir, "older") as RunRecord;
+    expect(run.cheats).toEqual([]);
+    expect(run.txs).toHaveLength(2);
   });
 
   test("readRun refuses ids that could escape the directory", () => {

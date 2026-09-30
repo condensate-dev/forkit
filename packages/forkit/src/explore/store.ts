@@ -193,6 +193,7 @@ export type PartLine =
   | { kind: "fill"; record: RunPart["fills"][number] }
   | { kind: "http"; record: RunPart["http"][number] }
   | { kind: "gas"; record: RunPart["gas"][number] }
+  | { kind: "cheat"; record: RunPart["cheats"][number] }
   | { kind: "labels"; labels: Record<string, string> }
   | { kind: "token"; key: string; info: TokenInfo };
 
@@ -216,6 +217,7 @@ export function emptyPart(meta: PartMeta): RunPart {
     fills: [],
     http: [],
     gas: [],
+    cheats: [],
     labels: {},
     tokens: {},
   };
@@ -254,6 +256,9 @@ export function applyLine(part: RunPart, line: PartLine): void {
     case "gas":
       part.gas.push(line.record);
       return;
+    case "cheat":
+      part.cheats.push(line.record);
+      return;
     case "labels":
       Object.assign(part.labels, line.labels);
       return;
@@ -287,8 +292,8 @@ export function mergeParts(id: string, parts: readonly RunPart[]): RunRecord {
   const sorted = [...parts].sort(
     (a, b) => a.startedAt - b.startedAt || (a.worker < b.worker ? -1 : 1),
   );
-  const all = <K extends "forks" | "txs" | "deals" | "fills" | "http" | "gas">(key: K) =>
-    sorted.flatMap((p) => p[key] as RunPart[K][number][]).sort(byTs) as RunPart[K];
+  const all = <K extends "forks" | "txs" | "deals" | "fills" | "http" | "gas" | "cheats">(key: K) =>
+    sorted.flatMap((p) => (p[key] ?? []) as RunPart[K][number][]).sort(byTs) as RunPart[K];
   const txs = all("txs");
   const labels: Record<string, string> = {};
   const tokens: Record<string, TokenInfo> = {};
@@ -332,6 +337,7 @@ export function mergeParts(id: string, parts: readonly RunPart[]): RunRecord {
     fills: all("fills"),
     http: all("http"),
     gas: all("gas"),
+    cheats: all("cheats"),
     labels,
     tokens,
   };
