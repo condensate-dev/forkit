@@ -91,4 +91,4 @@ The [landscape page](docs/landscape.md) compares forkit with tevm, anvil plus vi
 - [The forkit book](docs/README.md) · [Table of contents](docs/SUMMARY.md) · [FAQ](docs/faq.md) · [Troubleshooting](docs/troubleshooting.md)
 - [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Design spec](docs/spec.md)
 
-`@condensate/forkit` is private and unpublished until the maintainers decide. TODO(license): no license yet. MIT is planned, and the maintainers decide before anything is published.
+`@condensate/forkit` is not on npm yet. It is dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.

@@ -134,5 +134,6 @@
     "vitest": {
       "optional": true
     }
-  }
+  },
+  "license": "MIT OR Apache-2.0"
 }

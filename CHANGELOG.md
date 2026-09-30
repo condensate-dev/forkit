@@ -4,7 +4,7 @@ All notable changes to `@condensate/forkit`. The format follows [Keep a Changelo
 
 ## [Unreleased]
 
-Everything below is slated for **1.0.0** (`packages/forkit/package.json` carries that version). Not published: the package stays `private` and unlicensed until those are decided.
+Everything below is slated for **1.0.0** (`packages/forkit/package.json` carries that version). Not yet published to npm. Licensed under MIT OR Apache-2.0.
 
 ### Changed
 - **condensate.dev/forkit is a Vocs docs site** (`site/`, replacing the static `site/forkit/` page). The forkit book becomes the sidebar docs (synced from `docs/` at build time), with ⌘K search, light and dark themes, and a home page in the viem/Reth pattern: the forkit lockup over Condensate's forked-vapor WebGL shader, an npm/pnpm/bun install box, feature cards, the USDC quickstart, real terminal output and explorer screenshots. It builds static under `/forkit/` (`bun run site:build` → `site/dist`), with an offline link check and 390/1440 light/dark screenshots in CI. Not deployed from this repo.

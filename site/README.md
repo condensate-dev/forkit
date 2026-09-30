@@ -39,7 +39,7 @@ Serve `site/dist/` at the `/forkit/` subpath, for example as a Cloudflare Pages 
   - **Site-only edits:** there are three. Each is asserted, so a change in the book fails the build instead of leaving a stale page.
 - **Home page:** a two-column hero in the viem/Reth pattern. The copy is on the left, the artwork on the right, and on phones the artwork is a band above the copy. The copy is an HTML heading with the lockup (`public/lockup*.svg`), and Vocs' `HomePage` tagline, description and buttons. On top of those:
   - an npm / pnpm / bun install box;
-  - static badges (runners; CI links to the workflow, since the repository is private; licence "unlicensed" until the maintainers decide);
+  - static badges (runners; CI links to the workflow; licence "MIT OR Apache-2.0");
   - four feature cards;
   - the USDC quickstart;
   - the real terminal output;

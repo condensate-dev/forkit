@@ -1,8 +1,7 @@
 /**
- * Static badges: nothing loads from the network (no shields.io), and the repository is private,
+ * Static badges: nothing loads from the network (no shields.io), and badges stay static,
  * so there is no live status to read. "tests" therefore names where they run (CI) and links
- * there, rather than claiming a result that could be stale. The licence stays "unlicensed" until
- * the maintainers decide.
+ * there, rather than claiming a result that could be stale. The licence is MIT OR Apache-2.0.
  */
 const BADGES = [
   { label: "vitest", href: "/docs/getting-started/vitest" },
@@ -34,7 +33,7 @@ export function Badges({ base }: { base: string }) {
       <li>
         <span className="fk-badge">
           <span className="fk-badge-key">license</span>
-          <span className="fk-badge-value">unlicensed</span>
+          <span className="fk-badge-value">MIT OR Apache-2.0</span>
         </span>
       </li>
     </ul>

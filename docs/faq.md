@@ -22,4 +22,4 @@ No. They share one fork, and isolation is snapshot/revert around each test. Run 
 Yes. Commit `.forkit-cache` (or cache it), then run with `FORKIT_CACHE=offline`. For HTTP quote APIs, commit `.forkit-http`; CI replays them by default.
 
 **Is it published?**
-Not yet. `@condensate/forkit` is private until the maintainers decide. The license is also pending.
+Not yet. Until it is, depend on `packages/forkit` from a checkout of this repository. forkit is dual-licensed under MIT or Apache-2.0, at your option.
