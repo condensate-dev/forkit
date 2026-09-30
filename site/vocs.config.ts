@@ -24,8 +24,8 @@ export default defineConfig({
   search: { query: { boostDocument: false as never } },
   checkDeadlinks: true,
   // Vocs applies basePath to routes, not to logoUrl / iconUrl.
-  logoUrl: { light: asset("mark.svg"), dark: asset("mark-dark.svg") },
-  iconUrl: { light: asset("mark.svg"), dark: asset("mark-dark.svg") },
+  logoUrl: { light: asset("condensate-mark.svg"), dark: asset("condensate-mark-dark.svg") },
+  iconUrl: { light: asset("condensate-mark.svg"), dark: asset("condensate-mark-dark.svg") },
   // Seam violet; everything else stays Vocs' neutral, high-contrast palette.
   accentColor: "light-dark(#5a2ee6, #a394ff)",
   colorScheme: "light dark",

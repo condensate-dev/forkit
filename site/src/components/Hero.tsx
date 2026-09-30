@@ -20,14 +20,14 @@ export function Hero() {
         <h1 className="fk-wordmark">
           <img
             className="fk-light"
-            src={asset("lockup.svg")}
+            src={asset("cnd-lockup.svg")}
             alt="forkit"
             width={1089}
             height={320}
           />
           <img
             className="fk-dark"
-            src={asset("lockup-dark.svg")}
+            src={asset("cnd-lockup-dark.svg")}
             alt="forkit"
             width={1089}
             height={320}
