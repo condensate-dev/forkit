@@ -1,11 +1,11 @@
-# Stablecoin payments: `@condensate/forkit/payments`
+# Stablecoin payments: `@condensate_dev/forkit/payments`
 
-`@condensate/forkit/payments` signs the three ways a stablecoin payment is authorized off chain (EIP-2612 permits, EIP-3009 transfer authorizations and Permit2) against the real tokens on a fork, with deterministic test keys. It gets past USDT's and USDC's quirks, and it asserts what a payment changed. Nothing is mocked: every signature is checked by the forked contract's own code.
+`@condensate_dev/forkit/payments` signs the three ways a stablecoin payment is authorized off chain (EIP-2612 permits, EIP-3009 transfer authorizations and Permit2) against the real tokens on a fork, with deterministic test keys. It gets past USDT's and USDC's quirks, and it asserts what a payment changed. Nothing is mocked: every signature is checked by the forked contract's own code.
 
 ```ts
 import { parseEther, parseUnits } from "viem";
 import { base } from "viem/chains";
-import { expectBalanceChange } from "@condensate/forkit";
+import { expectBalanceChange } from "@condensate_dev/forkit";
 import {
   authorizationNonce,
   eip3009Abi,
@@ -13,8 +13,8 @@ import {
   signTransferWithAuthorization,
   testAccount,
   testAddress,
-} from "@condensate/forkit/payments";
-import { describeFork, itFork } from "@condensate/forkit/vitest";
+} from "@condensate_dev/forkit/payments";
+import { describeFork, itFork } from "@condensate_dev/forkit/vitest";
 
 const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const BLOCK = 51_950_000n;

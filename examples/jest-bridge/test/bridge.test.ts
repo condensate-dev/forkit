@@ -14,9 +14,9 @@
  * clock, are still open when the fill is checked against Arbitrum's clock.
  */
 import { fileURLToPath } from "node:url";
-import { label } from "@condensate/forkit";
-import { type AcrossFillDetails, across, bridge, spokePoolAbi } from "@condensate/forkit/bridges";
-import { describeFork, itFork } from "@condensate/forkit/jest";
+import { label } from "@condensate_dev/forkit";
+import { type AcrossFillDetails, across, bridge, spokePoolAbi } from "@condensate_dev/forkit/bridges";
+import { describeFork, itFork } from "@condensate_dev/forkit/jest";
 import { expect } from "@jest/globals";
 import {
   type Address,

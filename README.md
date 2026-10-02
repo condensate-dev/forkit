@@ -22,18 +22,18 @@ With forkit you fork real chains with anvil, fund any account, impersonate, warp
 ## Install
 
 ```sh
-bun add -d @condensate/forkit viem        # or npm / pnpm / yarn
+bun add -d @condensate_dev/forkit viem        # or npm / pnpm / yarn
 curl -L https://foundry.paradigm.xyz | bash && foundryup   # anvil 1.7.1+
 ```
 
-> `@condensate/forkit` isn't published to npm yet. Until it is, use it from this repository.
+> `@condensate_dev/forkit` isn't published to npm yet. Until it is, use it from this repository.
 
 ## Quickstart
 
 ```ts
 import { erc20Abi, parseUnits } from "viem";
 import { base } from "viem/chains";
-import { describeFork, itFork } from "@condensate/forkit/vitest";
+import { describeFork, itFork } from "@condensate_dev/forkit/vitest";
 
 const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const alice = "0x1111111111111111111111111111111111111111";
@@ -60,13 +60,13 @@ The same `describeFork` / `itFork` pair ships for [vitest](docs/getting-started/
 - **Foundry ergonomics**: `deal`, `prank`, `warp`, `roll`, `snapshot`/`revertTo` and `label`. The [cheatcode reference](docs/reference/cheatcodes.md) maps every cheatcode.
 - **Any runner**: vitest, bun:test, jest (native ESM) and node:test, with per-test snapshot isolation and nested `describe` support.
 - **Assertions and traces**: `expectRevert` (reasons, selectors, custom errors), `expectEmit` and `expectBalanceChange`. A reverted write carries a decoded, Foundry-style call trace. See the [guide](docs/guides/assertions-and-traces.md).
-- **Terminal output**: `@condensate/forkit/reporter` prints each fork's boot line, a per-test table of transactions, gas and signed balance changes, bridge fills and a gas snapshot diff; `NO_COLOR`, TTY and CI aware. See the [guide](docs/guides/terminal-output.md).
+- **Terminal output**: `@condensate_dev/forkit/reporter` prints each fork's boot line, a per-test table of transactions, gas and signed balance changes, bridge fills and a gas snapshot diff; `NO_COLOR`, TTY and CI aware. See the [guide](docs/guides/terminal-output.md).
 - **Post-test explorer**: `FORKIT_RECORD=1` records each run, and `forkit explore` serves a local, offline web UI: failures first with expected vs actual, each test's timeline of transactions and cheatcodes, and per transaction a decoded call tree with a gas icicle, token flows, balance and storage diffs, and code to reproduce it. See the [guide](docs/guides/explore.md).
 - **Record once, replay offline**: the fork cache records every RPC answer at a pinned block, so CI runs fork tests with no network and no RPC key. See the [guide](docs/guides/fork-cache-and-ci.md).
 - **Multi-chain**: `fork([base, arbitrum])` boots the chains in parallel, and `f.on(chain)` selects one. See the [guide](docs/guides/multi-chain.md).
 - **Cross-chain routes**: Across and Relay relayer simulators and `bridge.custom`, plus quote-API record/replay pinned to the fork block. See the [guide](docs/guides/cross-chain.md).
 - **ERC-4337**: `bundler(f)` runs alto against the fork, so user operations from real smart accounts land. See the [guide](docs/guides/erc-4337.md).
-- **Stablecoin payments**: `@condensate/forkit/payments` signs EIP-2612 permits, EIP-3009 authorizations and Permit2 transfers against the real tokens with deterministic test keys, handles USDT's `approve` and missing return value and USDC's blacklist and pause, and asserts nonces and allowances. See the [guide](docs/guides/payments.md).
+- **Stablecoin payments**: `@condensate_dev/forkit/payments` signs EIP-2612 permits, EIP-3009 authorizations and Permit2 transfers against the real tokens with deterministic test keys, handles USDT's `approve` and missing return value and USDC's blacklist and pause, and asserts nonces and allowances. See the [guide](docs/guides/payments.md).
 - **Gas snapshots and shared forks**: `forge snapshot`-style gas files checked in CI, and one fork shared by every file. See [gas snapshots](docs/guides/gas-snapshots.md) and [shared forks](docs/guides/shared-forks.md).
 
 ## Examples
@@ -92,4 +92,4 @@ The [landscape page](docs/landscape.md) compares forkit with tevm, anvil plus vi
 - [The forkit book](docs/README.md) · [Table of contents](docs/SUMMARY.md) · [FAQ](docs/faq.md) · [Troubleshooting](docs/troubleshooting.md)
 - [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md) · [Security](SECURITY.md) · [Design spec](docs/spec.md)
 
-`@condensate/forkit` is not on npm yet. It is dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.
+`@condensate_dev/forkit` is not on npm yet. It is dual-licensed under [MIT](LICENSE-MIT) or [Apache-2.0](LICENSE-APACHE), at your option.

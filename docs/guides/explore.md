@@ -18,23 +18,23 @@ FORKIT_RECORD=1 npx jest
 FORKIT_RECORD=1 node --test
 ```
 
-Or turn it on from the test runner's config with `@condensate/forkit/explore/record`:
+Or turn it on from the test runner's config with `@condensate_dev/forkit/explore/record`:
 
 ```ts
 // vitest.config.ts: every worker records, under one run id
 export default defineConfig({
-  test: { globalSetup: ["@condensate/forkit/explore/record"] },
+  test: { globalSetup: ["@condensate_dev/forkit/explore/record"] },
 });
 ```
 
 ```js
 // jest.config.js
-export default { globalSetup: "@condensate/forkit/explore/record" };
+export default { globalSetup: "@condensate_dev/forkit/explore/record" };
 ```
 
 ```sh
 # bun: preload it (bun test runs in one process)
-bun test --preload @condensate/forkit/explore/record
+bun test --preload @condensate_dev/forkit/explore/record
 ```
 
 As a setup file (vitest `setupFiles`, jest `setupFiles`), the module records the process that loads it.
@@ -61,7 +61,7 @@ Recording costs a few JSON-RPC calls per transaction (receipt, block, two `debug
 | Deals | `deal` and `dealNative`: the balance each one set. |
 | Cheats | `prank` (start and end), `warp`, `roll`, `snapshot` and `revertTo` made by the test, with the new block number and time after a `warp` or `roll`. The per-test isolation snapshot and revert are not recorded. |
 | Bridge fills | `bridge.across`, `bridge.relay` and `bridge.custom` fills: deposit, origin and destination chains, fill transactions and output. |
-| HTTP | `@condensate/forkit/http` requests: fixture set, redacted URL, and hit, recorded, passthrough or unmatched. |
+| HTTP | `@condensate_dev/forkit/http` requests: fixture set, redacted URL, and hit, recorded, passthrough or unmatched. |
 | Gas snapshots | `gasSnapshot` labels, gas, and the committed value. |
 | Labels | Every `label()` made during the run. |
 
@@ -122,7 +122,7 @@ Each worker appends to its own part file, so parallel workers never write the sa
 
 ## The run record
 
-`runs/<id>.json` is plain JSON (`RunRecord` in `@condensate/forkit/explore`, `version: 1`). Every bigint (wei amounts, gas, block numbers) is a decimal string, and every address is lowercase `0x` hex. Tools can read it directly, or use `readRun`, `listRuns` and `startExploreServer` from `@condensate/forkit/explore`.
+`runs/<id>.json` is plain JSON (`RunRecord` in `@condensate_dev/forkit/explore`, `version: 1`). Every bigint (wei amounts, gas, block numbers) is a decimal string, and every address is lowercase `0x` hex. Tools can read it directly, or use `readRun`, `listRuns` and `startExploreServer` from `@condensate_dev/forkit/explore`.
 
 ```ts
 interface RunRecord {

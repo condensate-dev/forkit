@@ -1,5 +1,5 @@
 /**
- * Packed-install smoke test: `bun run test:pack`. What `npm install @condensate/forkit` gets, run
+ * Packed-install smoke test: `bun run test:pack`. What `npm install @condensate_dev/forkit` gets, run
  * the way a user runs it, outside this workspace:
  *
  * 1. `npm pack` (prepack builds dist/) and install the tarball into a fresh temp project, with
@@ -97,11 +97,11 @@ try {
 
   // 2. Every runner, from node_modules.
   const importsMain =
-    'import { fork, expectRevert, label } from "@condensate/forkit";\n' +
+    'import { fork, expectRevert, label } from "@condensate_dev/forkit";\n' +
     "const main = [fork, expectRevert, label].every((f) => typeof f === 'function');\n";
   writeFileSync(
     join(app, "node.test.js"),
-    `${importsMain}import { test } from "node:test";\nimport assert from "node:assert/strict";\nimport { describeFork, itFork } from "@condensate/forkit/node";\ntest("imports", () => { assert.ok(main); assert.equal(typeof describeFork, "function"); assert.equal(typeof itFork, "function"); });\n`,
+    `${importsMain}import { test } from "node:test";\nimport assert from "node:assert/strict";\nimport { describeFork, itFork } from "@condensate_dev/forkit/node";\ntest("imports", () => { assert.ok(main); assert.equal(typeof describeFork, "function"); assert.equal(typeof itFork, "function"); });\n`,
   );
   check("node:test imports forkit and its adapter", () => {
     sh("node", ["--test", "node.test.js"], app);
@@ -109,7 +109,7 @@ try {
 
   writeFileSync(
     join(app, "jest.test.js"),
-    `${importsMain}import { expect, test } from "@jest/globals";\nimport { describeFork, itFork } from "@condensate/forkit/jest";\ntest("imports", () => { expect(main).toBe(true); expect(typeof describeFork).toBe("function"); expect(typeof itFork).toBe("function"); });\n`,
+    `${importsMain}import { expect, test } from "@jest/globals";\nimport { describeFork, itFork } from "@condensate_dev/forkit/jest";\ntest("imports", () => { expect(main).toBe(true); expect(typeof describeFork).toBe("function"); expect(typeof itFork).toBe("function"); });\n`,
   );
   writeFileSync(
     join(app, "jest.config.js"),
@@ -121,7 +121,7 @@ try {
 
   writeFileSync(
     join(app, "vitest.test.js"),
-    `${importsMain}import { expect, test } from "vitest";\nimport { describeFork, itFork } from "@condensate/forkit/vitest";\ntest("imports", () => { expect(main).toBe(true); expect(typeof describeFork).toBe("function"); expect(typeof itFork).toBe("function"); });\n`,
+    `${importsMain}import { expect, test } from "vitest";\nimport { describeFork, itFork } from "@condensate_dev/forkit/vitest";\ntest("imports", () => { expect(main).toBe(true); expect(typeof describeFork).toBe("function"); expect(typeof itFork).toBe("function"); });\n`,
   );
   check("vitest imports forkit and its adapter", () => {
     sh("npx", ["vitest", "run", "vitest.test.js"], app);
@@ -129,7 +129,7 @@ try {
 
   writeFileSync(
     join(app, "bun.test.js"),
-    `${importsMain}import { expect, test } from "bun:test";\nimport { describeFork, itFork } from "@condensate/forkit/bun";\ntest("imports", () => { expect(main).toBe(true); expect(typeof describeFork).toBe("function"); expect(typeof itFork).toBe("function"); });\n`,
+    `${importsMain}import { expect, test } from "bun:test";\nimport { describeFork, itFork } from "@condensate_dev/forkit/bun";\ntest("imports", () => { expect(main).toBe(true); expect(typeof describeFork).toBe("function"); expect(typeof itFork).toBe("function"); });\n`,
   );
   check("bun:test imports forkit and its adapter", () => {
     sh("bun", ["test", "./bun.test.js"], app);
@@ -140,7 +140,7 @@ try {
   const plain = Object.keys(manifest.exports).filter((k) => !runnerOnly.has(k));
   writeFileSync(
     join(app, "subpaths.mjs"),
-    plain.map((k, i) => `import * as m${i} from "@condensate/forkit${k.slice(1)}";`).join("\n") +
+    plain.map((k, i) => `import * as m${i} from "@condensate_dev/forkit${k.slice(1)}";`).join("\n") +
       `\nconsole.log("${plain.length} subpaths");\n`,
   );
   check(`the plain subpaths load under Node (${plain.join(", ")})`, () => {
@@ -151,12 +151,12 @@ try {
     join(app, "consumer.ts"),
     `import type { Address } from "viem";
 import { base } from "viem/chains";
-import { type Fork, expectBalanceChange, fork, NATIVE } from "@condensate/forkit";
-import { describeFork, itFork } from "@condensate/forkit/vitest";
-import { bridge } from "@condensate/forkit/bridges";
-import { bundler } from "@condensate/forkit/4337";
-import { forceApprove, PERMIT2, type SignedPermit, signPermit, testAccount } from "@condensate/forkit/payments";
-import { formatRun } from "@condensate/forkit/reporter";
+import { type Fork, expectBalanceChange, fork, NATIVE } from "@condensate_dev/forkit";
+import { describeFork, itFork } from "@condensate_dev/forkit/vitest";
+import { bridge } from "@condensate_dev/forkit/bridges";
+import { bundler } from "@condensate_dev/forkit/4337";
+import { forceApprove, PERMIT2, type SignedPermit, signPermit, testAccount } from "@condensate_dev/forkit/payments";
+import { formatRun } from "@condensate_dev/forkit/reporter";
 export async function consumer(alice: Address): Promise<bigint> {
   const f: Fork<typeof base> = await fork({ chain: base, blockNumber: 1n });
   await f.dealNative(alice, 1n);

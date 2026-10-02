@@ -4,8 +4,8 @@
  * ```ts
  * // vitest.config.ts
  * test: {
- *   setupFiles: ["@condensate/forkit/reporter/setup"],
- *   reporters: ["default", "@condensate/forkit/reporter"],
+ *   setupFiles: ["@condensate_dev/forkit/reporter/setup"],
+ *   reporters: ["default", "@condensate_dev/forkit/reporter"],
  * }
  * ```
  *

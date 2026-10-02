@@ -3,9 +3,9 @@
 import { useState } from "react";
 
 const MANAGERS = [
-  { id: "npm", command: "npm i -D @condensate/forkit viem" },
-  { id: "pnpm", command: "pnpm add -D @condensate/forkit viem" },
-  { id: "bun", command: "bun add -d @condensate/forkit viem" },
+  { id: "npm", command: "npm i -D @condensate_dev/forkit viem" },
+  { id: "pnpm", command: "pnpm add -D @condensate_dev/forkit viem" },
+  { id: "bun", command: "bun add -d @condensate_dev/forkit viem" },
 ] as const;
 
 /** npm / pnpm / bun install box with a copy button, in the Vocs home-page style. */

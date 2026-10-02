@@ -1,5 +1,5 @@
 /**
- * Run events: what forkit did during a run, for reporters (`@condensate/forkit/reporter`) and run
+ * Run events: what forkit did during a run, for reporters (`@condensate_dev/forkit/reporter`) and run
  * records (`forkit explore`). Emitting is synchronous and cheap; a listener that throws is
  * ignored, so observers can never break a test.
  */
@@ -112,7 +112,7 @@ export interface GasSnapshotEvent extends Base {
   previous?: bigint;
 }
 
-/** An HTTP request intercepted by `@condensate/forkit/http`. */
+/** An HTTP request intercepted by `@condensate_dev/forkit/http`. */
 export interface HttpEvent extends Base {
   type: "http:request";
   fixture: string;

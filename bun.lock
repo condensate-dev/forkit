@@ -12,7 +12,7 @@
     "examples/bun-multichain": {
       "name": "forkit-example-bun-multichain",
       "dependencies": {
-        "@condensate/forkit": "workspace:*",
+        "@condensate_dev/forkit": "workspace:*",
         "viem": "^2.56.9",
       },
       "devDependencies": {
@@ -22,7 +22,7 @@
     "examples/jest-bridge": {
       "name": "forkit-example-jest-bridge",
       "dependencies": {
-        "@condensate/forkit": "workspace:*",
+        "@condensate_dev/forkit": "workspace:*",
         "viem": "^2.56.9",
       },
       "devDependencies": {
@@ -36,7 +36,7 @@
     "examples/vitest-swap": {
       "name": "forkit-example-vitest-swap",
       "dependencies": {
-        "@condensate/forkit": "workspace:*",
+        "@condensate_dev/forkit": "workspace:*",
         "viem": "^2.56.9",
       },
       "devDependencies": {
@@ -45,7 +45,7 @@
       },
     },
     "packages/forkit": {
-      "name": "@condensate/forkit",
+      "name": "@condensate_dev/forkit",
       "dependencies": {
         "prool": "^0.2.16",
         "viem": "^2.56.9",
@@ -164,7 +164,7 @@
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.5.14", "", { "os": "win32", "cpu": "x64" }, "sha512-oJWmBhoHsnhUKIke+0gXDX0mltJrWHA1UyHsrTlXwX0TL64ilVZAo+TYZm97baecV0esBdpzy3k96q+09JaZUQ=="],
 
-    "@condensate/forkit": ["@condensate/forkit@workspace:packages/forkit"],
+    "@condensate_dev/forkit": ["@condensate_dev/forkit@workspace:packages/forkit"],
 
     "@emnapi/core": ["@emnapi/core@1.10.0", "", { "dependencies": { "@emnapi/wasi-threads": "1.2.1", "tslib": "^2.4.0" } }, "sha512-yq6OkJ4p82CAfPl0u9mQebQHKPJkY7WrIuk205cTYnYe+k2Z8YBh11FrbRG/H6ihirqcacOgl2BIO8oyMQLeXw=="],
 

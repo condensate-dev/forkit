@@ -5,7 +5,7 @@
 The assertions work in any runner. They throw `ForkitAssertionError`, which carries `actual` and `expected` so vitest prints a diff, and they return what they matched.
 
 ```ts
-import { expectBalanceChange, expectEmit, expectRevert, NATIVE } from "@condensate/forkit";
+import { expectBalanceChange, expectEmit, expectRevert, NATIVE } from "@condensate_dev/forkit";
 
 // f.client has no account: send as someone with f.prank (or pass `account`).
 const deposit = (value: bigint) =>

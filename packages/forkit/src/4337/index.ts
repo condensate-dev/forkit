@@ -1,5 +1,5 @@
 /**
- * `@condensate/forkit/4337`: an ERC-4337 bundler on a fork. `bundler(f)` starts Pimlico's alto
+ * `@condensate_dev/forkit/4337`: an ERC-4337 bundler on a fork. `bundler(f)` starts Pimlico's alto
  * against the fork's anvil, with funded executors, so production code that sends user operations
  * runs unchanged against real forked state.
  *

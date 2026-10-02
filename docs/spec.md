@@ -1,6 +1,6 @@
 # forkit: Foundry-style fork tests in TypeScript
 
-Repo: `condensate-dev/forkit` (private). Package: `@condensate/forkit`, because the unscoped `forkit` on npm is taken.
+Repo: `condensate-dev/forkit` (private). Package: `@condensate_dev/forkit`, because the unscoped `forkit` on npm is taken.
 
 **Clean-room rule.** forkit is original work. The build must copy no file, type, comment or constant from any other project's private code. Every chain fact comes from viem's chain definitions or from public docs.
 
@@ -12,11 +12,11 @@ Foundry gives Solidity devs `vm.createSelectFork`, `deal`, `prank`, `warp`, `sna
 
 | Layer | What | Depends on |
 |---|---|---|
-| `@condensate/forkit` (core) | `fork()`, the fork handle, cheats, snapshots and assertions. Has no test-framework imports. | viem, prool (anvil process), foundry's `anvil` on PATH |
-| `@condensate/forkit/vitest` | `describeFork`, `itFork` and the fixture lifecycle | core + vitest |
-| `@condensate/forkit/bun` | the same for `bun:test` | core |
-| `@condensate/forkit/jest`, `/node` | the same for jest and node:test | core |
-| `@condensate/forkit/4337` (optional) | boots an ERC-4337 bundler (alto) against a fork | core |
+| `@condensate_dev/forkit` (core) | `fork()`, the fork handle, cheats, snapshots and assertions. Has no test-framework imports. | viem, prool (anvil process), foundry's `anvil` on PATH |
+| `@condensate_dev/forkit/vitest` | `describeFork`, `itFork` and the fixture lifecycle | core + vitest |
+| `@condensate_dev/forkit/bun` | the same for `bun:test` | core |
+| `@condensate_dev/forkit/jest`, `/node` | the same for jest and node:test | core |
+| `@condensate_dev/forkit/4337` (optional) | boots an ERC-4337 bundler (alto) against a fork | core |
 
 ## Core API (target)
 
@@ -82,7 +82,7 @@ forkit's position: real anvil, your production TS code, any runner, Foundry ergo
 
 Goal: test a cross-chain route end to end across two or more forks, with no live relayer and no live quote API, so the tests are deterministic.
 
-### 1. The relayer simulator, `@condensate/forkit/bridges`
+### 1. The relayer simulator, `@condensate_dev/forkit/bridges`
 
 This runs on a multi-fork handle, e.g. `fork([base, arbitrum])`.
 
