@@ -140,8 +140,9 @@ try {
   const plain = Object.keys(manifest.exports).filter((k) => !runnerOnly.has(k));
   writeFileSync(
     join(app, "subpaths.mjs"),
-    plain.map((k, i) => `import * as m${i} from "@condensate_dev/forkit${k.slice(1)}";`).join("\n") +
-      `\nconsole.log("${plain.length} subpaths");\n`,
+    plain
+      .map((k, i) => `import * as m${i} from "@condensate_dev/forkit${k.slice(1)}";`)
+      .join("\n") + `\nconsole.log("${plain.length} subpaths");\n`,
   );
   check(`the plain subpaths load under Node (${plain.join(", ")})`, () => {
     sh("node", ["subpaths.mjs"], app);

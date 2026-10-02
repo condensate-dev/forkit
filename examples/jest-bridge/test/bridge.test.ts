@@ -15,7 +15,12 @@
  */
 import { fileURLToPath } from "node:url";
 import { label } from "@condensate_dev/forkit";
-import { type AcrossFillDetails, across, bridge, spokePoolAbi } from "@condensate_dev/forkit/bridges";
+import {
+  type AcrossFillDetails,
+  across,
+  bridge,
+  spokePoolAbi,
+} from "@condensate_dev/forkit/bridges";
 import { describeFork, itFork } from "@condensate_dev/forkit/jest";
 import { expect } from "@jest/globals";
 import {
