@@ -1,18 +1,18 @@
-# @condensate/forkit
+# @condensate_dev/forkit
 
 Foundry-style fork tests in TypeScript, for any test runner.
 
 Fork real chains with anvil, fund any account, impersonate, warp time, snapshot and revert, then assert on what actually landed. Your production TypeScript (routers, quoting, SDK calls, bundlers, bridges) runs against real mainnet state, inside the runner you already use: vitest, bun:test, jest or node:test.
 
 ```sh
-npm install -D @condensate/forkit viem
+npm install -D @condensate_dev/forkit viem
 curl -L https://foundry.paradigm.xyz | bash && foundryup   # anvil 1.7.1+
 ```
 
 ```ts
 import { erc20Abi, parseEther, parseUnits } from "viem";
 import { base } from "viem/chains";
-import { describeFork, itFork } from "@condensate/forkit/vitest";
+import { describeFork, itFork } from "@condensate_dev/forkit/vitest";
 
 const USDC = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // USDC on Base
 const alice = "0x778dd60929c5b6f928aeab807fec6986f6ea3d82";
@@ -33,12 +33,12 @@ describeFork("USDC on Base", { chain: base, blockNumber: 51_800_000n }, (f) => {
 
 | Import | For |
 |---|---|
-| `@condensate/forkit` | `fork()`, assertions, labels, events |
-| `@condensate/forkit/vitest`, `/bun`, `/jest`, `/node` | `describeFork` / `itFork` per runner |
-| `@condensate/forkit/http`, `/bridges` | quote-API record/replay; Across, Relay and custom bridge simulators |
-| `@condensate/forkit/4337` | an ERC-4337 bundler (alto) on a fork |
-| `@condensate/forkit/payments` | EIP-2612, EIP-3009 and Permit2 signatures, USDT and USDC quirks, payment assertions |
-| `@condensate/forkit/reporter` | terminal output |
-| `@condensate/forkit/explore` and the `forkit` command | run records and the post-test explorer |
+| `@condensate_dev/forkit` | `fork()`, assertions, labels, events |
+| `@condensate_dev/forkit/vitest`, `/bun`, `/jest`, `/node` | `describeFork` / `itFork` per runner |
+| `@condensate_dev/forkit/http`, `/bridges` | quote-API record/replay; Across, Relay and custom bridge simulators |
+| `@condensate_dev/forkit/4337` | an ERC-4337 bundler (alto) on a fork |
+| `@condensate_dev/forkit/payments` | EIP-2612, EIP-3009 and Permit2 signatures, USDT and USDC quirks, payment assertions |
+| `@condensate_dev/forkit/reporter` | terminal output |
+| `@condensate_dev/forkit/explore` and the `forkit` command | run records and the post-test explorer |
 
 Documentation: [the forkit book](https://github.com/condensate-dev/forkit/blob/main/docs/README.md), with a quickstart per runner and a [Foundry → forkit cheatcode reference](https://github.com/condensate-dev/forkit/blob/main/docs/reference/cheatcodes.md).

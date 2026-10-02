@@ -1,4 +1,4 @@
-# Terminal output: `@condensate/forkit/reporter`
+# Terminal output: `@condensate_dev/forkit/reporter`
 
 After a run, forkit prints what happened on the forks:
 
@@ -62,8 +62,8 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    setupFiles: ["@condensate/forkit/reporter/setup"],
-    reporters: ["default", "@condensate/forkit/reporter"],
+    setupFiles: ["@condensate_dev/forkit/reporter/setup"],
+    reporters: ["default", "@condensate_dev/forkit/reporter"],
   },
 });
 ```
@@ -73,7 +73,7 @@ The report prints once, after vitest's own summary, with one block per test file
 To pass options, use an instance:
 
 ```ts
-import { ForkitReporter } from "@condensate/forkit/reporter";
+import { ForkitReporter } from "@condensate_dev/forkit/reporter";
 
 reporters: ["default", new ForkitReporter({ color: false, tokens: { [USDC]: { symbol: "USDC", decimals: 6 } } })],
 ```
@@ -85,17 +85,17 @@ bun:test has no custom reporter API: `--reporter` accepts only `junit` and `dots
 ```toml
 # bunfig.toml
 [test]
-preload = ["@condensate/forkit/reporter/bun"]
+preload = ["@condensate_dev/forkit/reporter/bun"]
 ```
 
-or `bun test --preload @condensate/forkit/reporter/bun`. The report is a single block titled `bun test`, and it is not split per file.
+or `bun test --preload @condensate_dev/forkit/reporter/bun`. The report is a single block titled `bun test`, and it is not split per file.
 
 ### jest and node:test
 
 Collect in the test file and print when its tests are done:
 
 ```ts
-import { collectRun, formatRun } from "@condensate/forkit/reporter";
+import { collectRun, formatRun } from "@condensate_dev/forkit/reporter";
 
 const run = collectRun();
 afterAll(async () => {            // node:test: after(async () => { ... })

@@ -166,7 +166,7 @@ function isJsonRpc(body: unknown): boolean {
 }
 
 /** The active set, on a global symbol so two copies of this module still see each other. */
-const ACTIVE = Symbol.for("@condensate/forkit/http:active");
+const ACTIVE = Symbol.for("@condensate_dev/forkit/http:active");
 type Global = typeof globalThis & { [ACTIVE]?: { name: string; path: string } };
 
 async function toFixtureRequest(request: Request, redactor: Redactor): Promise<FixtureRequest> {

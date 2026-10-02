@@ -25,7 +25,7 @@ Not simulated: legacy deposits made as plain transfers to a solver EOA with the 
 ## API
 
 ```ts
-import { bridge } from "@condensate/forkit/bridges";
+import { bridge } from "@condensate_dev/forkit/bridges";
 
 const b = bridge.relay(f, { fee: { bps: 10 } }); // options below
 

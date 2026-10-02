@@ -11,8 +11,8 @@
  */
 import { expect } from "bun:test";
 import { fileURLToPath } from "node:url";
-import { label } from "@condensate/forkit";
-import { describeFork, itFork } from "@condensate/forkit/bun";
+import { label } from "@condensate_dev/forkit";
+import { describeFork, itFork } from "@condensate_dev/forkit/bun";
 import {
   type Address,
   erc20Abi,

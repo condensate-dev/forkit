@@ -13,7 +13,7 @@ export class AltoNotFoundError extends ForkitError {
     super(
       [
         `forkit: ${detail}`,
-        "@condensate/forkit/4337 runs Pimlico's alto bundler, an optional peer dependency. Install it with:",
+        "@condensate_dev/forkit/4337 runs Pimlico's alto bundler, an optional peer dependency. Install it with:",
         "  npm i -D @pimlico/alto   (or bun add -d / pnpm add -D / yarn add -D)",
         "or pass altoBinary: the path to alto's CLI (…/@pimlico/alto/esm/cli/alto.js) or an alto executable.",
       ].join("\n"),

@@ -4,8 +4,8 @@
 
 ```ts
 import { base, optimism } from "viem/chains";
-import { fork } from "@condensate/forkit";
-import { bridge } from "@condensate/forkit/bridges";
+import { fork } from "@condensate_dev/forkit";
+import { bridge } from "@condensate_dev/forkit/bridges";
 
 const f = await fork([
   { chain: optimism, blockNumber: 157_395_255n },
@@ -50,7 +50,7 @@ On Across the fee is set by the depositor at quote time: `fee = inputAmount - ou
 To build a deposit with a given fee, use the helper:
 
 ```ts
-import { across } from "@condensate/forkit/bridges";
+import { across } from "@condensate_dev/forkit/bridges";
 
 const outputAmount = across.outputAmount(1_000_000_000n, { bps: 5, fixed: 20_000n });
 // 1,000 USDC - (0.05 % + 0.02 USDC) = 999.48 USDC

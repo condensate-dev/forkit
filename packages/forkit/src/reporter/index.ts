@@ -1,9 +1,9 @@
 /**
- * `@condensate/forkit/reporter`: readable run output in any runner.
+ * `@condensate_dev/forkit/reporter`: readable run output in any runner.
  *
- * - vitest: `reporters: ["default", "@condensate/forkit/reporter"]` plus the setup file
- *   `@condensate/forkit/reporter/setup` (see {@link ForkitReporter}).
- * - bun:test: preload `@condensate/forkit/reporter/bun`.
+ * - vitest: `reporters: ["default", "@condensate_dev/forkit/reporter"]` plus the setup file
+ *   `@condensate_dev/forkit/reporter/setup` (see {@link ForkitReporter}).
+ * - bun:test: preload `@condensate_dev/forkit/reporter/bun`.
  * - jest, node:test: `const run = collectRun()` in the test file, then
  *   `console.log(formatRun(await run.snapshot()))` in `afterAll`/`after`.
  */

@@ -1,13 +1,13 @@
-# HTTP quote record and replay: `@condensate/forkit/http`
+# HTTP quote record and replay: `@condensate_dev/forkit/http`
 
-Quote APIs (0x, Relay, Across, ...) answer with prices and calldata that are only valid for the chain state they were priced against. A fork test that calls them live needs an API key, depends on the network, and gets a different quote every run. `@condensate/forkit/http` records those responses once, **pinned to the fork block**, and replays them in CI with no network and no key.
+Quote APIs (0x, Relay, Across, ...) answer with prices and calldata that are only valid for the chain state they were priced against. A fork test that calls them live needs an API key, depends on the network, and gets a different quote every run. `@condensate_dev/forkit/http` records those responses once, **pinned to the fork block**, and replays them in CI with no network and no key.
 
 It intercepts `globalThis.fetch`, so production code's own `fetch` calls are captured unchanged: nothing is injected and there is no new dependency.
 
 ## Usage
 
 ```ts
-import { http } from "@condensate/forkit/http";
+import { http } from "@condensate_dev/forkit/http";
 
 const BLOCK = 21_000_000n;
 const f = await fork({ chain: base, blockNumber: BLOCK });

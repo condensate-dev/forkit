@@ -1,7 +1,6 @@
 {
-  "name": "@condensate/forkit",
-  "version": "1.0.0",
-  "private": true,
+  "name": "@condensate_dev/forkit",
+  "version": "0.1.0",
   "description": "Foundry-style fork tests in TypeScript, for any test runner.",
   "keywords": [
     "foundry",
@@ -109,7 +108,8 @@
     "test:e2e": "vitest run --project e2e",
     "explore:fixture": "bun test/explore/make-fixture.ts",
     "test:screens": "vitest run --project screens",
-    "test:pack": "bun test/pack/pack.smoke.ts"
+    "test:pack": "bun test/pack/pack.smoke.ts",
+    "prepublishOnly": "bun run typecheck && bun run test && bun run test:pack"
   },
   "dependencies": {
     "prool": "^0.2.16",
@@ -142,5 +142,8 @@
       "optional": true
     }
   },
-  "license": "MIT OR Apache-2.0"
+  "license": "MIT OR Apache-2.0",
+  "publishConfig": {
+    "access": "public"
+  }
 }

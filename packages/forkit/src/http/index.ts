@@ -1,5 +1,5 @@
 /**
- * @condensate/forkit/http: record and replay the HTTP quote APIs (0x, Relay, Across, ...) that
+ * @condensate_dev/forkit/http: record and replay the HTTP quote APIs (0x, Relay, Across, ...) that
  * production code calls, pinned to the fork block the quotes were taken at.
  *
  * ```ts
