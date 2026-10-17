@@ -26,7 +26,13 @@ bun add -d @condensate/forkit viem        # or npm / pnpm / yarn
 curl -L https://foundry.paradigm.xyz | bash && foundryup   # anvil 1.7.1+
 ```
 
-> `@condensate/forkit` isn't published to npm yet. Until it is, use it from this repository.
+> `@condensate/forkit` isn't published to npm yet. Until it is, install it from a commit on GitHub with pnpm. The package lives in `packages/forkit`, and its build is committed, so nothing runs on install:
+>
+> ```sh
+> pnpm add -D "github:condensate-dev/forkit#<commit-sha>&path:/packages/forkit" viem
+> ```
+>
+> For Solana forks (`@condensate/forkit/svm`), add `@solana/kit` 8 and the [surfpool](https://github.com/solana-foundation/surfpool/releases) binary (1.6.1 or newer).
 
 ## Quickstart
 
@@ -67,6 +73,7 @@ The same `describeFork` / `itFork` pair ships for [vitest](docs/getting-started/
 - **Cross-chain routes**: Across and Relay relayer simulators and `bridge.custom`, plus quote-API record/replay pinned to the fork block. See the [guide](docs/guides/cross-chain.md).
 - **ERC-4337**: `bundler(f)` runs alto against the fork, so user operations from real smart accounts land. See the [guide](docs/guides/erc-4337.md).
 - **Stablecoin payments**: `@condensate/forkit/payments` signs EIP-2612 permits, EIP-3009 authorizations and Permit2 transfers against the real tokens with deterministic test keys, handles USDT's `approve` and missing return value and USDC's blacklist and pause, and asserts nonces and allowances. See the [guide](docs/guides/payments.md).
+- **Solana, with surfpool**: `@condensate/forkit/svm` forks mainnet-beta (or any RPC) with a surfpool surfnet per suite, with `@solana/kit` 8 clients and cheatcodes: `dealSol`, `deal` for SPL tokens, `setAccount`, `etch` for a program `.so`, `warp` and `roll`, and `reset`. See the [guide](docs/guides/solana.md), including when to use litesvm instead.
 - **Gas snapshots and shared forks**: `forge snapshot`-style gas files checked in CI, and one fork shared by every file. See [gas snapshots](docs/guides/gas-snapshots.md) and [shared forks](docs/guides/shared-forks.md).
 
 ## Examples
@@ -76,8 +83,9 @@ The same `describeFork` / `itFork` pair ships for [vitest](docs/getting-started/
 | [vitest-swap](examples/vitest-swap) | vitest | fork Base, deal USDC, swap through a real DEX, assert balance changes and gas |
 | [bun-multichain](examples/bun-multichain) | bun:test | two chains in one suite, `f.on(chain)`, isolation across both |
 | [jest-bridge](examples/jest-bridge) | jest | a cross-chain route through the Across simulator, with fee accounting |
+| [vitest-solana](examples/vitest-solana) | vitest | fork Solana mainnet-beta with surfpool, deal wrapped SOL, send an SPL transfer, warp the clock |
 
-Each example runs offline from its committed recording.
+The EVM examples run offline from their committed recordings. The Solana example forks live mainnet-beta, so it needs network.
 
 ## Why forkit
 

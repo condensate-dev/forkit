@@ -2,7 +2,7 @@
  * Packed-install smoke test: `bun run test:pack`. What `npm install @condensate/forkit` gets, run
  * the way a user runs it, outside this workspace:
  *
- * 1. `npm pack` (prepack builds dist/) and install the tarball into a fresh temp project, with
+ * 1. `npm pack` (test:pack builds dist/ first) and install the tarball into a fresh temp project, with
  *    the runners at the versions this repo tests.
  * 2. Every runner imports forkit from node_modules: node:test and jest load it with plain Node
  *    (which refuses to strip TypeScript under node_modules), vitest and bun:test through their
@@ -75,6 +75,8 @@ try {
       "--no-fund",
       join(work, tarball),
       `viem@${manifest.dependencies.viem}`,
+      // forkit/svm's optional peer.
+      `@solana/kit@${dev["@solana/kit"]}`,
       `vitest@${dev.vitest}`,
       `jest@${dev.jest}`,
       `@jest/globals@${dev["@jest/globals"]}`,
@@ -136,7 +138,15 @@ try {
   });
 
   // 3. Every subpath resolves; the declarations typecheck in a strict nodenext consumer.
-  const runnerOnly = new Set(["./vitest", "./bun", "./jest", "./reporter/bun", "./reporter/setup"]);
+  const runnerOnly = new Set([
+    "./vitest",
+    "./bun",
+    "./jest",
+    "./reporter/bun",
+    "./reporter/setup",
+    "./svm/vitest",
+    "./svm/bun",
+  ]);
   const plain = Object.keys(manifest.exports).filter((k) => !runnerOnly.has(k));
   writeFileSync(
     join(app, "subpaths.mjs"),
@@ -157,6 +167,15 @@ import { bridge } from "@condensate/forkit/bridges";
 import { bundler } from "@condensate/forkit/4337";
 import { forceApprove, PERMIT2, type SignedPermit, signPermit, testAccount } from "@condensate/forkit/payments";
 import { formatRun } from "@condensate/forkit/reporter";
+import { type Surfnet, surfnet } from "@condensate/forkit/svm";
+import { describeSurfnet, itSurfnet } from "@condensate/forkit/svm/vitest";
+export async function solana(): Promise<bigint> {
+  const s: Surfnet = await surfnet({ offline: true });
+  const slot: bigint = await s.rpc.getSlot().send();
+  void [describeSurfnet, itSurfnet];
+  await s.stop();
+  return slot;
+}
 export async function consumer(alice: Address): Promise<bigint> {
   const f: Fork<typeof base> = await fork({ chain: base, blockNumber: 1n });
   await f.dealNative(alice, 1n);

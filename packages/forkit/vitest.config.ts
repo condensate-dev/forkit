@@ -49,6 +49,25 @@ export default defineConfig({
         },
       },
       {
+        // Needs surfpool (scripts/with-surfpool.sh sets FORKIT_SURFPOOL_BIN to the pinned
+        // release). The fork source is a local offline surfnet, so no network.
+        test: {
+          name: "svm",
+          include: ["test/svm/**/*.vitest.ts"],
+          testTimeout: 30_000,
+          hookTimeout: 90_000,
+        },
+      },
+      {
+        // Needs surfpool and network: forks Solana mainnet-beta (FORKIT_SVM_RPC_URL overrides).
+        test: {
+          name: "svm-e2e",
+          include: ["test/svm-e2e/**/*.vitest.ts"],
+          testTimeout: 60_000,
+          hookTimeout: 120_000,
+        },
+      },
+      {
         // Needs anvil and a real RPC (public by default; override with FORKIT_RPC_URL_<chainId>).
         test: {
           name: "e2e",

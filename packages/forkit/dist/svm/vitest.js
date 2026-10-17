@@ -1,0 +1,12 @@
+/**
+ * vitest adapter for forkit/svm: `describeSurfnet` boots one surfnet per suite and stops it after
+ * the last test; `itSurfnet` hands each test that surfnet.
+ */
+import { afterAll, afterEach, beforeAll, beforeEach, describe, it } from "vitest";
+import { createSurfnetAdapter } from "./adapter.js";
+export const { describeSurfnet, itSurfnet } = createSurfnetAdapter({
+    describe: (name, body) => describe(name, body),
+    it: (name, fn, timeoutMs) => it(name, fn, timeoutMs),
+    hooks: { beforeAll, afterAll, beforeEach, afterEach },
+});
+//# sourceMappingURL=vitest.js.map

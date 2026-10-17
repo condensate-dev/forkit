@@ -1,0 +1,19 @@
+{
+  "name": "forkit-example-vitest-solana",
+  "private": true,
+  "description": "forkit example: fork Solana mainnet-beta with surfpool, deal wrapped SOL, send an SPL transfer (vitest).",
+  "type": "module",
+  "scripts": {
+    "test:svm:e2e": "../../scripts/with-surfpool.sh vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@condensate/forkit": "workspace:*",
+    "@solana-program/token": "0.18.0",
+    "@solana/kit": "8.5.0"
+  },
+  "devDependencies": {
+    "@types/node": "26.6.3",
+    "vitest": "^5.0.2"
+  }
+}

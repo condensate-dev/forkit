@@ -33,6 +33,67 @@ jobs:
       - run: bun run lint
       - run: bun run test
 
+  dist:
+    # packages/forkit/dist is committed so a GitHub commit pin installs with no build step. It must
+    # be exactly what `bun run build` makes from src/.
+    name: committed dist matches src
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - run: bun install --frozen-lockfile
+      - run: bun run check:dist
+
+  github-install:
+    # What users get: `pnpm add github:condensate-dev/forkit#<sha>&path:/packages/forkit` in a
+    # scratch project, at this very commit, then plain Node imports the EVM entry and the Solana
+    # entry (@condensate/forkit, @condensate/forkit/svm).
+    name: pnpm install from a GitHub commit pin
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11
+      - run: pnpm --version
+      - run: bun run test:github-install
+        env:
+          # The commit under test: the PR's head (pushed, so GitHub serves it), or the pushed sha.
+          FORKIT_INSTALL_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+  svm:
+    # forkit/svm against a real surfpool: the pinned release binary (scripts/install-surfpool.sh
+    # checks its sha256). test:svm forks a local offline surfnet, no network; test:svm:e2e forks
+    # Solana mainnet-beta over the public RPC (the package's e2e and examples/vitest-solana).
+    name: svm tests (surfpool, pinned)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: bun install --frozen-lockfile
+      - name: install surfpool
+        run: echo "FORKIT_SURFPOOL_BIN=$(scripts/install-surfpool.sh)" >> "$GITHUB_ENV"
+      - run: '"$FORKIT_SURFPOOL_BIN" --version'
+      - run: bun run test:svm
+      # examples/* import forkit as users do, from its committed dist/.
+      - run: bun run test:svm:e2e
+
   pack:
     # What `npm install @condensate/forkit` gets: pack, install into a fresh project, and import it
     # from node_modules under node:test, jest, vitest and bun:test; typecheck a strict consumer;
