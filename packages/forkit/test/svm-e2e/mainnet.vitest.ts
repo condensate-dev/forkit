@@ -19,4 +19,19 @@ describeSurfnet("mainnet-beta fork", {}, () => {
     const { value } = await s.rpc.getAccountInfo(WRAPPED_SOL_MINT, { encoding: "base64" }).send();
     expect(value?.owner).toBe(TOKEN_PROGRAM);
   });
+
+  itSurfnet("deals SOL and wrapped SOL to a fresh wallet", async (s) => {
+    const wallet = address("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+    await s.dealSol(wallet, 3_000_000_000n);
+    const ata = await s.deal(WRAPPED_SOL_MINT, wallet, 2_000_000_000n);
+    const { value } = await s.rpc.getTokenAccountBalance(ata).send();
+    expect(value.amount).toBe("2000000000");
+    expect(value.decimals).toBe(9);
+  });
+
+  itSurfnet("warps the mainnet clock a day forward", async (s) => {
+    const before = await s.clock();
+    const after = await s.warp(86_400);
+    expect(after.unixTimestamp).toBeGreaterThanOrEqual(before.unixTimestamp + 86_400n);
+  });
 });

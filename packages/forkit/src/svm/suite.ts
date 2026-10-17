@@ -3,9 +3,24 @@
  * `beforeAll`, stop in `afterAll`. The runner adapters (`@condensate/forkit/svm/vitest`,
  * `/svm/bun`) are this plus their imports.
  */
-import type { Rpc, RpcSubscriptions, SolanaRpcApi, SolanaRpcSubscriptionsApi } from "@solana/kit";
+import type {
+  Address,
+  Rpc,
+  RpcSubscriptions,
+  SolanaRpcApi,
+  SolanaRpcSubscriptionsApi,
+} from "@solana/kit";
 import { ForkitError } from "../errors.ts";
 import type { SuiteHooks } from "../suite.ts";
+import type {
+  AccountPatch,
+  DealTokenOptions,
+  EtchOptions,
+  ResetOptions,
+  SurfnetClock,
+  SurfnetEpochInfo,
+  WarpTarget,
+} from "./cheats.ts";
 import {
   DEFAULT_SURFNET_BOOT_TIMEOUT_MS,
   DEFAULT_SURFNET_STOP_TIMEOUT_MS,
@@ -17,6 +32,17 @@ import {
 import { assertSurfpoolInstalled, resolveSurfpoolBinary } from "./surfpool.ts";
 
 export type { SuiteHooks } from "../suite.ts";
+
+export interface SurfnetSuiteOptions extends SurfnetOptions {
+  /**
+   * `reset()` the whole surfnet after every test (`surfnet_resetNetwork`), so each test starts
+   * from the fork source's current state. Default false. Not a snapshot revert: accounts load
+   * again from the source as it is now, and the clock goes back to the source's.
+   */
+  resetEach?: boolean;
+}
+
+const EACH_HOOK_TIMEOUT_MS = 30_000;
 
 /** Slack on top of forkit's own ceilings, so forkit's error wins the race against the runner's. */
 const HOOK_SLACK_MS = 5_000;
@@ -65,6 +91,47 @@ class DeferredSurfnet implements Surfnet {
   stop(): Promise<void> {
     return this.#surfnet.stop();
   }
+  setAccount(account: Address, patch: AccountPatch): Promise<void> {
+    return this.#surfnet.setAccount(account, patch);
+  }
+  dealSol(account: Address, lamports: bigint): Promise<void> {
+    return this.#surfnet.dealSol(account, lamports);
+  }
+  deal(
+    mint: Address,
+    owner: Address,
+    amount: bigint,
+    options?: DealTokenOptions,
+  ): Promise<Address> {
+    return this.#surfnet.deal(mint, owner, amount, options);
+  }
+  clock(): Promise<SurfnetClock> {
+    return this.#surfnet.clock();
+  }
+  warp(seconds: bigint | number): Promise<SurfnetClock> {
+    return this.#surfnet.warp(seconds);
+  }
+  roll(slots: bigint | number): Promise<SurfnetClock> {
+    return this.#surfnet.roll(slots);
+  }
+  warpTo(target: WarpTarget): Promise<SurfnetEpochInfo> {
+    return this.#surfnet.warpTo(target);
+  }
+  pauseClock(): Promise<SurfnetEpochInfo> {
+    return this.#surfnet.pauseClock();
+  }
+  resumeClock(): Promise<SurfnetEpochInfo> {
+    return this.#surfnet.resumeClock();
+  }
+  etch(programId: Address, program: Uint8Array | string, options?: EtchOptions): Promise<void> {
+    return this.#surfnet.etch(programId, program, options);
+  }
+  setProgramAuthority(programId: Address, authority: Address | null): Promise<void> {
+    return this.#surfnet.setProgramAuthority(programId, authority);
+  }
+  reset(account?: Address, options?: ResetOptions): Promise<void> {
+    return this.#surfnet.reset(account, options);
+  }
 }
 
 /**
@@ -72,7 +139,7 @@ class DeferredSurfnet implements Surfnet {
  * are being collected: a missing or too-old surfpool throws right here, so the suite fails
  * loudly instead of skipping.
  */
-export function createSurfnetSuite(options: SurfnetOptions, hooks: SuiteHooks): Surfnet {
+export function createSurfnetSuite(options: SurfnetSuiteOptions, hooks: SuiteHooks): Surfnet {
   assertSurfpoolInstalled(resolveSurfpoolBinary(options.surfpoolBinary));
   let current: Surfnet | undefined;
   hooks.beforeAll(
@@ -91,5 +158,10 @@ export function createSurfnetSuite(options: SurfnetOptions, hooks: SuiteHooks): 
     },
     (options.stopTimeoutMs ?? DEFAULT_SURFNET_STOP_TIMEOUT_MS) + HOOK_SLACK_MS,
   );
+  if (options.resetEach === true) {
+    hooks.afterEach(async () => {
+      await current?.reset();
+    }, EACH_HOOK_TIMEOUT_MS);
+  }
   return new DeferredSurfnet(() => current);
 }

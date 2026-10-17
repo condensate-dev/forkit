@@ -1,6 +1,7 @@
 /**
  * The contract every forkit/svm runner adapter keeps, run by each runner's own test file.
  */
+import { address } from "@solana/kit";
 import { redactUrl } from "../../src/rpc.ts";
 import type { SurfnetAdapter } from "../../src/svm/index.ts";
 import { SEEDED, SEEDED_LAMPORTS } from "./upstream.ts";
@@ -55,6 +56,19 @@ export function adapterContract(
         expect.equal(t.source, "offline");
         expect.equal(t.rpcUrl === firstUrl, false);
       });
+    });
+  });
+
+  const FRESH = address("GQ6LhPXYNgTh9fbnomAjzj4nS6DjSAQWdZGQuYTCkrMc");
+  describeSurfnet(`${runner}: resetEach`, { rpcUrl: upstreamUrl, resetEach: true }, () => {
+    itSurfnet("cheats through the suite's handle", async (t) => {
+      await t.dealSol(FRESH, 5_000n);
+      await t.dealSol(SEEDED, 1n);
+      expect.equal((await t.rpc.getBalance(FRESH).send()).value, 5_000n);
+    });
+    itSurfnet("the next test starts from the fork source again", async (t) => {
+      expect.equal((await t.rpc.getBalance(FRESH).send()).value, 0n);
+      expect.equal((await t.rpc.getBalance(SEEDED).send()).value, SEEDED_LAMPORTS);
     });
   });
 

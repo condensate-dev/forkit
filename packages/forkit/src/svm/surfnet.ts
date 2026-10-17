@@ -17,6 +17,7 @@ import {
 import { freePort } from "../anvil.ts";
 import { ForkitError } from "../errors.ts";
 import { redactUrl } from "../rpc.ts";
+import { createCheats, type SurfnetCheats } from "./cheats.ts";
 import { SurfnetBootError } from "./errors.ts";
 import { jsonRpc } from "./rpc.ts";
 import { assertSurfpoolInstalled, resolveSurfpoolBinary } from "./surfpool.ts";
@@ -60,8 +61,8 @@ export interface SurfnetInfo {
   startup: SurfnetStartupStatus;
 }
 
-/** A running surfnet. */
-export interface Surfnet {
+/** A running surfnet's endpoints, clients and lifecycle; {@link Surfnet} adds the cheatcodes. */
+export interface SurfnetBase {
   /** HTTP JSON-RPC endpoint, `http://127.0.0.1:<port>`. */
   readonly rpcUrl: string;
   /** WebSocket endpoint for subscriptions. */
@@ -81,6 +82,9 @@ export interface Surfnet {
   /** Stop surfpool. Idempotent; kills it if it does not exit within `stopTimeoutMs`. */
   stop(): Promise<void>;
 }
+
+/** A running surfnet, with its cheatcodes ({@link SurfnetCheats}). */
+export interface Surfnet extends SurfnetBase, SurfnetCheats {}
 
 /** The fork source: `"offline"`, the option, `FORKIT_SVM_RPC_URL`, or the public mainnet RPC. */
 export function resolveSurfnetSource(
@@ -187,7 +191,7 @@ function exitDescription(code: number | null, signal: NodeJS.Signals | null): st
   return signal !== null ? `was killed by ${signal}` : `exited with code ${code}`;
 }
 
-class RunningSurfnet implements Surfnet {
+class RunningSurfnet implements SurfnetBase {
   readonly rpcUrl: string;
   readonly wsUrl: string;
   readonly source: string;
@@ -264,7 +268,7 @@ async function bootOnce(
   surfpoolVersion: string,
   forkUrl: string | undefined,
   deadline: number,
-): Promise<{ surfnet: RunningSurfnet; tail: OutputTail }> {
+): Promise<{ surfnet: Surfnet; tail: OutputTail }> {
   const ports: Ports = { rpc: await freePort(), ws: await freePort(), studio: await freePort() };
   // surfpool writes logs and state under its working directory: keep that out of the user's repo.
   const workDir = mkdtempSync(join(tmpdir(), "forkit-surfnet-"));
@@ -304,7 +308,12 @@ async function bootOnce(
     for (;;) {
       if (exitedWith !== undefined) throw new Exited(exitedWith);
       const info = await surfnet.info().catch(() => undefined);
-      if (info?.startup.phase === "ready") return { surfnet, tail };
+      if (info?.startup.phase === "ready") {
+        const cheats = createCheats(surfnet.rpc, (method, params) =>
+          surfnet.request(method, params),
+        );
+        return { surfnet: Object.assign(surfnet, cheats), tail };
+      }
       if (info?.startup.phase === "failed") {
         throw new SurfnetBootError(
           `forkit: surfpool reported a failed startup: ${info.startup.error ?? "no reason given"}`,

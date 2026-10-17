@@ -5,6 +5,7 @@
 import { afterAll, afterEach, beforeAll, beforeEach, describe, it } from "bun:test";
 import { createSurfnetAdapter } from "./adapter.ts";
 
+export type { SurfnetSuiteOptions } from "./suite.ts";
 export type { Surfnet, SurfnetOptions } from "./surfnet.ts";
 
 export const { describeSurfnet, itSurfnet } = createSurfnetAdapter({

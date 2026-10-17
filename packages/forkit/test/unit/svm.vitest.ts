@@ -2,12 +2,14 @@ import { describe, expect, test } from "vitest";
 import {
   assertSurfpoolInstalled,
   DEFAULT_SVM_RPC_URL,
+  decodeClock,
   ForkitError,
   parseSurfpoolVersion,
   resolveSurfnetSource,
   resolveSurfpoolBinary,
   SURFPOOL_VERSION,
   SurfpoolNotFoundError,
+  stringifyWithBigints,
   surfpoolArgs,
 } from "../../src/svm/index.ts";
 
@@ -90,5 +92,29 @@ describe("surfpoolArgs", () => {
     expect(args).toContain("--offline");
     expect(args[args.indexOf("--slot-time") + 1]).toBe("50");
     expect(args.slice(-2)).toEqual(["--log-level", "debug"]);
+  });
+});
+
+describe("stringifyWithBigints", () => {
+  test("bigints become exact JSON numbers, strings stay strings", () => {
+    expect(stringifyWithBigints({ a: 18446744073709551615n, b: [1n, "2"], c: -3n })).toBe(
+      '{"a":18446744073709551615,"b":[1,"2"],"c":-3}',
+    );
+  });
+});
+
+describe("decodeClock", () => {
+  test("reads slot, epoch and unix time from the 40-byte Clock sysvar", () => {
+    const data = new Uint8Array(40);
+    const view = new DataView(data.buffer);
+    view.setBigUint64(0, 123n, true);
+    view.setBigInt64(8, 1_700_000_000n, true);
+    view.setBigUint64(16, 7n, true);
+    view.setBigUint64(24, 8n, true);
+    view.setBigInt64(32, 1_700_000_500n, true);
+    expect(decodeClock(data)).toEqual({ slot: 123n, epoch: 7n, unixTimestamp: 1_700_000_500n });
+  });
+  test("refuses a short buffer", () => {
+    expect(() => decodeClock(new Uint8Array(8))).toThrow(/8 bytes/);
   });
 });
