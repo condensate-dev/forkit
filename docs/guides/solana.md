@@ -104,9 +104,11 @@ Every cheatcode is a `surfnet_*` method of surfpool 1.6.1. Balances that a cheat
 | (none) | `s.pauseClock()`, `s.resumeClock()` | `surfnet_pauseClock`, `surfnet_resumeClock` | stop and restart slot production |
 | (none) | `s.clock()` | reads the `Clock` sysvar | `{ slot, epoch, unixTimestamp }` |
 | `vm.snapshot` / `vm.revertTo` | **none** | **none** | surfpool 1.6.1 has no runtime snapshot or revert; see below |
-| `vm.prank(who)` | none | none | Solana transactions carry signatures; sign with a test keypair (`createKeyPairSignerFromPrivateKeyBytes` with a fixed seed) |
+| `vm.prank(who)` | none | none | Solana transactions carry signatures; sign with a test keypair (`createKeyPairSignerFromPrivateKeyBytes` over a hash of a label) |
 
 Lamports, token amounts, slots and timestamps are bigints, and they reach surfpool as exact u64s.
+
+**Test keys on a live fork.** Like Foundry's `deal`, `dealSol` sets only the balance. If an address already exists on mainnet, it keeps that account's owner and data. A fee payer must be a system account with no data, so derive test keys from a hash of a label. Never use a trivial seed: the key for 32 bytes of `0x01` is in use on mainnet as a non-system account, and paying fees from it fails with "This account may not be used to pay transaction fees".
 
 ### Programs
 
