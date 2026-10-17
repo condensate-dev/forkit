@@ -1,4 +1,5 @@
 import { type Rpc, type RpcSubscriptions, type SolanaRpcApi, type SolanaRpcSubscriptionsApi } from "@solana/kit";
+import { type SurfnetCheats } from "./cheats.ts";
 /** Solana's public mainnet-beta RPC: the fork source when nothing else is configured. */
 export declare const DEFAULT_SVM_RPC_URL = "https://api.mainnet-beta.solana.com";
 export declare const DEFAULT_SURFNET_BOOT_TIMEOUT_MS = 60000;
@@ -38,8 +39,8 @@ export interface SurfnetInfo {
     runbookExecutions: readonly unknown[];
     startup: SurfnetStartupStatus;
 }
-/** A running surfnet. */
-export interface Surfnet {
+/** A running surfnet's endpoints, clients and lifecycle; {@link Surfnet} adds the cheatcodes. */
+export interface SurfnetBase {
     /** HTTP JSON-RPC endpoint, `http://127.0.0.1:<port>`. */
     readonly rpcUrl: string;
     /** WebSocket endpoint for subscriptions. */
@@ -58,6 +59,9 @@ export interface Surfnet {
     info(): Promise<SurfnetInfo>;
     /** Stop surfpool. Idempotent; kills it if it does not exit within `stopTimeoutMs`. */
     stop(): Promise<void>;
+}
+/** A running surfnet, with its cheatcodes ({@link SurfnetCheats}). */
+export interface Surfnet extends SurfnetBase, SurfnetCheats {
 }
 /** The fork source: `"offline"`, the option, `FORKIT_SVM_RPC_URL`, or the public mainnet RPC. */
 export declare function resolveSurfnetSource(options: Pick<SurfnetOptions, "rpcUrl" | "offline">, env?: Readonly<Record<string, string | undefined>>): string | undefined;

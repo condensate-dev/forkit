@@ -10,6 +10,7 @@ import { createSolanaRpc, createSolanaRpcSubscriptions, } from "@solana/kit";
 import { freePort } from "../anvil.js";
 import { ForkitError } from "../errors.js";
 import { redactUrl } from "../rpc.js";
+import { createCheats } from "./cheats.js";
 import { SurfnetBootError } from "./errors.js";
 import { jsonRpc } from "./rpc.js";
 import { assertSurfpoolInstalled, resolveSurfpoolBinary } from "./surfpool.js";
@@ -200,8 +201,10 @@ async function bootOnce(options, binary, surfpoolVersion, forkUrl, deadline) {
             if (exitedWith !== undefined)
                 throw new Exited(exitedWith);
             const info = await surfnet.info().catch(() => undefined);
-            if (info?.startup.phase === "ready")
-                return { surfnet, tail };
+            if (info?.startup.phase === "ready") {
+                const cheats = createCheats(surfnet.rpc, (method, params) => surfnet.request(method, params));
+                return { surfnet: Object.assign(surfnet, cheats), tail };
+            }
             if (info?.startup.phase === "failed") {
                 throw new SurfnetBootError(`forkit: surfpool reported a failed startup: ${info.startup.error ?? "no reason given"}`);
             }

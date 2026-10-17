@@ -1,5 +1,13 @@
 import { SurfnetRpcError } from "./errors.js";
 let nextId = 0;
+const BIGINT = "__forkit_bigint__";
+/**
+ * JSON with bigints as plain JSON numbers: surfpool reads lamports, token amounts, slots and
+ * timestamps as u64, and a JS number loses precision above 2^53.
+ */
+export function stringifyWithBigints(value) {
+    return JSON.stringify(value, (_key, v) => typeof v === "bigint" ? `${BIGINT}${v.toString()}` : v).replace(new RegExp(`"${BIGINT}(-?\\d+)"`, "g"), "$1");
+}
 /**
  * One JSON-RPC call over HTTP. forkit/svm uses it for surfpool's own `surfnet_*` methods, which
  * `@solana/kit`'s typed RPC does not know; everything else goes through the handle's `rpc`.
@@ -10,7 +18,7 @@ export async function jsonRpc(url, method, params = [], signal) {
         response = await fetch(url, {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ jsonrpc: "2.0", id: ++nextId, method, params }),
+            body: stringifyWithBigints({ jsonrpc: "2.0", id: ++nextId, method, params }),
             ...(signal === undefined ? {} : { signal }),
         });
     }
