@@ -17,7 +17,10 @@
     "erc-4337",
     "eip-2612",
     "eip-3009",
-    "permit2"
+    "permit2",
+    "solana",
+    "surfpool",
+    "svm"
   ],
   "repository": {
     "type": "git",
@@ -70,6 +73,18 @@
       "types": "./dist/payments/index.d.ts",
       "default": "./dist/payments/index.js"
     },
+    "./svm": {
+      "types": "./dist/svm/index.d.ts",
+      "default": "./dist/svm/index.js"
+    },
+    "./svm/vitest": {
+      "types": "./dist/svm/vitest.d.ts",
+      "default": "./dist/svm/vitest.js"
+    },
+    "./svm/bun": {
+      "types": "./dist/svm/bun.d.ts",
+      "default": "./dist/svm/bun.js"
+    },
     "./explore": {
       "types": "./dist/explore/index.d.ts",
       "default": "./dist/explore/index.js"
@@ -98,7 +113,6 @@
   ],
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.build.json && cp -R src/explore/ui dist/explore/ui",
-    "prepack": "bun run build",
     "typecheck": "tsc -p tsconfig.json",
     "test": "bun run test:bun && bun run test:vitest && bun run test:jest && bun run test:node",
     "test:bun": "bun test ./test/bun.test.ts",
@@ -107,9 +121,13 @@
     "test:node": "node --test test/node.smoke.ts",
     "test:anvil": "vitest run --project anvil --project shared && bun test ./test/anvil/bun-adapter.test.ts && NODE_OPTIONS=--experimental-vm-modules jest --config jest.anvil.config.js && node --test test/anvil/node-adapter.test.ts",
     "test:e2e": "vitest run --project e2e",
+    "test:svm": "../../scripts/with-surfpool.sh sh -c 'vitest run --project svm && bun test ./test/svm/bun-adapter.test.ts'",
+    "test:svm:e2e": "../../scripts/with-surfpool.sh vitest run --project svm-e2e",
     "explore:fixture": "bun test/explore/make-fixture.ts",
     "test:screens": "vitest run --project screens",
-    "test:pack": "bun test/pack/pack.smoke.ts"
+    "test:pack": "bun run build && bun test/pack/pack.smoke.ts",
+    "test:github-install": "bun test/pack/github-install.smoke.ts",
+    "check:dist": "../../scripts/check-dist.sh"
   },
   "dependencies": {
     "prool": "^0.2.16",
@@ -118,6 +136,7 @@
   "devDependencies": {
     "@jest/globals": "^30.5.2",
     "@pimlico/alto": "0.0.21",
+    "@solana/kit": "8.5.0",
     "@swc/core": "^1.16.2",
     "@swc/jest": "^0.2.39",
     "@types/bun": "^1.4.2",
@@ -129,7 +148,8 @@
   "peerDependencies": {
     "@jest/globals": ">=29",
     "@pimlico/alto": ">=0.0.21",
-    "vitest": ">=3"
+    "vitest": ">=3",
+    "@solana/kit": ">=8 <9"
   },
   "peerDependenciesMeta": {
     "@jest/globals": {
@@ -139,6 +159,9 @@
       "optional": true
     },
     "vitest": {
+      "optional": true
+    },
+    "@solana/kit": {
       "optional": true
     }
   },

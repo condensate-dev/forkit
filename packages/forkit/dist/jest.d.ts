@@ -1,0 +1,3 @@
+export type { ForkSuiteOptions, ForkTargets } from "./suite.ts";
+export declare const describeFork: <TChain extends import("viem").Chain>(name: string, targets: import("./suite.ts").ForkTargets<TChain>, body: (fork: import("./types.ts").Fork<TChain>) => void, options?: import("./suite.ts").ForkSuiteOptions) => void, itFork: <TChain extends import("viem").Chain = import("viem").Chain>(name: string, fn: (fork: import("./types.ts").Fork<TChain>) => Promise<void> | void, timeoutMs?: number) => void;
+//# sourceMappingURL=jest.d.ts.map

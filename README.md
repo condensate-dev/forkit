@@ -26,7 +26,13 @@ bun add -d @condensate/forkit viem        # or npm / pnpm / yarn
 curl -L https://foundry.paradigm.xyz | bash && foundryup   # anvil 1.7.1+
 ```
 
-> `@condensate/forkit` isn't published to npm yet. Until it is, use it from this repository.
+> `@condensate/forkit` isn't published to npm yet. Until it is, install it from a commit on GitHub with pnpm. The package lives in `packages/forkit`, and its build is committed, so nothing runs on install:
+>
+> ```sh
+> pnpm add -D "github:condensate-dev/forkit#<commit-sha>&path:/packages/forkit" viem
+> ```
+>
+> For Solana forks (`@condensate/forkit/svm`), add `@solana/kit` 8 and the [surfpool](https://github.com/solana-foundation/surfpool/releases) binary (1.6.1 or newer).
 
 ## Quickstart
 

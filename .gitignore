@@ -1,5 +1,8 @@
 node_modules
 dist
+# Except forkit's own build: it is committed, so a GitHub commit pin installs with no build step
+# (scripts/check-dist.sh keeps it in sync with src/).
+!packages/forkit/dist/
 .anvil-cache
 # Run records (forkit explore) and explorer screenshots: never commit them.
 .forkit/
@@ -9,3 +12,5 @@ site/dist/
 site/.vocs/
 site/src/pages/docs/
 site/src/pages.gen.ts
+# Pinned tool binaries (scripts/install-surfpool.sh).
+.tools/
