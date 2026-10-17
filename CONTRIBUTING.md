@@ -6,7 +6,7 @@
 
 ## Setup
 
-You need [bun](https://bun.sh), Node ≥ 22.18 (for the jest and node:test runners and the 4337 bundler), and foundry's `anvil`, 1.7.1 or newer. CI runs 1.7.1 and stable.
+You need [bun](https://bun.sh), Node ≥ 22.18 (for the jest and node:test runners and the 4337 bundler), and foundry's `anvil`, 1.7.1 or newer. CI runs 1.7.1 and stable. The Solana side (`forkit/svm`) needs surfpool at the pinned release: `bun run test:svm` installs it into `.tools/` for you (`scripts/install-surfpool.sh`, checksum-verified, no sudo), and CI uses the same script.
 
 ```sh
 bun install
@@ -18,7 +18,12 @@ bun run test:anvil    # local anvils, no network; every runner adapter and the s
 bun run test:e2e      # forks real chains; replays committed recordings (FORKIT_CACHE=offline in CI)
 bun run test:examples # the runnable examples, offline, against dist/
 bun run test:pack     # npm pack, install in a fresh project, import under all four runners
+bun run test:svm      # forkit/svm on the pinned surfpool, forking a local offline surfnet; no network
+bun run test:svm:e2e  # forkit/svm forking Solana mainnet-beta (FORKIT_SVM_RPC_URL overrides the public RPC)
+bun run check:dist    # the committed packages/forkit/dist is what src/ builds to
 ```
+
+`packages/forkit/dist` is committed: users install forkit from a GitHub commit pin, with nothing to build. After changing `src/`, run `bun run build` and commit `dist/` with it; `check:dist` fails in CI otherwise.
 
 The package's own tests import `src/` directly. Anything that imports `@condensate/forkit` by name (the examples, users) gets the built `dist/`, so rebuild after changing `src/` before running the examples.
 
