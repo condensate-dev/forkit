@@ -29,6 +29,7 @@
   - [Relay solver simulator](guides/bridges-relay.md)
 - [ERC-4337 bundler](guides/erc-4337.md)
 - [Stablecoin payments](guides/payments.md)
+- [Solana forks with surfpool](guides/solana.md)
 
 ## More
 

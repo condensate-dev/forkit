@@ -15,7 +15,7 @@
     "test:anvil": "bun run --filter '*' test:anvil",
     "test:e2e": "bun run --filter '*' test:e2e",
     "test:svm": "bun run --filter './packages/*' test:svm",
-    "test:svm:e2e": "bun run --filter './packages/*' test:svm:e2e",
+    "test:svm:e2e": "bun run --filter './packages/*' --filter './examples/*' test:svm:e2e",
     "test:screens": "bun run --filter '*' test:screens",
     "test:examples": "bun run --filter './examples/*' test",
     "test:pack": "bun run --filter './packages/*' test:pack",

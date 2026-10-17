@@ -33,6 +33,18 @@
         "jest": "^30.5.2",
       },
     },
+    "examples/vitest-solana": {
+      "name": "forkit-example-vitest-solana",
+      "dependencies": {
+        "@condensate/forkit": "workspace:*",
+        "@solana-program/token": "0.18.0",
+        "@solana/kit": "8.5.0",
+      },
+      "devDependencies": {
+        "@types/node": "26.6.3",
+        "vitest": "^5.0.2",
+      },
+    },
     "examples/vitest-swap": {
       "name": "forkit-example-vitest-swap",
       "dependencies": {
@@ -69,11 +81,13 @@
       "peerDependencies": {
         "@jest/globals": ">=29",
         "@pimlico/alto": ">=0.0.21",
+        "@solana/kit": ">=8 <9",
         "vitest": ">=3",
       },
       "optionalPeers": [
         "@jest/globals",
         "@pimlico/alto",
+        "@solana/kit",
         "vitest",
       ],
     },
@@ -484,6 +498,10 @@
     "@sinonjs/commons": ["@sinonjs/commons@3.0.1", "", { "dependencies": { "type-detect": "4.0.8" } }, "sha512-K3mCHKQ9sVh8o1C9cxkwxaOmXoAMlDxC1mYyHrjqOWEcBjYr76t96zL2zlj5dUGZ3HSw240X1qgH3Mjf1yJWpQ=="],
 
     "@sinonjs/fake-timers": ["@sinonjs/fake-timers@15.4.0", "", { "dependencies": { "@sinonjs/commons": "^3.0.1" } }, "sha512-DsG+8/LscQIQg68J6Ef3dv10u6nVyetYn923s3/sus5eaGfTo1of5WMZSLf0UJc9KDuKPilPH0UDJCjvNbDNCA=="],
+
+    "@solana-program/system": ["@solana-program/system@0.16.0", "", { "peerDependencies": { "@solana/kit": "^8.5.0" } }, "sha512-/RG6q2E2vG/XpdOt8Jj/kbQktPlL5JyJuNGAeN9wDcxKDKQtrGTJpDrJgQUxiEy23fsPNXQbLN8XeCtYoMof3Q=="],
+
+    "@solana-program/token": ["@solana-program/token@0.18.0", "", { "dependencies": { "@solana-program/system": "^0.16.0" }, "peerDependencies": { "@solana/kit": "^8.5.0" } }, "sha512-YNN13I4BxBnGPGk0NzP/LLQMCmJVdunbtgqjl7/Gfp1fDXQrKXh9df8xu+2ayNdvjGJYC4c9D5vZpVetHdyJaQ=="],
 
     "@solana/accounts": ["@solana/accounts@8.5.0", "", { "dependencies": { "@solana/addresses": "8.5.0", "@solana/codecs-core": "8.5.0", "@solana/codecs-strings": "8.5.0", "@solana/errors": "8.5.0", "@solana/rpc-spec": "8.5.0", "@solana/rpc-types": "8.5.0" }, "peerDependencies": { "typescript": ">=5.4.0" }, "optionalPeers": ["typescript"] }, "sha512-vwwXYCobg1oG4kFeUEsGiNORjPujI2ff3yKLp6lCa7QBIlKaD7kZ2QRI3PZFYcNrMJ6HYNwNeZXR7ixg02pWdA=="],
 
@@ -948,6 +966,8 @@
     "forkit-example-bun-multichain": ["forkit-example-bun-multichain@workspace:examples/bun-multichain"],
 
     "forkit-example-jest-bridge": ["forkit-example-jest-bridge@workspace:examples/jest-bridge"],
+
+    "forkit-example-vitest-solana": ["forkit-example-vitest-solana@workspace:examples/vitest-solana"],
 
     "forkit-example-vitest-swap": ["forkit-example-vitest-swap@workspace:examples/vitest-swap"],
 

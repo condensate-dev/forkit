@@ -74,7 +74,7 @@ jobs:
   svm:
     # forkit/svm against a real surfpool: the pinned release binary (scripts/install-surfpool.sh
     # checks its sha256). test:svm forks a local offline surfnet, no network; test:svm:e2e forks
-    # Solana mainnet-beta over the public RPC.
+    # Solana mainnet-beta over the public RPC (the package's e2e and examples/vitest-solana).
     name: svm tests (surfpool, pinned)
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -91,6 +91,7 @@ jobs:
         run: echo "FORKIT_SURFPOOL_BIN=$(scripts/install-surfpool.sh)" >> "$GITHUB_ENV"
       - run: '"$FORKIT_SURFPOOL_BIN" --version'
       - run: bun run test:svm
+      # examples/* import forkit as users do, from its committed dist/.
       - run: bun run test:svm:e2e
 
   pack:

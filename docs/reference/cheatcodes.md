@@ -325,3 +325,7 @@ const called = calls(root).some(
   (c) => c.to?.toLowerCase() === target.toLowerCase() && c.input.startsWith(selector),
 );
 ```
+
+## Solana
+
+On Solana, `@condensate/forkit/svm` forks with surfpool and has its own cheatcodes: `dealSol`, `deal(mint, owner, amount)`, `setAccount`, `etch` for a program `.so`, `warp` and `roll` on the `Clock`, and `reset`. There is no snapshot or revert, because surfpool 1.6.1 has none. The [Solana chapter](../guides/solana.md#cheatcodes) maps each one to Foundry and to its `surfnet_*` method.
