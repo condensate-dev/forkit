@@ -17,6 +17,6 @@ bun install              # at the repo root: the examples are workspace packages
 bun run test:examples    # all three
 ```
 
-Inside this repo the examples depend on `@condensate/forkit` through the workspace
+Inside this repo the examples depend on `@condensate_dev/forkit` through the workspace
 (`"workspace:*"`). To copy one into your own project, copy its directory and replace that with the
 published version.

@@ -1,5 +1,5 @@
 /**
- * `@condensate/forkit/bridges`: simulated relayers and solvers for cross-chain tests on a
+ * `@condensate_dev/forkit/bridges`: simulated relayers and solvers for cross-chain tests on a
  * multi-chain fork. `bridge.across(f)`, `bridge.relay(f)`, or `bridge.custom(f, {...})` for any
  * other bridge; then `await b.settle()` fills every pending deposit and `b.fills` lists them.
  */

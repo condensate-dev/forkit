@@ -3,8 +3,8 @@
 Test a cross-chain route end to end on a [multi-chain fork](multi-chain.md), with no live relayer and no live quote API:
 
 ```ts
-import { bridge } from "@condensate/forkit/bridges";
-import { http } from "@condensate/forkit/http";
+import { bridge } from "@condensate_dev/forkit/bridges";
+import { http } from "@condensate_dev/forkit/http";
 
 const f = await fork([{ chain: base, blockNumber: B }, { chain: arbitrum, blockNumber: A }]);
 const across = bridge.across(f);                 // watch Base's SpokePool from now on
@@ -20,7 +20,7 @@ fill.outputAmount; fill.details.fee;             // assert on economics
 
 | Piece | What it does | Guide |
 |---|---|---|
-| `@condensate/forkit/http` | intercepts `globalThis.fetch`: records quote APIs once, replays them pinned to the fork block, and redacts secrets | [HTTP record/replay](http-replay.md) |
+| `@condensate_dev/forkit/http` | intercepts `globalThis.fetch`: records quote APIs once, replays them pinned to the fork block, and redacts secrets | [HTTP record/replay](http-replay.md) |
 | `bridge.across(f)` | watches Across SpokePool deposits; `settle()` fills them on the destination as a funded relayer | [Across](bridges-across.md) |
 | `bridge.relay(f)` | watches Relay's depository; a simulated solver pays the order you register | [Relay](bridges-relay.md) |
 | `bridge.custom(f, { originEvent, destinationOf, onDeposit })` | any other bridge | below |

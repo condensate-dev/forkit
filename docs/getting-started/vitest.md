@@ -7,7 +7,7 @@ This page gets you from nothing to a passing fork test on vitest. The test forks
 ## 1. Install
 
 ```sh
-npm install -D @condensate/forkit viem vitest
+npm install -D @condensate_dev/forkit viem vitest
 curl -L https://foundry.paradigm.xyz | bash
 foundryup
 anvil --version
@@ -51,7 +51,7 @@ forkit sets the timeouts of its own hooks, so the fork boot is not cut off by `h
 import { type Address, erc20Abi, parseEther, parseUnits } from "viem";
 import { base } from "viem/chains";
 import { expect } from "vitest";
-import { describeFork, itFork } from "@condensate/forkit/vitest";
+import { describeFork, itFork } from "@condensate_dev/forkit/vitest";
 
 const USDC: Address = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913"; // USDC on Base
 // Fresh addresses: vanity ones (0x…a11ce) often hold airdropped tokens on real chains.
@@ -103,7 +103,7 @@ describeFork("USDC on Base", { chain: base, blockNumber: 51_800_000n }, (f) => {
 - `f.deal(token, holder, amount)` sets an ERC-20 balance to exactly `amount` and reads `balanceOf` back to confirm it. `f.dealNative(holder, amount)` sets the native balance.
 - `f.prank(account, fn)` impersonates `account` while `fn` runs. `c` is a viem client whose account is that address, so no private key is needed. Impersonation stops when `fn` settles.
 - Writes on a fork client return once the transaction is mined, so the next read sees it.
-- `f.expectBalanceChange(token, holder, delta, fn)` runs `fn` and throws `ForkitAssertionError` unless the balance changed by exactly `delta`. Use a negative `delta` for a decrease. Import `NATIVE` from `@condensate/forkit` to check the native balance. It resolves to what `fn` resolved to.
+- `f.expectBalanceChange(token, holder, delta, fn)` runs `fn` and throws `ForkitAssertionError` unless the balance changed by exactly `delta`. Use a negative `delta` for a decrease. Import `NATIVE` from `@condensate_dev/forkit` to check the native balance. It resolves to what `fn` resolved to.
 - `itFork` also passes the fork to its callback (`async (g) => ...`). The body's `f` is precisely typed. `g` is typed `Fork<Chain>` unless you write `itFork<typeof base>(...)`.
 
 ## 4. Run it
@@ -125,7 +125,7 @@ The first run fetches state from Base's public RPC (`https://mainnet.base.org`, 
 import { type Address, erc20Abi, parseUnits } from "viem";
 import { base } from "viem/chains";
 import { beforeEach, describe, expect } from "vitest";
-import { describeFork, itFork } from "@condensate/forkit/vitest";
+import { describeFork, itFork } from "@condensate_dev/forkit/vitest";
 
 const USDC: Address = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
 const alice: Address = "0x778dd60929c5b6f928aeab807fec6986f6ea3d82";

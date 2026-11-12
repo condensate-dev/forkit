@@ -4,7 +4,7 @@ Booting and syncing a fork is the slow part. So boot it once in a global setup, 
 
 ```ts
 // vitest.global-setup.ts   (vitest.config: test.globalSetup)
-import { startSharedForks } from "@condensate/forkit";
+import { startSharedForks } from "@condensate_dev/forkit";
 import { base } from "viem/chains";
 
 export default async () => (await startSharedForks({ chain: base, blockNumber: 51_800_000n })).stop;
