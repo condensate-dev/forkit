@@ -1,6 +1,6 @@
 /**
  * Builds `describeFork` / `itFork` for one test runner from its `describe`, `it` and hooks. Each
- * runner adapter (`@condensate/forkit/vitest`, `/bun`, `/jest`, `/node`) is this plus imports.
+ * runner adapter (`@condensate_dev/forkit/vitest`, `/bun`, `/jest`, `/node`) is this plus imports.
  */
 import type { Chain } from "viem";
 import { ForkitError } from "./errors.ts";

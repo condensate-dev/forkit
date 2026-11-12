@@ -40,7 +40,7 @@ the repo root and commit `.forkit-cache/`.
 
 ## forkit features used
 
-- `describeFork` / `itFork` from `@condensate/forkit/bun`, with an array of targets: a multi-chain
+- `describeFork` / `itFork` from `@condensate_dev/forkit/bun`, with an array of targets: a multi-chain
   fork, booted in parallel.
 - `f.on(chain)`, called while tests are collected; it resolves once the forks are up.
 - `f.forks`, `f.chain`, `f.rpcUrl`.

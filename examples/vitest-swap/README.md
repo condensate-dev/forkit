@@ -41,7 +41,7 @@ the recording) and commit `.forkit-cache/` and `.gas-snapshot`.
 
 ## forkit features used
 
-- `describeFork` / `itFork` from `@condensate/forkit/vitest`: one anvil per `describeFork`, each
+- `describeFork` / `itFork` from `@condensate_dev/forkit/vitest`: one anvil per `describeFork`, each
   test reverted to a clean snapshot.
 - `f.deal` (ERC-20) and `f.dealNative`.
 - `f.prank`: send as `alice` without her key.

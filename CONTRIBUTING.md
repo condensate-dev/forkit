@@ -20,7 +20,7 @@ bun run test:examples # the runnable examples, offline, against dist/
 bun run test:pack     # npm pack, install in a fresh project, import under all four runners
 ```
 
-The package's own tests import `src/` directly. Anything that imports `@condensate/forkit` by name (the examples, users) gets the built `dist/`, so rebuild after changing `src/` before running the examples.
+The package's own tests import `src/` directly. Anything that imports `@condensate_dev/forkit` by name (the examples, users) gets the built `dist/`, so rebuild after changing `src/` before running the examples.
 
 Before a PR, run all of them on **both** anvil versions. A fork test that passes on only one version is a bug.
 

@@ -1,5 +1,5 @@
 /**
- * `@condensate/forkit/explore/record`: record runs without setting `FORKIT_RECORD` by hand.
+ * `@condensate_dev/forkit/explore/record`: record runs without setting `FORKIT_RECORD` by hand.
  *
  * - As a global setup (vitest or jest `globalSetup`), it turns recording on for every worker and
  *   gives them one run id.

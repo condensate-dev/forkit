@@ -735,8 +735,8 @@ export function snippets(idx, tx) {
   const test = idx.tests.get(key);
   const usesRevert = steps.some((s) => s.includes("expectRevert"));
   const forkit = [
-    ...(usesRevert ? [`import { expectRevert } from "@condensate/forkit";`] : []),
-    `import { describeFork, itFork } from "@condensate/forkit/vitest";`,
+    ...(usesRevert ? [`import { expectRevert } from "@condensate_dev/forkit";`] : []),
+    `import { describeFork, itFork } from "@condensate_dev/forkit/vitest";`,
     chainImportLine,
     "",
     `describeFork("replay", { chain: ${chainRef}${block ? `, blockNumber: ${bigintLiteral(block)}` : ""} }, (f) => {`,

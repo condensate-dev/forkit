@@ -1,5 +1,5 @@
 /**
- * `@condensate/forkit/payments`: stablecoin payments on a fork. Sign EIP-2612 permits, EIP-3009
+ * `@condensate_dev/forkit/payments`: stablecoin payments on a fork. Sign EIP-2612 permits, EIP-3009
  * authorizations and Permit2 transfers against real tokens with deterministic test keys, get past
  * USDT's and USDC's quirks, and assert what the payment changed.
  *

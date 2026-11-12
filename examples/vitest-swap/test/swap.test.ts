@@ -11,8 +11,8 @@
  * - ABIs: IV3SwapRouter.sol (Uniswap/swap-router-contracts), IQuoterV2.sol (Uniswap/v3-periphery)
  */
 import { fileURLToPath } from "node:url";
-import { expectRevert, label } from "@condensate/forkit";
-import { describeFork, itFork } from "@condensate/forkit/vitest";
+import { expectRevert, label } from "@condensate_dev/forkit";
+import { describeFork, itFork } from "@condensate_dev/forkit/vitest";
 import {
   type Address,
   encodeFunctionData,

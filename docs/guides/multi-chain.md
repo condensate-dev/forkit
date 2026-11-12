@@ -4,7 +4,7 @@ Pass several chains to `fork()` (or `describeFork`) to fork them side by side. E
 
 ```ts
 import { arbitrum, base } from "viem/chains";
-import { fork } from "@condensate/forkit";
+import { fork } from "@condensate_dev/forkit";
 
 const f = await fork([
   { chain: base, blockNumber: 51_800_000n },

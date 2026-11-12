@@ -31,7 +31,7 @@ function test_transfer() public {
 import { erc20Abi, parseEther } from "viem";
 import { base } from "viem/chains";
 import { beforeAll } from "vitest";
-import { describeFork, itFork } from "@condensate/forkit/vitest";
+import { describeFork, itFork } from "@condensate_dev/forkit/vitest";
 
 // RPC: FORKIT_RPC_URL_8453, else base's default RPC.
 describeFork("transfer", { chain: base, blockNumber: 21_000_000n }, (f) => {
@@ -101,7 +101,7 @@ Sources: [prank](https://getfoundry.sh/reference/cheatcodes/prank), [startPrank]
 
 | Foundry | forkit | Note |
 |---|---|---|
-| `makeAddrAndKey(name)` (forge-std) | `testAccount(name)` from `@condensate/forkit/payments` | A viem private-key account whose key is hashed from `name`, labelled `name`. forkit hashes in a prefix, so its keys differ from forge-std's for the same name. |
+| `makeAddrAndKey(name)` (forge-std) | `testAccount(name)` from `@condensate_dev/forkit/payments` | A viem private-key account whose key is hashed from `name`, labelled `name`. forkit hashes in a prefix, so its keys differ from forge-std's for the same name. |
 | `makeAddr(name)` (forge-std) | `testAddress(name)` | Labelled `name`. Unlike forge-std's, no one holds its key. |
 | `vm.addr(privateKey)` | `privateKeyToAccount(privateKey).address` (viem) | |
 | `vm.sign(privateKey, digest)` | `await account.sign({ hash: digest })` (viem) | Returns the 65-byte signature; viem's `parseSignature` splits it into `r`, `s` and `v`. For EIP-712 messages, `account.signTypedData(...)`. |
@@ -166,7 +166,7 @@ Source: [writing tests](https://getfoundry.sh/forge/writing-tests) ("`setUp()` r
 
 ## Assertions
 
-`expectRevert`, `expectEmit` and `expectBalanceChange` come from `@condensate/forkit`. They throw `ForkitAssertionError` in any runner.
+`expectRevert`, `expectEmit` and `expectBalanceChange` come from `@condensate_dev/forkit`. They throw `ForkitAssertionError` in any runner.
 
 ### Reverts
 
@@ -187,7 +187,7 @@ Foundry checks "the next call", which with nested calls can be an inner one. for
 A reverting write normally rejects at gas estimation. If you pass `gas` explicitly, anvil mines the reverted transaction instead. Then pass the receipt promise and `{ client: f.client }`, so forkit can trace the transaction to find the revert data.
 
 ```ts
-import { expectRevert } from "@condensate/forkit";
+import { expectRevert } from "@condensate_dev/forkit";
 
 await f.prank(alice, async (c) => {
   await expectRevert(
@@ -215,7 +215,7 @@ await f.prank(alice, async (c) => {
 
 ```ts
 import { getAbiItem } from "viem";
-import { expectEmit } from "@condensate/forkit";
+import { expectEmit } from "@condensate_dev/forkit";
 
 const receipt = await f.client.waitForTransactionReceipt({ hash });
 expectEmit(receipt, getAbiItem({ abi: vaultAbi, name: "Deposited" }), { account: alice }, { address: vault });
@@ -298,7 +298,7 @@ Sources: [store](https://getfoundry.sh/reference/cheatcodes/store), [load](https
 
 | Foundry | Closest workaround |
 |---|---|
-| `vm.mockCall` / `clearMockedCalls` | None per calldata. `f.client.setCode` replaces a contract's whole code with a stub you compile (like `vm.etch`). For off-chain quote APIs, `@condensate/forkit/http` records and replays HTTP. |
+| `vm.mockCall` / `clearMockedCalls` | None per calldata. `f.client.setCode` replaces a contract's whole code with a stub you compile (like `vm.etch`). For off-chain quote APIs, `@condensate_dev/forkit/http` records and replays HTTP. |
 | `vm.expectCall` | Trace the transaction and check the call tree: read `await f.trace(hash)`, or request `debug_traceTransaction` with `{ tracer: "callTracer" }` and walk the frames (the `CallFrame` type is exported). |
 | `vm.assume`, fuzz tests, `bound`, invariant tests | forkit has no fuzzer. Use a property-testing library such as fast-check, or the runner's `test.each`, and keep each run small, because every case forks real state. |
 | `vm.warp` / `vm.roll` backwards, `rewind` | `f.snapshot()` before, `f.revertTo(id)` after. |
@@ -311,7 +311,7 @@ Sources: [store](https://getfoundry.sh/reference/cheatcodes/store), [load](https
 | `forge snapshot --diff`, `--tolerance` | None. |
 
 ```ts
-import type { CallFrame } from "@condensate/forkit";
+import type { CallFrame } from "@condensate_dev/forkit";
 
 // A stand-in for vm.expectCall: did the transaction call `target` with this selector?
 // viem's anvil schema doesn't type debug_traceTransaction, hence the untyped request.
