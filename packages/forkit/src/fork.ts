@@ -48,21 +48,27 @@ export function toForkOptions<TChain extends Chain>(
 }
 
 /**
- * The anvil flags forkit passes. Exported for tests. `viaCache` means `url` is forkit's local
- * recording proxy: then anvil's own disk cache is off (it would hide requests from the
- * recording) and so is its rate limiter (the proxy is local).
+ * The anvil flags forkit passes. Exported for tests. `url` is the upstream to fork, or `undefined`
+ * for an empty chain (`forkUrl: false`). `viaCache` means `url` is forkit's local recording proxy:
+ * then anvil's own disk cache is off (it would hide requests from the recording) and so is its
+ * rate limiter (the proxy is local).
  */
 export function anvilParameters(
   options: ForkOptions,
-  url: string,
+  url: string | undefined,
   port: number,
   viaCache = false,
 ): Instance.anvil.Parameters {
+  // prool renders `false` as `--flag false`, which anvil rejects.
+  const extra = Object.fromEntries(
+    Object.entries(options.anvil ?? {}).filter(([, value]) => value !== false),
+  );
   return {
+    ...extra,
     binary: options.anvilBinary ?? "anvil",
     host: "127.0.0.1",
     port,
-    forkUrl: url,
+    ...(url === undefined ? { chainId: options.chain.id } : { forkUrl: url }),
     ...(options.blockNumber === undefined ? {} : { forkBlockNumber: options.blockNumber }),
     // Only ever pass `true`: prool renders `false` as `--optimism false`, which anvil rejects.
     ...(isOpStack(options.chain) ? { optimism: true } : {}),
@@ -426,8 +432,14 @@ async function forkOne<TChain extends Chain>(
   const warn = options.onWarn ?? ((message: string) => console.warn(message));
   assertAnvilInstalled(options.anvilBinary);
 
-  const rpc = resolveForkUrl(chain, options.forkUrl);
-  if (options.blockNumber === undefined) {
+  // `forkUrl: false`: an empty chain with nothing behind it.
+  const rpc = options.forkUrl === false ? undefined : resolveForkUrl(chain, options.forkUrl);
+  if (rpc === undefined && options.blockNumber !== undefined) {
+    throw new ForkitError(
+      `forkit: ${chain.name} (${chain.id}) has forkUrl: false, so there is no block ${options.blockNumber} to pin. Drop blockNumber or give a forkUrl.`,
+    );
+  }
+  if (rpc !== undefined && options.blockNumber === undefined) {
     warn(
       `forkit: forking ${chain.name} (${chain.id}) at the live head. This run is not reproducible; pin blockNumber.`,
     );
@@ -438,7 +450,7 @@ async function forkOne<TChain extends Chain>(
   const cacheSettings = resolveCacheSettings(options.cache, options.cacheDir);
   const settings = resolveHandleSettings(options);
   const cache =
-    options.blockNumber === undefined || cacheSettings.mode === "off"
+    rpc === undefined || options.blockNumber === undefined || cacheSettings.mode === "off"
       ? undefined
       : await startRpcCache({
           upstream: rpc.url,
@@ -446,17 +458,20 @@ async function forkOne<TChain extends Chain>(
           blockNumber: options.blockNumber,
           mode: cacheSettings.mode,
           dir: cacheSettings.dir,
-          port: await freePort(),
         });
 
-  const port = await freePort();
+  const port = options.port ?? (await freePort());
   const instance = Instance.anvil(
-    anvilParameters(options, cache?.url ?? rpc.url, port, cache !== undefined),
+    anvilParameters(options, cache?.url ?? rpc?.url, port, cache !== undefined),
   );
   const bootTimeoutMs = options.bootTimeoutMs ?? DEFAULT_BOOT_TIMEOUT_MS;
-  const where = `${chain.name} (${chain.id}) via ${redactUrl(rpc.url)}${
-    options.blockNumber === undefined ? "" : ` at block ${options.blockNumber}`
-  }`;
+  const upstream = rpc === undefined ? "no upstream" : redactUrl(rpc.url);
+  const where =
+    rpc === undefined
+      ? `${chain.name} (${chain.id}) with no upstream`
+      : `${chain.name} (${chain.id}) via ${upstream}${
+          options.blockNumber === undefined ? "" : ` at block ${options.blockNumber}`
+        }`;
   const bootStarted = Date.now();
   try {
     await withTimeout(
@@ -464,7 +479,9 @@ async function forkOne<TChain extends Chain>(
       bootTimeoutMs,
       () =>
         new ForkBootError(
-          `forkit: anvil did not become ready within ${bootTimeoutMs}ms forking ${where}. Public RPCs are slow and rate limited; set ${rpcEnvVar(chain.id)} to a paid endpoint or raise bootTimeoutMs.`,
+          rpc === undefined
+            ? `forkit: anvil did not become ready within ${bootTimeoutMs}ms starting ${where}.`
+            : `forkit: anvil did not become ready within ${bootTimeoutMs}ms forking ${where}. Public RPCs are slow and rate limited; set ${rpcEnvVar(chain.id)} to a paid endpoint or raise bootTimeoutMs.`,
         ),
     );
   } catch (error) {
@@ -504,7 +521,7 @@ async function forkOne<TChain extends Chain>(
   if (servedChainId !== chain.id) {
     const stopFailure = await failureOf(handle.stop());
     throw bootError(
-      `forkit: ${redactUrl(rpc.url)} serves chain ${servedChainId}, but the fork asked for ${chain.name} (${chain.id}).`,
+      `forkit: ${upstream} serves chain ${servedChainId}, but the fork asked for ${chain.name} (${chain.id}).`,
       undefined,
       stopFailure,
     );
@@ -516,7 +533,7 @@ async function forkOne<TChain extends Chain>(
     chainId: chain.id,
     chainName: chain.name,
     ...(options.blockNumber === undefined ? {} : { blockNumber: options.blockNumber }),
-    upstream: redactUrl(rpc.url),
+    upstream,
     rpcUrl,
     ...(cacheStats === undefined ? {} : { cache: cacheStats }),
     bootMs: Date.now() - bootStarted,
@@ -576,6 +593,21 @@ export async function attachForks(
   const first = handles[0];
   if (first === undefined) throw new ForkitError("forkit: nothing to attach to.");
   return first as unknown as Fork;
+}
+
+/**
+ * A handle on an anvil that something else started (your own launcher, a container): `deal`,
+ * `prank`, `trace`, `bundler(f)` and the rest work on it. forkit checks that `rpcUrl` serves the
+ * chain. `stop()` leaves the anvil running. Of the options, only `traces`, the gas snapshot
+ * settings and `onWarn` apply.
+ */
+export async function attachFork<TChain extends Chain>(
+  target: ForkTarget<TChain>,
+  rpcUrl: string,
+): Promise<Fork<TChain>> {
+  const options = toForkOptions(target) as unknown as ForkOptions;
+  const handle = await attachForks([{ options, rpcUrl }], async () => {});
+  return handle as unknown as Fork<TChain>;
 }
 
 /**

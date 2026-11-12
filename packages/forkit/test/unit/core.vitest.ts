@@ -64,6 +64,19 @@ describe("OP-stack detection and anvil flags", () => {
     });
     expect("noStorageCaching" in anvilParameters({ chain: mainnet }, "http://rpc", 1)).toBe(false);
   });
+
+  test("passes extra anvil flags, drops false ones, and keeps forkit's own", () => {
+    const anvil = { stepsTracing: true, gasLimit: 9n, noMining: false, port: 1 } as never;
+    const params = anvilParameters({ chain: mainnet, anvil }, "http://rpc", 4242);
+    expect(params).toMatchObject({ stepsTracing: true, gasLimit: 9n, port: 4242 });
+    expect("noMining" in params).toBe(false);
+  });
+
+  test("with no upstream, starts an empty chain with the chain's id", () => {
+    const params = anvilParameters({ chain: mainnet, forkUrl: false }, undefined, 1);
+    expect(params.chainId).toBe(mainnet.id);
+    expect("forkUrl" in params).toBe(false);
+  });
 });
 
 describe("ports", () => {

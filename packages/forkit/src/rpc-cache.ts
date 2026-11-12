@@ -9,6 +9,7 @@
 import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { dirname, join, resolve } from "node:path";
+import { freePort } from "./anvil.ts";
 import { type ForkCacheMiss, ForkCacheMissError } from "./errors.ts";
 import { redactUrl } from "./rpc.ts";
 
@@ -48,6 +49,11 @@ export interface RpcCache {
   readonly url: string;
   stats(): RpcCacheStats;
   /**
+   * Write new entries to disk now and keep serving. For a fork that runs for hours: a process
+   * that is killed keeps what it recorded up to its last flush. Does nothing unless `readwrite`.
+   */
+  flush(): void;
+  /**
    * Stop serving and write new entries to disk. Offline, it then rejects with a
    * {@link ForkCacheMissError} if any request missed the recording.
    */
@@ -60,7 +66,8 @@ export interface RpcCacheOptions {
   blockNumber: bigint;
   mode: Exclude<CacheMode, "off">;
   dir: string;
-  port: number;
+  /** Port on 127.0.0.1. Default: a free port from the OS. */
+  port?: number;
 }
 
 interface CacheFile {
@@ -459,14 +466,30 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
       );
     });
   });
+  const port = options.port ?? (await freePort());
   await new Promise<void>((ok, fail) => {
     server.once("error", fail);
-    server.listen(options.port, "127.0.0.1", () => ok());
+    server.listen(port, "127.0.0.1", () => ok());
   });
+
+  const flush = (): void => {
+    if (options.mode !== "readwrite" || (fresh.size === 0 && freshUnsupported.size === 0)) return;
+    // Merge with whatever parallel runs wrote meanwhile.
+    const onDisk = readCacheFile(path);
+    writeCacheFile(path, {
+      version: 1,
+      chainId: options.chainId,
+      blockNumber: options.blockNumber.toString(),
+      unsupported: [...new Set([...onDisk.unsupported, ...freshUnsupported])].sort(),
+      entries: { ...onDisk.entries, ...Object.fromEntries(fresh) },
+    });
+    fresh.clear();
+    freshUnsupported.clear();
+  };
 
   let closed: Promise<void> | undefined;
   return {
-    url: `http://127.0.0.1:${options.port}`,
+    url: `http://127.0.0.1:${port}`,
     stats: () => ({
       path,
       mode: options.mode,
@@ -475,23 +498,14 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
       entries: entries.size,
       missesByMethod: { ...missesByMethod },
     }),
+    flush,
     close() {
       closed ??= (async () => {
         await new Promise<void>((ok) => {
           server.close(() => ok());
           server.closeAllConnections();
         });
-        if (options.mode === "readwrite" && (fresh.size > 0 || freshUnsupported.size > 0)) {
-          // Merge with whatever parallel runs wrote meanwhile.
-          const onDisk = readCacheFile(path);
-          writeCacheFile(path, {
-            version: 1,
-            chainId: options.chainId,
-            blockNumber: options.blockNumber.toString(),
-            unsupported: [...new Set([...onDisk.unsupported, ...freshUnsupported])].sort(),
-            entries: { ...onDisk.entries, ...Object.fromEntries(fresh) },
-          });
-        }
+        flush();
         // A warning here would go unseen (test runners swallow a passing file's console), and a
         // miss can pass unnoticed: anvil, a bundler or the code under test may catch the failed
         // request. So the run fails, naming each request that missed.

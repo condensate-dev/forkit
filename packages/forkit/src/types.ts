@@ -1,3 +1,4 @@
+import type { Instance } from "prool";
 import type { Address, Chain, Hex } from "viem";
 import type { NATIVE } from "./assertions.ts";
 import type { ForkClient, PrankClient } from "./client.ts";
@@ -5,14 +6,34 @@ import type { DealOptions } from "./deal.ts";
 import type { GasSnapshotMode } from "./gas.ts";
 import type { CacheMode, RpcCacheStats } from "./rpc-cache.ts";
 
+/**
+ * anvil flags beyond the ones forkit sets, by their prool name (`stepsTracing`, `gasLimit`,
+ * `blockTime`, ...). forkit owns the binary, host, port, fork URL, fork block and chain id.
+ */
+export type AnvilFlags = Omit<
+  Instance.anvil.Parameters,
+  "binary" | "host" | "port" | "forkUrl" | "forkBlockNumber" | "chainId"
+>;
+
 /** Options for forking one chain. */
 export interface ForkOptions<TChain extends Chain = Chain> {
   /** The viem chain to fork. OP-stack chains are detected from it and get `--optimism`. */
   chain: TChain;
   /** Block to pin the fork to. Unpinned forks warn, because they are not reproducible. */
   blockNumber?: bigint;
-  /** Explicit RPC URL. Otherwise `FORKIT_RPC_URL_<chainId>`, then the chain's default RPC. */
-  forkUrl?: string;
+  /**
+   * Explicit RPC URL. Otherwise `FORKIT_RPC_URL_<chainId>`, then the chain's default RPC.
+   * `false` forks nothing: anvil starts an empty chain with this chain's id, for a chain that
+   * has no RPC to fork. `blockNumber` and the cache do not apply to it.
+   */
+  forkUrl?: string | false;
+  /** Port for this fork's anvil on 127.0.0.1. Default: a free port from the OS. */
+  port?: number;
+  /**
+   * More anvil flags, e.g. `{ stepsTracing: true, gasLimit: 30_000_000n }`. forkit's own flags
+   * win over these, and a `false` value is dropped (anvil's boolean flags take no value).
+   */
+  anvil?: AnvilFlags;
   /**
    * Fork state cache for pinned forks. forkit records every upstream answer at the pinned block
    * to `<cacheDir>/<chainId>/<block>.json` and replays it on later runs, so warm runs make no
