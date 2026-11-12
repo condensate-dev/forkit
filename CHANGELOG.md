@@ -4,7 +4,17 @@ All notable changes to `@condensate_dev/forkit`. The format follows [Keep a Chan
 
 ## [Unreleased]
 
-Everything below is slated for **1.0.0** (`packages/forkit/package.json` carries that version). Not yet published to npm. Licensed under MIT OR Apache-2.0.
+## [0.2.0] - 2026-11-12
+
+### Added
+- **A long-running local stack** (see `docs/guides/long-running-stacks.md`): what a stack that starts its own anvils needs from forkit.
+  - `fork()` takes `port` (a fixed anvil port), `anvil` (more anvil flags, e.g. `stepsTracing` and `gasLimit`) and `forkUrl: false` (an empty chain with the chain's id, for a chain with no RPC to fork).
+  - `attachFork(chain, rpcUrl)`: a fork handle on an anvil that something else started, so `deal`, `prank`, `trace` and `bundler(f)` work on it. `stop()` leaves the anvil running.
+  - `startRpcCache` (with `RpcCache` and `RpcCacheOptions`) is exported, so the fork cache can sit behind any launcher. Its `port` is optional, and `flush()` writes the recording to disk while it still serves.
+
+## [0.1.0] - 2026-10-02
+
+The first npm release, as `@condensate_dev/forkit`. Licensed under MIT OR Apache-2.0.
 
 ### Changed
 - **An offline fork cache miss fails the run.** In `offline` mode, stopping a fork (the end of a `describeFork`) throws `ForkCacheMissError` when any request missed the recording, listing each one with its params. Before, a miss the code under test caught, or one anvil or a bundler made on their own, left only a warning, which test runners hide for a passing file. The failed request's own error now names its params too.
@@ -12,10 +22,6 @@ Everything below is slated for **1.0.0** (`packages/forkit/package.json` carries
 - **Ships compiled JavaScript** (release readiness): `@condensate_dev/forkit` now builds to `dist/` (ESM, `.d.ts`, source maps), and `exports` and the `forkit` bin point there. Before this, the package exported its TypeScript sources, which works inside this workspace but not from `node_modules`: Node refuses to strip types there, so node:test and jest could not import an installed forkit. `bun run test:pack` (a CI job) packs the package, installs it into a fresh project and checks all four runners, every subpath, a strict `nodenext` TypeScript consumer and the `forkit` bin.
 
 ### Added
-- **A long-running local stack** (see `docs/guides/long-running-stacks.md`): what a stack that starts its own anvils needs from forkit.
-  - `fork()` takes `port` (a fixed anvil port), `anvil` (more anvil flags, e.g. `stepsTracing` and `gasLimit`) and `forkUrl: false` (an empty chain with the chain's id, for a chain with no RPC to fork).
-  - `attachFork(chain, rpcUrl)`: a fork handle on an anvil that something else started, so `deal`, `prank`, `trace` and `bundler(f)` work on it. `stop()` leaves the anvil running.
-  - `startRpcCache` (with `RpcCache` and `RpcCacheOptions`) is exported, so the fork cache can sit behind any launcher. Its `port` is optional, and `flush()` writes the recording to disk while it still serves.
 - **`ForkCacheMissError`** (and its `ForkCacheMiss` entries): what an offline fork asked for that its recording does not have. A boot that fails for lack of a recording names its misses as well.
 - **Stablecoin payments**: `@condensate_dev/forkit/payments`. Sign EIP-2612 permits, EIP-3009 transfer and receive authorizations, and Permit2 SignatureTransfer and AllowanceTransfer messages with deterministic test keys (`testAccount`, `testAddress`), the nonce and EIP-712 domain read from the forked token (EIP-5267 when it has it) and checked against its `DOMAIN_SEPARATOR()`. `forceApprove` and `safeTransfer` get past USDT's nonzero-to-nonzero `approve` and missing return value; `blacklist` and `pause` act through USDC's real role holders. Assertions cover allowances, permit nonces, EIP-3009 authorizations, and Permit2 nonces and allowances. A Base and Ethereum e2e against the real contracts replays offline on anvil 1.7 and 1.8.
 - **Explorer UI v2** (`forkit explore`): rebuilt in the Condensate design language (the orb and a "forkit explore" wordmark, neutral surfaces, seam violet used sparingly, light and dark, WCAG AA contrast, a phone layout) and made for reading a test run. The run overview puts failures first with expected vs actual. A test's timeline shows every transaction and cheatcode in order. The transaction view has a collapsible decoded call tree with events inline and a frame inspector, a gas icicle, token transfers as a flow, balances and storage before and after, and "Copy as code" (a forkit test that replays the steps, or a viem call). Addresses get a balance chart over the run. Search, `j`/`k`/`h`/`l`/`/` keys, deep links for every view and selection, and virtualised lists for large runs. Still offline, static and CSP-safe.

@@ -1,6 +1,6 @@
 {
   "name": "@condensate_dev/forkit",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Foundry-style fork tests in TypeScript, for any test runner.",
   "keywords": [
     "foundry",

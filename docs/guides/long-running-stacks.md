@@ -5,7 +5,7 @@ A test suite boots a fork, runs and stops it. A local stack is different: one se
 ## Fixed ports and your own anvil flags
 
 ```ts
-import { fork } from "@condensate/forkit";
+import { fork } from "@condensate_dev/forkit";
 import { base } from "viem/chains";
 
 const f = await fork({
@@ -30,8 +30,8 @@ const local = await fork({ chain: myChain, forkUrl: false });
 ## Cheats and a bundler on an anvil you started
 
 ```ts
-import { attachFork } from "@condensate/forkit";
-import { bundler } from "@condensate/forkit/4337";
+import { attachFork } from "@condensate_dev/forkit";
+import { bundler } from "@condensate_dev/forkit/4337";
 
 const f = await attachFork(base, "http://127.0.0.1:8545/8453");
 await f.deal(USDC, alice, 1_000_000n);
@@ -45,7 +45,7 @@ const b = await bundler(f, { entryPoints: ["0.8"] });
 ## The fork cache behind your own launcher
 
 ```ts
-import { startRpcCache } from "@condensate/forkit";
+import { startRpcCache } from "@condensate_dev/forkit";
 
 const cache = await startRpcCache({
   upstream: process.env.BASE_RPC_URL,
