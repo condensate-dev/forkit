@@ -6,10 +6,10 @@
  * ```toml
  * # bunfig.toml
  * [test]
- * preload = ["@condensate/forkit/reporter/bun"]
+ * preload = ["@condensate_dev/forkit/reporter/bun"]
  * ```
  *
- * or `bun test --preload @condensate/forkit/reporter/bun`.
+ * or `bun test --preload @condensate_dev/forkit/reporter/bun`.
  */
 import { afterAll } from "bun:test";
 import { shouldColor } from "./ansi.ts";

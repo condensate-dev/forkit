@@ -58,8 +58,8 @@ offline recording would miss the storage the fill reads.
 
 ## forkit features used
 
-- `describeFork` / `itFork` from `@condensate/forkit/jest`, with a multi-chain fork.
-- `bridge.across(f)` from `@condensate/forkit/bridges`: `poll()`, `settle()`, `pending`, and the
+- `describeFork` / `itFork` from `@condensate_dev/forkit/jest`, with a multi-chain fork.
+- `bridge.across(f)` from `@condensate_dev/forkit/bridges`: `poll()`, `settle()`, `pending`, and the
   `outputAmount` option.
 - `across.outputAmount` and `across.fee` to build and check the fee, `across.spokePools` for the
   addresses, `spokePoolAbi` for the deposit call.

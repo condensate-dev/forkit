@@ -1,6 +1,6 @@
 /**
- * `@condensate/forkit/explore`: run records and the `forkit explore` server, for tools that want
- * them programmatically. Recording itself: `FORKIT_RECORD=1`, or `@condensate/forkit/explore/record`.
+ * `@condensate_dev/forkit/explore`: run records and the `forkit explore` server, for tools that want
+ * them programmatically. Recording itself: `FORKIT_RECORD=1`, or `@condensate_dev/forkit/explore/record`.
  */
 export { stringify, toJson } from "./json.ts";
 export {

@@ -1,5 +1,5 @@
 /**
- * vitest setup file for `@condensate/forkit/reporter`: collects run events in each worker and
+ * vitest setup file for `@condensate_dev/forkit/reporter`: collects run events in each worker and
  * hands them to the reporter in the main process through task metadata. After every test (and
  * after the file) it attaches the events since the last hand-off, as bigint-safe JSON, to the
  * test's (or file's) `meta.forkit`.
@@ -7,8 +7,8 @@
  * ```ts
  * // vitest.config.ts
  * test: {
- *   setupFiles: ["@condensate/forkit/reporter/setup"],
- *   reporters: ["default", "@condensate/forkit/reporter"],
+ *   setupFiles: ["@condensate_dev/forkit/reporter/setup"],
+ *   reporters: ["default", "@condensate_dev/forkit/reporter"],
  * }
  * ```
  */
@@ -18,7 +18,7 @@ import { META_KEY } from "./meta.ts";
 import { serializeRunLog } from "./serialize.ts";
 
 // One collector per worker module graph, even if the setup file runs again (e.g. `isolate: false`).
-const GLOBAL = Symbol.for("@condensate/forkit/reporter/collector");
+const GLOBAL = Symbol.for("@condensate_dev/forkit/reporter/collector");
 const store = globalThis as { [GLOBAL]?: RunCollector };
 const collector = store[GLOBAL] ?? collectRun();
 store[GLOBAL] = collector;

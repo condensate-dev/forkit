@@ -1,7 +1,7 @@
 /**
- * @condensate/forkit: Foundry-style fork tests in TypeScript.
+ * @condensate_dev/forkit: Foundry-style fork tests in TypeScript.
  *
- * Runner adapters live in subpath exports (`@condensate/forkit/vitest`, ...). APIs planned for a
+ * Runner adapters live in subpath exports (`@condensate_dev/forkit/vitest`, ...). APIs planned for a
  * later milestone throw {@link NotImplementedError} (see docs/spec.md, "Milestones").
  */
 

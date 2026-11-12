@@ -1,5 +1,5 @@
 /**
- * `@condensate/forkit/payments` without a network: key derivation, the EIP-712 digests the
+ * `@condensate_dev/forkit/payments` without a network: key derivation, the EIP-712 digests the
  * contracts compute, domain discovery, assertion messages and the token-quirk rules, against a
  * mocked JSON-RPC client. test/e2e/payments-base-ethereum.vitest.ts runs the same code against
  * the real tokens.

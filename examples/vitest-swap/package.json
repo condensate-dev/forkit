@@ -8,7 +8,7 @@
     "typecheck": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@condensate/forkit": "workspace:*",
+    "@condensate_dev/forkit": "workspace:*",
     "viem": "^2.56.9"
   },
   "devDependencies": {

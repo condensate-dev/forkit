@@ -27,14 +27,14 @@ jobs:
         with:
           node-version: 24
       - run: bun install --frozen-lockfile
-      # examples/* import @condensate/forkit as users do, from its built dist/.
+      # examples/* import @condensate_dev/forkit as users do, from its built dist/.
       - run: bun run build
       - run: bun run typecheck
       - run: bun run lint
       - run: bun run test
 
   pack:
-    # What `npm install @condensate/forkit` gets: pack, install into a fresh project, and import it
+    # What `npm install @condensate_dev/forkit` gets: pack, install into a fresh project, and import it
     # from node_modules under node:test, jest, vitest and bun:test; typecheck a strict consumer;
     # run the `forkit` bin.
     name: packed install
