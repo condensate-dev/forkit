@@ -50,7 +50,7 @@ export {
   type TxSentEvent,
   trackObserverWork,
 } from "./events.ts";
-export { DEFAULT_BOOT_TIMEOUT_MS, DEFAULT_STOP_TIMEOUT_MS, fork } from "./fork.ts";
+export { attachFork, DEFAULT_BOOT_TIMEOUT_MS, DEFAULT_STOP_TIMEOUT_MS, fork } from "./fork.ts";
 export {
   DEFAULT_GAS_SNAPSHOT_FILE,
   formatGasSnapshot,
@@ -74,7 +74,10 @@ export {
   CACHE_MODE_ENV,
   type CacheMode,
   DEFAULT_CACHE_DIR,
+  type RpcCache,
+  type RpcCacheOptions,
   type RpcCacheStats,
+  startRpcCache,
 } from "./rpc-cache.ts";
 export {
   type AttachOptions,
@@ -90,4 +93,11 @@ export {
   type SuiteHooks,
 } from "./suite.ts";
 export { type CallFrame, formatTrace } from "./trace.ts";
-export type { Fork, ForkOptions, ForkTarget, GasSource, SnapshotId } from "./types.ts";
+export type {
+  AnvilFlags,
+  Fork,
+  ForkOptions,
+  ForkTarget,
+  GasSource,
+  SnapshotId,
+} from "./types.ts";

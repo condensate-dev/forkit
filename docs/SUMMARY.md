@@ -18,6 +18,7 @@
 
 - [The fork cache, and running in CI](guides/fork-cache-and-ci.md)
 - [One fork shared by every file](guides/shared-forks.md)
+- [A long-running local stack](guides/long-running-stacks.md)
 - [Gas snapshots](guides/gas-snapshots.md)
 - [Assertions, traces and labels](guides/assertions-and-traces.md)
 - [Terminal output](guides/terminal-output.md)
