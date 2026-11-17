@@ -76,6 +76,8 @@ interface CacheFile {
   blockNumber: string;
   /** Methods the upstream does not support (anvil probes some and falls back). */
   unsupported?: string[];
+  /** Keys of the entries that a run asked for. A seed fetches these again at a new block. */
+  used?: string[];
   entries: Record<string, unknown>;
 }
 
@@ -253,13 +255,21 @@ export function cacheFilePath(dir: string, chainId: number, blockNumber: bigint)
   return resolve(join(dir, String(chainId), `${blockNumber}.json`));
 }
 
-function readCacheFile(path: string): { entries: Record<string, unknown>; unsupported: string[] } {
+function readCacheFile(path: string): {
+  entries: Record<string, unknown>;
+  unsupported: string[];
+  used?: string[];
+} {
   try {
     const parsed = JSON.parse(readFileSync(path, "utf8")) as Partial<CacheFile>;
     if (parsed.version !== 1 || typeof parsed.entries !== "object" || parsed.entries === null) {
       return { entries: {}, unsupported: [] };
     }
-    return { entries: parsed.entries, unsupported: parsed.unsupported ?? [] };
+    return {
+      entries: parsed.entries,
+      unsupported: parsed.unsupported ?? [],
+      ...(parsed.used === undefined ? {} : { used: parsed.used }),
+    };
   } catch {
     return { entries: {}, unsupported: [] };
   }
@@ -340,6 +350,9 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
   const unsupported = new Set(recorded.unsupported);
   const freshUnsupported = new Set<string>();
   const fresh = new Map<string, unknown>();
+  /** Keys that this run asked for, and whether a flush has written each new one yet. */
+  const used = new Set<string>();
+  let hasUnwrittenUse = false;
   const inflight = new Map<string, Promise<JsonRpcResponse>>();
   const hashes = new Map<string, bigint>();
   const learnHash = (result: unknown): void => {
@@ -368,6 +381,10 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
     }
     const cacheable = isCacheable(request, options.blockNumber, hashes);
     const key = cacheable ? cacheKey(request, hashes) : undefined;
+    if (key !== undefined && !used.has(key)) {
+      used.add(key);
+      hasUnwrittenUse = true;
+    }
     if (unsupported.has(request.method) || NODE_PROBES.has(request.method)) {
       hits++;
       return {
@@ -473,7 +490,8 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
   });
 
   const flush = (): void => {
-    if (options.mode !== "readwrite" || (fresh.size === 0 && freshUnsupported.size === 0)) return;
+    const hasNews = fresh.size > 0 || freshUnsupported.size > 0 || hasUnwrittenUse;
+    if (options.mode !== "readwrite" || !hasNews) return;
     // Merge with whatever parallel runs wrote meanwhile.
     const onDisk = readCacheFile(path);
     writeCacheFile(path, {
@@ -481,10 +499,12 @@ export async function startRpcCache(options: RpcCacheOptions): Promise<RpcCache>
       chainId: options.chainId,
       blockNumber: options.blockNumber.toString(),
       unsupported: [...new Set([...onDisk.unsupported, ...freshUnsupported])].sort(),
+      used: [...new Set([...(onDisk.used ?? []), ...used])].sort(),
       entries: { ...onDisk.entries, ...Object.fromEntries(fresh) },
     });
     fresh.clear();
     freshUnsupported.clear();
+    hasUnwrittenUse = false;
   };
 
   let closed: Promise<void> | undefined;
@@ -563,8 +583,8 @@ export interface RpcCacheSeedOptions {
 export interface RpcCacheSeedStats {
   /** File the new recording lives in. */
   readonly path: string;
-  /** The recording whose reads the seed fetched again. Undefined when the chain has none. */
-  readonly from?: string;
+  /** The older recordings whose reads the seed fetched again. Empty when the chain has none. */
+  readonly from: readonly string[];
   /** Reads fetched at the new block and written to `path`. */
   readonly seeded: number;
   /** Reads that the upstream did not answer. A fork fetches them on first use, as with no seed. */
@@ -572,41 +592,50 @@ export interface RpcCacheSeedStats {
   readonly ms: number;
 }
 
-/** The recording of a chain with the highest block, other than `blockNumber`. */
-function previousRecording(dir: string, chainId: number, blockNumber: bigint): string | undefined {
-  let best: bigint | undefined;
+/** The recordings of a chain at each block other than `blockNumber`. */
+function olderRecordings(dir: string, chainId: number, blockNumber: bigint): string[] {
   let files: string[];
   try {
     files = readdirSync(join(dir, String(chainId)));
   } catch {
-    return undefined;
+    return [];
   }
-  for (const file of files) {
-    const match = /^(\d+)\.json$/.exec(file);
-    if (match?.[1] === undefined) continue;
-    const block = BigInt(match[1]);
-    if (block !== blockNumber && (best === undefined || block > best)) best = block;
-  }
-  return best === undefined ? undefined : cacheFilePath(dir, chainId, best);
+  return files.flatMap((file) => {
+    const block = /^(\d+)\.json$/.exec(file)?.[1];
+    return block === undefined || BigInt(block) === blockNumber
+      ? []
+      : [cacheFilePath(dir, chainId, BigInt(block))];
+  });
 }
 
 /**
- * Starts the recording of a new block from the recording of an older one. A fork that moves to a
- * newer block keeps a warm cache: each account and storage read of the older recording is fetched
- * again at the new block, many at a time, and written to the new recording. Run it before
- * {@link startRpcCache}. It skips a read that the new recording already has.
+ * Starts the recording of a new block from the older recordings of the chain. A fork that moves
+ * to a newer block keeps a warm cache: each account and storage read that a run of an older
+ * recording asked for is fetched again at the new block, many at a time, and written to the new
+ * recording. Run it before {@link startRpcCache}. It skips a read that the new recording already has.
+ *
+ * Only the reads that a run asked for carry over, so a read of a one-off address (a new deposit
+ * address of each test run) does not grow the seed of each later boot. Keep the older
+ * recordings that the seed should use, and delete the rest. A recording from before forkit
+ * tracked its used reads seeds all its reads.
  */
 export async function seedRpcCache(options: RpcCacheSeedOptions): Promise<RpcCacheSeedStats> {
   const startedAt = Date.now();
   const path = cacheFilePath(options.dir, options.chainId, options.blockNumber);
-  const from = previousRecording(options.dir, options.chainId, options.blockNumber);
-  if (from === undefined) return { path, seeded: 0, failed: 0, ms: 0 };
-  const previous = readCacheFile(from);
+  const from = olderRecordings(options.dir, options.chainId, options.blockNumber);
+  if (from.length === 0) return { path, from, seeded: 0, failed: 0, ms: 0 };
   const current = readCacheFile(path);
-  const unsupported = new Set([...previous.unsupported, ...current.unsupported]);
+  const unsupported = new Set(current.unsupported);
+  const recordedKeys = new Set<string>();
+  for (const file of from) {
+    const older = readCacheFile(file);
+    for (const method of older.unsupported) unsupported.add(method);
+    for (const key of older.used ?? Object.keys(older.entries)) recordedKeys.add(key);
+  }
   const block = `0x${options.blockNumber.toString(16)}`;
   const reads: { request: JsonRpcRequest; key: string }[] = [];
-  for (const recordedKey of Object.keys(previous.entries)) {
+  const queued = new Set<string>();
+  for (const recordedKey of recordedKeys) {
     const separator = recordedKey.indexOf(":");
     const method = recordedKey.slice(0, separator);
     if (!SEEDABLE.has(method) || unsupported.has(method)) continue;
@@ -614,7 +643,9 @@ export async function seedRpcCache(options: RpcCacheSeedOptions): Promise<RpcCac
     params[params.length - 1] = block;
     const request: JsonRpcRequest = { jsonrpc: "2.0", id: 1, method, params };
     const key = cacheKey(request);
-    if (!(key in current.entries)) reads.push({ request, key });
+    if (key in current.entries || queued.has(key)) continue;
+    queued.add(key);
+    reads.push({ request, key });
   }
 
   const entries: Record<string, unknown> = { ...current.entries };
@@ -646,7 +677,8 @@ export async function seedRpcCache(options: RpcCacheSeedOptions): Promise<RpcCac
     version: 1,
     chainId: options.chainId,
     blockNumber: options.blockNumber.toString(),
-    unsupported: [...unsupported],
+    unsupported: [...unsupported].sort(),
+    used: current.used ?? [],
     entries,
   });
   return { path, from, seeded, failed, ms: Date.now() - startedAt };

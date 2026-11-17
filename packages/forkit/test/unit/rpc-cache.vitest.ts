@@ -372,7 +372,7 @@ describe("seedRpcCache", () => {
       expect(stats).toMatchObject({
         seeded: 2,
         failed: 0,
-        from: expect.stringContaining("100.json"),
+        from: [expect.stringContaining("100.json")],
       });
       // The seed does not fetch an eth_call: its answer depends on more than the state it names.
       expect(upstream.reads.sort()).toEqual(["eth_getBalance", "eth_getStorageAt"]);
@@ -411,9 +411,60 @@ describe("seedRpcCache", () => {
         blockNumber: 200n,
         dir,
       });
-      expect(stats).toMatchObject({ seeded: 0, failed: 0 });
-      expect(stats.from).toBeUndefined();
+      expect(stats).toMatchObject({ seeded: 0, failed: 0, from: [] });
     } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("carries over only the reads that the last run asked for", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "forkit-cache-seed-"));
+    const upstream = await blockEchoUpstream();
+    const ask = (url: string, method: string, params: unknown[]) =>
+      fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+      });
+    const other = "0x00000000000000000000000000000000000000bb";
+    try {
+      const first = await startRpcCache({
+        upstream: upstream.url,
+        chainId: 1,
+        blockNumber: 100n,
+        mode: "readwrite",
+        dir,
+      });
+      await ask(first.url, "eth_getBalance", [account, "0x64"]);
+      await ask(first.url, "eth_getBalance", [other, "0x64"]);
+      await first.close();
+
+      expect(
+        (await seedRpcCache({ upstream: upstream.url, chainId: 1, blockNumber: 200n, dir })).seeded,
+      ).toBe(2);
+      const second = await startRpcCache({
+        upstream: upstream.url,
+        chainId: 1,
+        blockNumber: 200n,
+        mode: "readwrite",
+        dir,
+      });
+      // This run asks for one of the two seeded reads only.
+      await ask(second.url, "eth_getBalance", [account, "0xc8"]);
+      await second.close();
+      rmSync(join(dir, "1", "100.json"));
+
+      upstream.reads.length = 0;
+      const stats = await seedRpcCache({
+        upstream: upstream.url,
+        chainId: 1,
+        blockNumber: 300n,
+        dir,
+      });
+      expect(stats.seeded).toBe(1);
+      expect(upstream.reads).toEqual(["eth_getBalance"]);
+    } finally {
+      upstream.close();
       rmSync(dir, { recursive: true, force: true });
     }
   });
