@@ -6,7 +6,7 @@
  * and serves them locally on the next run. A warm run makes no network calls at all, which makes
  * fork tests fast, deterministic and safe to cache (turbo, actions/cache, or just commit the file).
  */
-import { mkdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, renameSync, writeFileSync } from "node:fs";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { dirname, join, resolve } from "node:path";
 import { freePort } from "./anvil.ts";
@@ -537,4 +537,117 @@ export function resolveCacheSettings(
     resolvedMode = envMode as CacheMode;
   }
   return { mode: resolvedMode, dir: dir ?? env[CACHE_DIR_ENV] ?? DEFAULT_CACHE_DIR };
+}
+
+/** Reads of account and storage state. A seed fetches each recorded one again at the new block. */
+const SEEDABLE = new Set([
+  "eth_getStorageAt",
+  "eth_getBalance",
+  "eth_getCode",
+  "eth_getTransactionCount",
+  "eth_getAccountInfo",
+]);
+
+const DEFAULT_SEED_CONCURRENCY = 64;
+
+export interface RpcCacheSeedOptions {
+  upstream: string;
+  chainId: number;
+  /** The block of the new recording. */
+  blockNumber: bigint;
+  dir: string;
+  /** Requests in flight at one time. Default: 64. */
+  concurrency?: number;
+}
+
+export interface RpcCacheSeedStats {
+  /** File the new recording lives in. */
+  readonly path: string;
+  /** The recording whose reads the seed fetched again. Undefined when the chain has none. */
+  readonly from?: string;
+  /** Reads fetched at the new block and written to `path`. */
+  readonly seeded: number;
+  /** Reads that the upstream did not answer. A fork fetches them on first use, as with no seed. */
+  readonly failed: number;
+  readonly ms: number;
+}
+
+/** The recording of a chain with the highest block, other than `blockNumber`. */
+function previousRecording(dir: string, chainId: number, blockNumber: bigint): string | undefined {
+  let best: bigint | undefined;
+  let files: string[];
+  try {
+    files = readdirSync(join(dir, String(chainId)));
+  } catch {
+    return undefined;
+  }
+  for (const file of files) {
+    const match = /^(\d+)\.json$/.exec(file);
+    if (match?.[1] === undefined) continue;
+    const block = BigInt(match[1]);
+    if (block !== blockNumber && (best === undefined || block > best)) best = block;
+  }
+  return best === undefined ? undefined : cacheFilePath(dir, chainId, best);
+}
+
+/**
+ * Starts the recording of a new block from the recording of an older one. A fork that moves to a
+ * newer block keeps a warm cache: each account and storage read of the older recording is fetched
+ * again at the new block, many at a time, and written to the new recording. Run it before
+ * {@link startRpcCache}. It skips a read that the new recording already has.
+ */
+export async function seedRpcCache(options: RpcCacheSeedOptions): Promise<RpcCacheSeedStats> {
+  const startedAt = Date.now();
+  const path = cacheFilePath(options.dir, options.chainId, options.blockNumber);
+  const from = previousRecording(options.dir, options.chainId, options.blockNumber);
+  if (from === undefined) return { path, seeded: 0, failed: 0, ms: 0 };
+  const previous = readCacheFile(from);
+  const current = readCacheFile(path);
+  const unsupported = new Set([...previous.unsupported, ...current.unsupported]);
+  const block = `0x${options.blockNumber.toString(16)}`;
+  const reads: { request: JsonRpcRequest; key: string }[] = [];
+  for (const recordedKey of Object.keys(previous.entries)) {
+    const separator = recordedKey.indexOf(":");
+    const method = recordedKey.slice(0, separator);
+    if (!SEEDABLE.has(method) || unsupported.has(method)) continue;
+    const params = JSON.parse(recordedKey.slice(separator + 1)) as unknown[];
+    params[params.length - 1] = block;
+    const request: JsonRpcRequest = { jsonrpc: "2.0", id: 1, method, params };
+    const key = cacheKey(request);
+    if (!(key in current.entries)) reads.push({ request, key });
+  }
+
+  const entries: Record<string, unknown> = { ...current.entries };
+  let seeded = 0;
+  let failed = 0;
+  let next = 0;
+  const worker = async (): Promise<void> => {
+    for (let read = reads[next++]; read !== undefined; read = reads[next++]) {
+      try {
+        const response = asResponse(await forward(options.upstream, read.request), 1);
+        if (
+          response.error === undefined &&
+          response.result !== null &&
+          response.result !== undefined
+        ) {
+          entries[read.key] = response.result;
+          seeded++;
+        } else {
+          failed++;
+        }
+      } catch {
+        failed++;
+      }
+    }
+  };
+  const concurrency = Math.min(options.concurrency ?? DEFAULT_SEED_CONCURRENCY, reads.length);
+  await Promise.all(Array.from({ length: concurrency }, worker));
+  writeCacheFile(path, {
+    version: 1,
+    chainId: options.chainId,
+    blockNumber: options.blockNumber.toString(),
+    unsupported: [...unsupported],
+    entries,
+  });
+  return { path, from, seeded, failed, ms: Date.now() - startedAt };
 }

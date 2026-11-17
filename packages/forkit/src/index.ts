@@ -76,7 +76,10 @@ export {
   DEFAULT_CACHE_DIR,
   type RpcCache,
   type RpcCacheOptions,
+  type RpcCacheSeedOptions,
+  type RpcCacheSeedStats,
   type RpcCacheStats,
+  seedRpcCache,
   startRpcCache,
 } from "./rpc-cache.ts";
 export {

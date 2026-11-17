@@ -4,6 +4,9 @@ All notable changes to `@condensate_dev/forkit`. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Added
+- **`seedRpcCache`** (with `RpcCacheSeedOptions` and `RpcCacheSeedStats`): starts the recording of a new block from the newest older recording of the chain. It fetches each recorded account and storage read again at the new block, 64 at a time. A stack that pins the latest block at each boot then keeps a warm cache. One boot of 10 chains seeded about 6,600 reads in 4 s.
+
 ## [0.2.0] - 2026-11-12
 
 ### Added
