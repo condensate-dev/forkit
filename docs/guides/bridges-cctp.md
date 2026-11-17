@@ -33,7 +33,8 @@ Use it to test what your code does when the USDC arrives. Do not use it to test 
 Both come from [circlefin/evm-cctp-contracts](https://github.com/circlefin/evm-cctp-contracts). Their topics were checked against live Base logs.
 
 - **The destination chain** is the chain of `destinationDomain`, from `CCTP_DOMAINS` and your `domains`.
-- **The recipient** is `mintRecipient`. It must be an EVM address in a bytes32 (12 zero bytes, then 20). Anything else, such as a Solana account, fails loudly.
+- **The recipient** is `mintRecipient`. It must be an EVM address in a bytes32 (12 zero bytes, then 20). Anything else fails loudly.
+- **A deposit to a domain with no chain id**, such as Solana (domain 5), fails. Without `maxFillAttempts` it holds the deposits behind it. To let a stack go on, map that domain to a chain id you do not fork, such as `domains: { 900005: 5 }`, and pass `unforkedDestination: "skip"` or `"deliver"`.
 - **The token** is what the real mint uses: the destination TokenMessenger's `localMinter()`, then `getLocalToken(originDomain, burnToken)`. Pass `usdc` to name it yourself.
 - **The amount** is `amount` for v1. For v2 it is `amount - fee`, where the fee is `maxFee` for a Fast Transfer (`minFinalityThreshold` below 2000) and 0 for a Standard Transfer. Circle sets the real fee at attestation, and it is at most `maxFee`, so the default is the least the recipient can get. Pass `fee` to choose it.
 

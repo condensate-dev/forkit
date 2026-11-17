@@ -23,7 +23,7 @@ What it does not do:
 
 - **No DVN or message library verifies the packet.** `lzReceive` is called directly on the OApp, so the endpoint's inbound nonce is not advanced.
 - **The endpoint gets gas money for the call, and its balance is put back after.** No native value is sent with `lzReceive` or `lzCompose`, so an `lzReceive` or `lzCompose` option that asks for `msg.value` is not honoured.
-- **A transfer to a non-EVM chain**, or one whose recipient is not an EVM address, fails loudly.
+- **A transfer to a non-EVM chain**, or one whose recipient is not an EVM address, fails loudly. A transfer to an eid with no chain id fails. Without `maxFillAttempts` it holds the transfers behind it. To let a stack go on, map that eid in `eids` to a chain id you do not fork, and pass `unforkedDestination: "skip"` or `"deliver"`.
 
 A delivery whose `lzReceive` ran and whose compose failed is retried by the next `settle()`. The retry does not call `lzReceive` again, unless an `evm_revert` undid it, so the recipient is not credited twice.
 

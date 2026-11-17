@@ -174,7 +174,7 @@ export class CctpError extends ForkitError {
 function addressOf(value: Hex, what: string): Address {
   if (!isHex(value) || size(value) !== 32 || BigInt(slice(value, 0, 12)) !== 0n) {
     throw new CctpError(
-      `forkit: CCTP ${what} ${value} is not an EVM address in a bytes32 (12 zero bytes, then 20). A deposit to a non-EVM domain cannot be credited on a fork; pass unforkedDestination: "skip" or "deliver" and leave its domain out of \`domains\`.`,
+      `forkit: CCTP ${what} ${value} is not an EVM address in a bytes32 (12 zero bytes, then 20). A deposit to a non-EVM domain cannot be credited on a fork: map that domain in \`domains\` to a chain id that is not forked, and pass unforkedDestination: "skip" or "deliver".`,
     );
   }
   return getAddress(slice(value, 12));
@@ -310,7 +310,7 @@ function cctpSimulator(f: MultiFork, options: CctpOptions = {}): BridgeSimulator
     const chainId = chainOfDomain.get(domain);
     if (chainId === undefined) {
       throw new CctpError(
-        `forkit: a CCTP deposit goes to domain ${domain}, which has no chain id. Pass domains: { [chainId]: ${domain} }.`,
+        `forkit: a CCTP deposit goes to domain ${domain}, which has no chain id. Pass domains: { [chainId]: ${domain} }. For a chain you do not fork, such as Solana (domain 5), a chain id that is not forked works, with unforkedDestination: "skip" or "deliver".`,
       );
     }
     return chainId;
