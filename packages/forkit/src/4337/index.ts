@@ -100,6 +100,15 @@ export interface BundlerOptions {
    */
   utilityKey?: Hex;
   /**
+   * How many blocks below the head alto searches for a receipt it has no record of (alto's
+   * `--max-block-range`, 2000 by default). Set it on a long-running fork. forkit then mines that
+   * many empty blocks, plus one, before alto starts, so the search stays in local blocks. Without
+   * it the search reaches blocks before the fork block, and each one goes to the upstream RPC,
+   * which can take seconds. The mined blocks carry the timestamp of the block before them, so
+   * the fork's clock does not move. See "A long-running fork" in docs/guides/erc-4337.md.
+   */
+  receiptLookupBlocks?: number;
+  /**
    * Extra alto flags by their `alto --help` name, without dashes, e.g. `{ "max-bundle-interval":
    * 200 }`. They override forkit's own, so use them with care.
    */
@@ -224,6 +233,36 @@ async function callAlto(url: string, method: string, params: unknown[]): Promise
   return body.result;
 }
 
+/**
+ * Mine `blocks` empty blocks that all carry the timestamp of the current head, so the chain gets
+ * taller and its clock does not move. `bundler(f, { receiptLookupBlocks })` calls it; call it
+ * yourself for an alto that you start with `--max-block-range`.
+ *
+ * It sets anvil's block timestamp interval to 0 and removes the interval afterwards. That also
+ * removes an interval you set before, so set yours after this.
+ */
+export async function mineAtSameTime<TChain extends Chain>(
+  handle: Fork<TChain>,
+  blocks: number,
+): Promise<void> {
+  if (!Number.isInteger(blocks) || blocks < 0) {
+    throw new ForkitError(
+      `forkit: mineAtSameTime blocks is ${blocks}; pass a whole number, 0 or more.`,
+    );
+  }
+  if (blocks === 0) return;
+  const f = handle as unknown as Fork;
+  // With the interval at 0, each block's timestamp is the one before it plus 0. Without it,
+  // anvil stamps blocks with its wall clock, and on an Ethereum fork that changes the
+  // beacon-roots slot a block touches from run to run (see the fork cache guide).
+  await f.client.setBlockTimestampInterval({ interval: 0 });
+  try {
+    await f.client.mine({ blocks });
+  } finally {
+    await f.client.removeBlockTimestampInterval();
+  }
+}
+
 /** How long a successful receipt reply waits for alto to finish with the bundle. */
 const INCLUDED_WAIT_MS = 10_000;
 
@@ -257,6 +296,12 @@ export async function bundler<TChain extends Chain>(
 ): Promise<Bundler> {
   // The bundler only needs chain-agnostic calls; the chain-typed client is invariant in TChain.
   const f = handle as unknown as Fork;
+  const lookup = options.receiptLookupBlocks;
+  if (lookup !== undefined && (!Number.isInteger(lookup) || lookup < 1)) {
+    throw new ForkitError(
+      `forkit: bundler receiptLookupBlocks is ${lookup}; pass a whole number, 1 or more, or omit it for alto's default.`,
+    );
+  }
   const debug = process.env.FORKIT_DEBUG === "1" || process.env.FORKIT_DEBUG === "true";
   const alto = resolveAlto(options.altoBinary);
   const chain = f.chain;
@@ -295,6 +340,10 @@ export async function bundler<TChain extends Chain>(
     await f.dealNative(account, EXECUTOR_FUNDING);
   }
 
+  // alto searches from `head - lookup` up to the head, both included. One block more than
+  // `lookup` puts the lowest block of that search above the fork block.
+  if (lookup !== undefined) await mineAtSameTime(f, lookup + 1);
+
   // alto reads the chain through forkit, which records the highest block alto has been told of.
   let altoHighest = 0n;
   const chainProxy = await startRpcProxy({
@@ -317,6 +366,7 @@ export async function bundler<TChain extends Chain>(
     port: altoPort,
     "enable-debug-endpoints": true,
     "log-level": debug ? "info" : "warn",
+    ...(lookup === undefined ? {} : { "max-block-range": lookup }),
     ...options.altoFlags,
   });
   const onLine =
