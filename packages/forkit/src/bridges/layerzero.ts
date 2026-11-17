@@ -170,7 +170,7 @@ const GAS_FUNDS = parseEther("1");
 function addressIn(word: Hex, what: string): Address {
   if (BigInt(slice(word, 0, 12)) !== 0n) {
     throw new OftError(
-      `forkit: LayerZero ${what} ${word} is not an EVM address in a bytes32. A transfer to a non-EVM chain cannot be delivered on a fork; pass unforkedDestination: "skip" or "deliver".`,
+      `forkit: LayerZero ${what} ${word} is not an EVM address in a bytes32. A transfer to a non-EVM chain cannot be delivered on a fork: map its eid in \`eids\` to a chain id that is not forked, and pass unforkedDestination: "skip" or "deliver".`,
     );
   }
   return getAddress(slice(word, 12));
@@ -197,6 +197,18 @@ export function decodeOftPacket(payload: Hex): OftPacket {
     amountSD: hexToBigInt(slice(message, 32, 40)),
     ...(size(message) > 40 ? { compose: slice(message, 40) } : {}),
   };
+}
+
+/**
+ * The OFT packet with `guid` among the `PacketSent` payloads of one transaction, or `undefined`.
+ * It matches on the guid before it decodes: the same transaction can send other LayerZero
+ * messages (to another OApp, or to a non-EVM chain) that do not decode as an OFT message.
+ */
+export function oftPacketFor(payloads: readonly Hex[], guid: Hex): OftPacket | undefined {
+  const payload = payloads.find(
+    (p) => size(p) >= 113 && slice(p, 81, 113).toLowerCase() === guid.toLowerCase(),
+  );
+  return payload === undefined ? undefined : decodeOftPacket(payload);
 }
 
 const isHexValue = (v: unknown): v is Hex => typeof v === "string" && isHex(v);
@@ -267,9 +279,12 @@ function oftSimulator(f: MultiFork, options: OftOptions): BridgeSimulator<OftSen
   }: FillContext<Record<string, unknown>>): Promise<FillResult> {
     const args = decodeOftSent(deposit.args);
     const sent = await origin.client.getTransactionReceipt({ hash: deposit.txHash });
-    const packet = parseEventLogs({ abi: [lzPacketSentEvent], logs: sent.logs })
-      .map((log) => decodeOftPacket(log.args.encodedPayload))
-      .find((p) => p.guid.toLowerCase() === args.guid.toLowerCase());
+    const packet = oftPacketFor(
+      parseEventLogs({ abi: [lzPacketSentEvent], logs: sent.logs }).map(
+        (log) => log.args.encodedPayload,
+      ),
+      args.guid,
+    );
     if (packet === undefined) {
       throw new OftError(
         `forkit: OFTSent ${args.guid} in ${deposit.txHash} on chain ${deposit.originChainId} has no PacketSent with its guid in the same transaction. Is ${deposit.address} an OFT on a LayerZero v2 endpoint?`,
@@ -382,7 +397,7 @@ function oftSimulator(f: MultiFork, options: OftOptions): BridgeSimulator<OftSen
       const chainId = chainOfEid.get(dstEid);
       if (chainId === undefined) {
         throw new OftError(
-          `forkit: an OFT transfer goes to LayerZero eid ${dstEid}, which has no chain id. Pass eids: { [chainId]: ${dstEid} }.`,
+          `forkit: an OFT transfer goes to LayerZero eid ${dstEid}, which has no chain id. Pass eids: { [chainId]: ${dstEid} }. For a chain you do not fork, such as Solana, a chain id that is not forked works, with unforkedDestination: "skip" or "deliver".`,
         );
       }
       return chainId;

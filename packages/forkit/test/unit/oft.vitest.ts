@@ -1,7 +1,7 @@
 /** LayerZero OFT, the parts that need no chain: the OFTSent topic and the packet layout. */
-import { concat, numberToHex, pad, toEventSelector } from "viem";
+import { concat, numberToHex, pad, slice, toEventSelector } from "viem";
 import { describe, expect, test } from "vitest";
-import { decodeOftPacket, OftError, oftSentEvent } from "../../src/bridges/index.ts";
+import { decodeOftPacket, OftError, oftPacketFor, oftSentEvent } from "../../src/bridges/index.ts";
 
 const oft = "0x00000000000000000000000000000000000000f7";
 const bob = "0x0000000000000000000000000000000000000B0b";
@@ -55,5 +55,14 @@ describe("LayerZero OFT", () => {
     expect(() =>
       decodeOftPacket(packet(concat([`0x${"11".repeat(32)}`, numberToHex(5n, { size: 8 })]))),
     ).toThrow(/sendTo .* is not an EVM address/);
+  });
+
+  test("finds the packet by its guid among other messages of the transaction", () => {
+    const plain = packet(concat([pad(bob), numberToHex(5n, { size: 8 })]));
+    // Another OApp's message in the same transaction: too short for an OFT message, with
+    // another guid. Decoding it first would throw.
+    const other = concat([slice(plain, 0, 81), `0x${"cd".repeat(32)}`]);
+    expect(oftPacketFor([other, plain], guid)).toMatchObject({ guid, sendTo: bob, amountSD: 5n });
+    expect(oftPacketFor([other], guid)).toBeUndefined();
   });
 });

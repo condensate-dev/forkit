@@ -100,6 +100,7 @@ export {
   type OftOptions,
   type OftPacket,
   type OftSentArgs,
+  oftPacketFor,
   oftReceivedEvent,
   oftSentEvent,
 } from "./layerzero.ts";
