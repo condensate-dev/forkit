@@ -120,3 +120,40 @@ The built-in table (`across.spokePools`) comes from Across's docs, [Chains & Con
 The Ethereum, Optimism, Base and Arbitrum entries were checked on chain in September 2026. Their recent logs are all `FundsDeposited`, and the implementation behind each proxy has both `fillRelay` (`0xdeff4b24`) and `fillV3Relay` (`0x2e378115`).
 
 The ABI fragments (`spokePoolAbi` in `src/bridges/across-abi.ts`) come from [`V3SpokePoolInterface.sol`](https://github.com/across-protocol/contracts/blob/master/contracts/interfaces/V3SpokePoolInterface.sol). The fill rules described above come from [`SpokePool.sol`](https://github.com/across-protocol/contracts/blob/master/contracts/spoke-pools/SpokePool.sol).
+
+## Prefunded orders: `bridge.acrossPrefunded`
+
+The Across v5 intents flow funds an order on the origin chain without a SpokePool deposit. The order's funds go into Across's PrefundedAdapter with `store(bytes32 witness, address token, uint256 amount)`, which emits:
+
+```solidity
+event PrefundingStored(bytes32 indexed witness, address token, uint256 amount);
+// topic0 0x5d48f46b5dc16d228768bab74bb2e371f21c82004e9fadc08ce039cfe89304c5
+```
+
+The witness is the order id. The event does not say what the order pays on the destination, so you register that for each order id, as with [`bridge.relay`](bridges-relay.md):
+
+```ts
+import { ACROSS_PREFUNDED_ADAPTER_BASE, bridge } from "@condensate_dev/forkit/bridges";
+
+const f = await fork([{ chain: base, blockNumber: B }, { chain: optimism, blockNumber: O }]);
+const prefunded = bridge.acrossPrefunded(f, { adapters: { [base.id]: ACROSS_PREFUNDED_ADAPTER_BASE } });
+
+prefunded.expect(orderId, { destinationChainId: optimism.id, token: USDC_OP, amount: 999_000n, recipient });
+await submitOrderOnBase(orderId);            // your code: store(orderId, USDC_BASE, 1_000_000n)
+const [fill] = await prefunded.settle();     // the relayer paid `recipient` 999_000 USDC on Optimism
+fill.details.inputAmount;                    // 1_000_000n, from the event
+```
+
+- **On `settle()`,** an impersonated relayer is funded on the destination fork with the token and some gas, then pays the recipient with a plain transfer. The zero address as `token` means native currency.
+- **An order is paid once.** The adapter adds up every `store()` for one order. A later event for an order already paid is a top-up: the fill has `details.topUp: true`, no transaction and `outputAmount: 0n`, and gets its own journal file. If an `evm_revert` undid the event that paid it, the next event pays the order again.
+- **An unregistered order** makes `settle()` reject with an `AcrossPrefundedError` that names the order id and the ids registered. Under `maxFillAttempts`, it is given up like any failed fill.
+- **The adapter address** is an option per origin chain. forkit has no table of them. `ACROSS_PREFUNDED_ADAPTER_BASE` (`0x794dBdbDBFd3f8A3b887F4513bf5FF29edD04a94`) is the one address forkit checked: the contract verified as `PrefundedAdapter` [on Basescan](https://basescan.org/address/0x794dbdbdbfd3f8a3b887f4513bf5ff29edd04a94#code). Take the address for another chain from Across's docs.
+
+| Option | Default | |
+| --- | --- | --- |
+| `adapters` | required | `{ [originChainId]: address }`. |
+| `relayer` | `across.defaultRelayer` | Who pays on the destination. |
+| `orders` | none | `{ [orderId]: order }`, the same as one `expect()` call each. |
+| `journalDir`, `maxFillAttempts`, `unforkedDestination` | | see [the long-running stack guide](long-running-stacks.md#the-fill-journal) |
+
+This simulates the outcome for the recipient, not Across's settlement: nothing is checked against a signed order, and no repayment happens on the origin. `test/anvil/bridges-across-prefunded.vitest.ts` runs on local anvils with a contract that emits the adapter's event. `test/e2e/across-prefunded-base-optimism.vitest.ts` stores USDC in the real adapter on Base.

@@ -67,3 +67,64 @@ await cache.close();
 - **`flush()`** writes new entries to disk and keeps serving. `close()` also writes them. A process that is killed keeps what it recorded up to its last flush.
 - **Close after anvil stops**, so anvil's last reads are in the recording. In `offline` mode, `close()` rejects with a `ForkCacheMissError` that lists each request the recording did not have.
 - The modes are the ones in [the fork cache guide](fork-cache-and-ci.md). `port` is optional.
+
+## Bridges that settle on their own
+
+A test calls `settle()`. A stack has no test, so `bridge.run` calls it for you:
+
+```ts
+import { bridge } from "@condensate_dev/forkit/bridges";
+
+const across = bridge.across(f, { journalDir: ".stack/fills", maxFillAttempts: 3, unforkedDestination: "deliver" });
+const relay = bridge.relay(f, { journalDir: ".stack/fills", maxFillAttempts: 3 });
+
+const stop = bridge.run([across, relay], {
+  intervalMs: 500,
+  onError: (error) => console.error("bridge fill failed", error),
+});
+// on shutdown, before the anvils stop:
+await stop();
+```
+
+- **One settle at a time.** A round settles each simulator in turn. The next round starts `intervalMs` after the last one ended (default 1000), so two settles never overlap.
+- **`onError` is required.** It gets the error of each settle that rejects, and the loop goes on. If `onError` throws, the loop ends and `stop()` rejects with what it threw.
+- **`stop()` waits** for the settle in progress, so the anvils are not stopped under a fill. It does not wait out the pause between rounds.
+
+## The fill journal
+
+With `journalDir`, a simulator writes the outcome of each deposit to its own JSON file, so another process (a service, a test runner, a script) can read what was filled.
+
+- **The name** is `<journalDir>/<bridge>-<key>.json`. The key is the id the bridge knows the deposit by: for `across`, the origin chain id and the deposit id (`across-8453-12345.json`); for `relay`, the order id; for `across-prefunded`, the order id. Characters that are not safe in a file name become `-`.
+- **Atomic.** forkit writes a temporary file in the same directory and renames it into place. A reader sees the whole old file or the whole new one, never half of one. Read a file at any time.
+- **The content** is a `FillJournalEntry` (exported from `@condensate_dev/forkit/bridges`). Switch on `status`:
+
+| `status` | Fields | When |
+|---|---|---|
+| `filled` | `destinationChainId`, `destinationTxHashes`, `outputAmount?`, `details?` | the fill ran on the destination fork |
+| `unforked` | `destinationChainId`, `destinationTxHashes: []` | the destination is not in the fork and `unforkedDestination` is `deliver` |
+| `failed` | `destinationChainId?`, `error: { name, message }`, `attempts`, `retrying` | the last attempt threw |
+
+Every entry also has `version: 1`, `bridge`, `key`, `deposit` (the origin log and its decoded args) and `updatedAt`. Bigints are decimal strings. A `failed` file with `retrying: true` is replaced when a later attempt succeeds or fails again.
+
+## Retries
+
+A deposit whose fill throws is retried by the next `settle()`. `maxFillAttempts` bounds that:
+
+- **Without it** (the default, right for a test), there is no limit. The deposit stays pending, holds the deposits behind it so fills keep their order, and each `settle()` rejects.
+- **With it,** the deposit is given up after its last failed attempt. It leaves `pending`, goes to `failed`, and is journaled with `retrying: false`. That same `settle()` fills the deposits behind it, then rejects with the error, which `bridge.run` passes to `onError`.
+
+A stack wants a small limit, such as 3, so one bad deposit does not block every fill behind it for ever. A Relay deposit with no registered order, or an Across prefunded order with no registered destination, counts as a failed attempt too.
+
+## Chains you did not fork
+
+A stack can fork only some chains. A deposit to a chain that is not in the fork follows `unforkedDestination`:
+
+| Value | What happens |
+|---|---|
+| `reject` (default) | the fill fails with `destination chain N is not in this fork`, under the rule of `maxFillAttempts` |
+| `skip` | the simulator drops the deposit: no fill, no journal file |
+| `deliver` | the simulator records a fill with no transaction (`fill.unforked === true`) and journals it as `unforked` |
+
+## A bundler on a long-running fork
+
+Pass `receiptLookupBlocks` to `bundler(f)`, so a receipt lookup stays on the fork. See [the ERC-4337 guide](erc-4337.md#a-long-running-fork).

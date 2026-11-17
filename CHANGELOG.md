@@ -4,6 +4,14 @@ All notable changes to `@condensate_dev/forkit`. The format follows [Keep a Chan
 
 ## [Unreleased]
 
+### Added
+- **Bridges for a long-running stack** (see `docs/guides/long-running-stacks.md`):
+  - `bridge.run([...], { intervalMs, onError })` settles simulators on an interval until stopped. Two settles never overlap, a failed settle goes to `onError` and the loop goes on, and the returned `stop()` waits for the settle in progress.
+  - `journalDir` (every simulator) writes one JSON file per deposit, by a temporary file and a rename, so another process can read it at any time. `FillJournalEntry` is its type: `filled`, `unforked` or `failed`.
+  - `maxFillAttempts` gives up a deposit after that many failed attempts. It goes to the simulator's new `failed` list and is journaled as failed. The default is still no limit.
+  - `unforkedDestination: "reject" | "skip" | "deliver"` says what to do with a deposit to a chain that is not in the fork. The default is still `reject`.
+- **`bridge.acrossPrefunded(f, { adapters })`**: Across prefunded orders (the v5 intents flow). It watches the PrefundedAdapter's `PrefundingStored` event, and a simulated relayer pays the order you register with `expect(orderId, { destinationChainId, token, amount, recipient })`. `ACROSS_PREFUNDED_ADAPTER_BASE` is the adapter on Base; other chains take an address you pass.
+
 ## [0.2.0] - 2026-11-12
 
 ### Added
