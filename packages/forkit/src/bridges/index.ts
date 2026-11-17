@@ -2,10 +2,12 @@
  * `@condensate_dev/forkit/bridges`: simulated relayers and solvers for cross-chain tests on a
  * multi-chain fork. `bridge.across(f)`, `bridge.relay(f)`, or `bridge.custom(f, {...})` for any
  * other bridge; then `await b.settle()` fills every pending deposit and `b.fills` lists them.
+ * `bridge.run([...])` settles simulators on an interval, for a long-running stack.
  */
 import { across } from "./across.ts";
 import { custom } from "./core.ts";
 import { relay } from "./relay.ts";
+import { runBridges } from "./run.ts";
 
 export {
   ACROSS_DEFAULT_RELAYER,
@@ -58,6 +60,7 @@ export {
   type RelayFill,
   type RelayQuoteLike,
 } from "./relay-plan.ts";
+export { type RunBridgesOptions, runBridges, type Settleable } from "./run.ts";
 export { across, custom, relay };
 
-export const bridge = { across, relay, custom } as const;
+export const bridge = { across, relay, custom, run: runBridges } as const;
