@@ -30,13 +30,18 @@ import {
 import type { Fork } from "../types.ts";
 import {
   type BridgeSimulator,
+  type BridgeSimulatorOptions,
+  combineErrors,
   custom,
   type Deposit,
+  type FailedFill,
   type Fill,
   type FillContext,
   type FillResult,
   handleFor,
   type MultiFork,
+  pickSimulatorOptions,
+  SettlePaused,
 } from "./core.ts";
 import {
   fundsForwardedWithDataEvent,
@@ -82,7 +87,7 @@ export { RelayFillError } from "./relay-plan.ts";
 /** Where contracts live, per chain id. */
 type AddressMap = Readonly<Record<number, Address | readonly Address[]>>;
 
-export interface RelayOptions {
+export interface RelayOptions extends BridgeSimulatorOptions {
   /** The solver that fills on the destination (impersonated and funded). Default {@link DEFAULT_RELAY_SOLVER}. */
   solver?: Address;
   /** Fee for fills whose output is the default `inputAmount - fee`. Default 0. */
@@ -158,10 +163,6 @@ interface Watcher {
   sim: BridgeSimulator;
 }
 
-// Thrown by a watcher's onDeposit to stop its settle() after the one deposit allowed to fill, so
-// deposits from different events are filled in one chronological order (see settle below).
-const PAUSE = new Error("forkit relay: pause");
-
 function relaySimulator(f: MultiFork, options: RelayOptions = {}): RelaySimulator {
   const solver = getAddress(options.solver ?? DEFAULT_RELAY_SOLVER);
   const fills = new Map<Hex, RelayFill>();
@@ -214,11 +215,24 @@ function relaySimulator(f: MultiFork, options: RelayOptions = {}): RelaySimulato
   const normalizeSync = (kind: RelayDepositKind, deposit: Deposit): Deposit<RelayDepositArgs> =>
     normalized.get(deposit.id) ?? { ...deposit, args: decodeRelayDeposit(kind, deposit.args) };
 
+  const normalizeFailed = (
+    kind: RelayDepositKind,
+    x: FailedFill,
+  ): FailedFill<RelayDepositArgs> => ({
+    ...x,
+    deposit: normalized.get(x.deposit.id) ?? {
+      ...x.deposit,
+      args: decodeRelayDeposit(kind, x.deposit.args),
+    },
+  });
+
   async function onDeposit(
     kind: RelayDepositKind,
     context: FillContext<Record<string, unknown>>,
   ): Promise<FillResult> {
-    if (context.deposit.id !== allowed) throw PAUSE;
+    // Stop the watcher's settle() after the one deposit allowed to fill, so deposits from
+    // different events are filled in one chronological order (see settle below).
+    if (context.deposit.id !== allowed) throw new SettlePaused();
     allowed = undefined;
     const deposit = await normalize(kind, context.deposit);
     const fill = fills.get(deposit.args.id) as RelayFill;
@@ -261,6 +275,9 @@ function relaySimulator(f: MultiFork, options: RelayOptions = {}): RelaySimulato
       originEvent: { event, address },
       destinationOf: (args, origin) => destinationOf(kind, args, origin),
       onDeposit: (context) => onDeposit(kind, context),
+      // A Relay deposit is known by its order id (for a receiver deposit, the forwarded data).
+      journalKey: (deposit) => keyOf(kind, deposit.args),
+      ...pickSimulatorOptions(options),
     });
     return [{ kind, sim }];
   };
@@ -301,6 +318,7 @@ function relaySimulator(f: MultiFork, options: RelayOptions = {}): RelaySimulato
   async function settle(): Promise<Fill<RelayDepositArgs>[]> {
     await poll();
     const settled: Fill<RelayDepositArgs>[] = [];
+    const errors: unknown[] = [];
     // Each event has its own watcher, and a watcher's settle() fills all of its pending deposits.
     // To fill across watchers in chain, block and log order, repeatedly pick the earliest head and
     // let only that deposit through: the watcher's next onDeposit throws PAUSE, stopping it there.
@@ -313,11 +331,16 @@ function relaySimulator(f: MultiFork, options: RelayOptions = {}): RelaySimulato
       if (next === undefined) break;
       const { w, d } = next;
       const before = w.sim.fills.length;
+      const failedBefore = w.sim.failed.length;
       allowed = d.id;
       try {
         await w.sim.settle();
       } catch (error) {
-        if (error !== PAUSE) throw error;
+        if (!(error instanceof SettlePaused)) {
+          // A deposit that is still pending is tried first by the next settle(), so stop here.
+          if (w.sim.pending.some((p) => p.id === d.id)) throw combineErrors([...errors, error]);
+          errors.push(error);
+        }
       } finally {
         allowed = undefined;
         for (const fill of w.sim.fills.slice(before)) {
@@ -326,10 +349,17 @@ function relaySimulator(f: MultiFork, options: RelayOptions = {}): RelaySimulato
           settled.push(done);
         }
       }
-      if (w.sim.fills.length === before) {
+      // The deposit was filled, given up, or (unforkedDestination: "skip") dropped. Anything else
+      // would loop for ever.
+      if (
+        w.sim.fills.length === before &&
+        w.sim.failed.length === failedBefore &&
+        w.sim.pending.some((p) => p.id === d.id)
+      ) {
         throw new RelayFillError(`forkit: bridge.relay could not fill deposit ${d.id}`);
       }
     }
+    if (errors.length > 0) throw combineErrors(errors);
     return settled;
   }
 
@@ -343,10 +373,15 @@ function relaySimulator(f: MultiFork, options: RelayOptions = {}): RelaySimulato
     get fills() {
       return [...made];
     },
+    get failed() {
+      return watchers.flatMap((w) => w.sim.failed.map((x) => normalizeFailed(w.kind, x)));
+    },
     poll,
     settle,
     expect(id, fill) {
-      handleFor(f, fill.destinationChainId, "destination");
+      // Under "skip" and "deliver", a destination outside the fork is expected.
+      if ((options.unforkedDestination ?? "reject") === "reject")
+        handleFor(f, fill.destinationChainId, "destination");
       getAddress(fill.recipient);
       getAddress(fill.currency);
       fills.set(relayKey(id), fill);

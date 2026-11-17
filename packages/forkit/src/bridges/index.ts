@@ -16,6 +16,7 @@ export {
   type AcrossDeposit,
   type AcrossDepositArgs,
   type AcrossDepositEvent,
+  type AcrossFailedFill,
   type AcrossFeeConfig,
   type AcrossFill,
   type AcrossFillDetails,
@@ -26,13 +27,25 @@ export {
 } from "./across.ts";
 export type {
   BridgeSimulator,
+  BridgeSimulatorOptions,
   CustomBridgeOptions,
   Deposit,
+  FailedFill,
   Fill,
   FillContext,
   FillResult,
   MultiFork,
+  UnforkedDestination,
 } from "./core.ts";
+export {
+  type FailedJournalEntry,
+  type FilledJournalEntry,
+  type FillJournalDeposit,
+  type FillJournalEntry,
+  fillJournalFile,
+  type JsonValue,
+  type UnforkedJournalEntry,
+} from "./journal.ts";
 export {
   DEFAULT_RELAY_SOLVER,
   type RelayFillDetails,

@@ -33,12 +33,15 @@ import type { Fork } from "../types.ts";
 import { ACROSS_SPOKE_POOLS, spokePoolAbi } from "./across-abi.ts";
 import {
   type BridgeSimulator,
+  type BridgeSimulatorOptions,
   custom,
   type Deposit,
+  type FailedFill,
   type Fill,
   type FillContext,
   type FillResult,
   type MultiFork,
+  pickSimulatorOptions,
 } from "./core.ts";
 
 export { ACROSS_MULTICALL_HANDLER, ACROSS_SPOKE_POOLS, spokePoolAbi } from "./across-abi.ts";
@@ -71,6 +74,7 @@ export interface AcrossDepositArgs {
 
 export type AcrossDeposit = Deposit<AcrossDepositArgs>;
 export type AcrossFill = Fill<AcrossDepositArgs>;
+export type AcrossFailedFill = FailedFill<AcrossDepositArgs>;
 
 /** What `bridge.across` reports in each fill's `details`. */
 export interface AcrossFillDetails {
@@ -94,7 +98,7 @@ export interface AcrossFeeConfig {
   fixed?: bigint;
 }
 
-export interface AcrossOptions {
+export interface AcrossOptions extends BridgeSimulatorOptions {
   /**
    * SpokePool addresses by chain id, merged over the built-in table ({@link ACROSS_SPOKE_POOLS}).
    * Use it for a chain the table lacks or a fork of a test deployment.
@@ -428,6 +432,20 @@ function merge(
     get fills() {
       return parts.flatMap(({ event, sim }) => sim.fills.map((x) => views.fill(event, x)));
     },
+    get failed() {
+      return parts.flatMap(({ event, sim }) =>
+        sim.failed.map(
+          (x): AcrossFailedFill => ({
+            ...x,
+            deposit: {
+              ...x.deposit,
+              address: getAddress(x.deposit.address),
+              args: decodeAcrossDeposit(event, x.deposit.args),
+            },
+          }),
+        ),
+      );
+    },
     async poll() {
       const found: AcrossDeposit[] = [];
       for (const { event, sim } of parts)
@@ -464,6 +482,9 @@ function acrossSimulator(
         name: "across",
         originEvent: { event: getAbiItem({ abi: spokePoolAbi, name: event }), address },
         destinationOf: (args: Record<string, unknown>) => args.destinationChainId as bigint,
+        // An Across deposit is known by its origin chain and its deposit id.
+        journalKey: (deposit) => `${deposit.originChainId}-${String(deposit.args.depositId)}`,
+        ...pickSimulatorOptions(options),
         onDeposit: (context) =>
           fill({ ...context, deposit: views.deposit(event, context.deposit) }, options),
       }),

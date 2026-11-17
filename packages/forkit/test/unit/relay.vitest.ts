@@ -341,3 +341,48 @@ describe("loud failures", () => {
     expect(b.solver).toMatch(/^0x[0-9a-fA-F]{40}$/);
   });
 });
+
+describe("a long-running stack", () => {
+  test("maxFillAttempts: 1 gives up a deposit with no registered fill, and does not read it again", async () => {
+    const f = stubFork(() => [depositLog(ORDER_ID)]) as MultiFork & { mine: () => void };
+    const b = relay(f, { maxFillAttempts: 1 });
+    await b.poll();
+    f.mine();
+    await expect(b.settle()).rejects.toThrow(RelayFillError);
+    expect(b.pending).toEqual([]);
+    expect(b.failed).toHaveLength(1);
+    expect(b.failed[0]).toMatchObject({ attempts: 1, deposit: { args: erc20Deposit(1_000n) } });
+    // The bridge never learned where the deposit goes.
+    expect(b.failed[0]?.deposit.destinationChainId).toBeUndefined();
+    expect(await b.settle()).toEqual([]);
+    expect(b.failed).toHaveLength(1);
+  });
+
+  test("unforkedDestination: deliver takes an order for a chain outside the fork", async () => {
+    const f = stubFork(() => [depositLog(ORDER_ID)]) as MultiFork & { mine: () => void };
+    const b = relay(f, { unforkedDestination: "deliver" });
+    b.expect(ORDER_ID, toArb({ destinationChainId: 10 }));
+    await b.poll();
+    f.mine();
+    const fills = await b.settle();
+    expect(fills).toHaveLength(1);
+    expect(fills[0]).toMatchObject({
+      destinationChainId: 10,
+      txHashes: [],
+      unforked: true,
+      deposit: { args: erc20Deposit(1_000n) },
+    });
+    expect(b.pending).toEqual([]);
+  });
+
+  test("unforkedDestination: skip drops an order for a chain outside the fork", async () => {
+    const f = stubFork(() => [depositLog(ORDER_ID)]) as MultiFork & { mine: () => void };
+    const b = relay(f, { unforkedDestination: "skip" });
+    b.expect(ORDER_ID, toArb({ destinationChainId: 10 }));
+    await b.poll();
+    f.mine();
+    expect(await b.settle()).toEqual([]);
+    expect(b.pending).toEqual([]);
+    expect(b.fills).toEqual([]);
+  });
+});
