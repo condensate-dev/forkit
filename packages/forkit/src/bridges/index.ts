@@ -1,10 +1,12 @@
 /**
  * `@condensate_dev/forkit/bridges`: simulated relayers and solvers for cross-chain tests on a
- * multi-chain fork. `bridge.across(f)`, `bridge.relay(f)`, or `bridge.custom(f, {...})` for any
- * other bridge; then `await b.settle()` fills every pending deposit and `b.fills` lists them.
+ * multi-chain fork. `bridge.across(f)`, `bridge.acrossPrefunded(f, {...})`, `bridge.relay(f)`, or
+ * `bridge.custom(f, {...})` for any other bridge; then `await b.settle()` fills every pending
+ * deposit and `b.fills` lists them.
  * `bridge.run([...])` settles simulators on an interval, for a long-running stack.
  */
 import { across } from "./across.ts";
+import { acrossPrefunded } from "./across-prefunded.ts";
 import { custom } from "./core.ts";
 import { relay } from "./relay.ts";
 import { runBridges } from "./run.ts";
@@ -25,6 +27,17 @@ export {
   acrossOutputAmount,
   spokePoolAbi,
 } from "./across.ts";
+export {
+  ACROSS_PREFUNDED_ADAPTER_BASE,
+  type AcrossPrefundedArgs,
+  AcrossPrefundedError,
+  type AcrossPrefundedFillDetails,
+  type AcrossPrefundedOptions,
+  type AcrossPrefundedOrder,
+  type AcrossPrefundedSimulator,
+  acrossPrefundedAdapterAbi,
+  acrossPrefundingStoredEvent,
+} from "./across-prefunded.ts";
 export type {
   BridgeSimulator,
   BridgeSimulatorOptions,
@@ -74,6 +87,6 @@ export {
   type RelayQuoteLike,
 } from "./relay-plan.ts";
 export { type RunBridgesOptions, runBridges, type Settleable } from "./run.ts";
-export { across, custom, relay };
+export { across, acrossPrefunded, custom, relay };
 
-export const bridge = { across, relay, custom, run: runBridges } as const;
+export const bridge = { across, acrossPrefunded, relay, custom, run: runBridges } as const;
