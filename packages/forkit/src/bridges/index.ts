@@ -1,6 +1,7 @@
 /**
  * `@condensate_dev/forkit/bridges`: simulated relayers and solvers for cross-chain tests on a
- * multi-chain fork. `bridge.across(f)`, `bridge.acrossPrefunded(f, {...})`, `bridge.cctp(f)`, `bridge.relay(f)`, or
+ * multi-chain fork. `bridge.across(f)`, `bridge.acrossPrefunded(f, {...})`, `bridge.cctp(f)`, `bridge.oft(f, {...})`,
+ * `bridge.relay(f)`, or
  * `bridge.custom(f, {...})` for any other bridge; then `await b.settle()` fills every pending
  * deposit and `b.fills` lists them.
  * `bridge.run([...])` settles simulators on an interval, for a long-running stack.
@@ -9,6 +10,7 @@ import { across } from "./across.ts";
 import { acrossPrefunded } from "./across-prefunded.ts";
 import { cctp } from "./cctp.ts";
 import { custom } from "./core.ts";
+import { oft } from "./layerzero.ts";
 import { relay } from "./relay.ts";
 import { runBridges } from "./run.ts";
 
@@ -81,6 +83,27 @@ export {
   type UnforkedJournalEntry,
 } from "./journal.ts";
 export {
+  decodeOftPacket,
+  decodeOftSent,
+  LAYERZERO_EIDS,
+  LAYERZERO_ENDPOINT_V2,
+  lzComposeSentEvent,
+  lzEndpointAbi,
+  lzOAppAbi,
+  lzPacketSentEvent,
+  OFT_DEFAULT_EXECUTOR,
+  type OftDeposit,
+  OftError,
+  type OftFailedFill,
+  type OftFill,
+  type OftFillDetails,
+  type OftOptions,
+  type OftPacket,
+  type OftSentArgs,
+  oftReceivedEvent,
+  oftSentEvent,
+} from "./layerzero.ts";
+export {
   DEFAULT_RELAY_SOLVER,
   type RelayFillDetails,
   RelayFillError,
@@ -108,6 +131,14 @@ export {
   type RelayQuoteLike,
 } from "./relay-plan.ts";
 export { type RunBridgesOptions, runBridges, type Settleable } from "./run.ts";
-export { across, acrossPrefunded, cctp, custom, relay };
+export { across, acrossPrefunded, cctp, custom, oft, relay };
 
-export const bridge = { across, acrossPrefunded, cctp, relay, custom, run: runBridges } as const;
+export const bridge = {
+  across,
+  acrossPrefunded,
+  cctp,
+  oft,
+  relay,
+  custom,
+  run: runBridges,
+} as const;
