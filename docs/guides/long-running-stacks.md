@@ -94,7 +94,7 @@ await stop();
 
 With `journalDir`, a simulator writes the outcome of each deposit to its own JSON file, so another process (a service, a test runner, a script) can read what was filled.
 
-- **The name** is `<journalDir>/<bridge>-<key>.json`. The key is the id the bridge knows the deposit by: for `across`, the origin chain id and the deposit id (`across-8453-12345.json`); for `relay`, the order id; for `across-prefunded`, the order id. Characters that are not safe in a file name become `-`.
+- **The name** is `<journalDir>/<bridge>-<key>.json`. The key is the id the bridge knows the deposit by: for `across`, the origin chain id and the deposit id (`across-8453-12345.json`); for `relay`, the order id; for `across-prefunded`, the order id; for `cctp`, `v1-<origin domain>-<nonce>` or `v2-<deposit id>`; for `oft`, the LayerZero guid. Characters that are not safe in a file name become `-`.
 - **Atomic.** forkit writes a temporary file in the same directory and renames it into place. A reader sees the whole old file or the whole new one, never half of one. Read a file at any time.
 - **The content** is a `FillJournalEntry` (exported from `@condensate_dev/forkit/bridges`). Switch on `status`:
 
