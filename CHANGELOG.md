@@ -11,6 +11,7 @@ All notable changes to `@condensate_dev/forkit`. The format follows [Keep a Chan
   - `maxFillAttempts` gives up a deposit after that many failed attempts. It goes to the simulator's new `failed` list and is journaled as failed. The default is still no limit.
   - `unforkedDestination: "reject" | "skip" | "deliver"` says what to do with a deposit to a chain that is not in the fork. The default is still `reject`.
 - **`bridge.acrossPrefunded(f, { adapters })`**: Across prefunded orders (the v5 intents flow). It watches the PrefundedAdapter's `PrefundingStored` event, and a simulated relayer pays the order you register with `expect(orderId, { destinationChainId, token, amount, recipient })`. `ACROSS_PREFUNDED_ADAPTER_BASE` is the adapter on Base; other chains take an address you pass.
+- **`bridge.cctp(f)`**: Circle CCTP, v1 and v2. It watches `DepositForBurn` on the TokenMessengers and credits the mint recipient on the destination with `deal`, which is not a real mint. The token comes from the destination minter, as in the real mint. A v2 Fast Transfer keeps `maxFee` by default; `fee` changes that. See `docs/guides/bridges-cctp.md`.
 - **`bundler(f, { receiptLookupBlocks })`**: a short receipt lookup window for a long-running fork. It sets alto's `--max-block-range` and mines that many empty blocks, plus one, before alto starts, with the fork's clock held still, so a receipt lookup never goes to the upstream RPC. `mineAtSameTime(f, blocks)` does the mining for an alto you start yourself. See `docs/guides/erc-4337.md`.
 
 ## [0.2.0] - 2026-11-12

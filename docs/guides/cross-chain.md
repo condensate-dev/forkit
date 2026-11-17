@@ -24,6 +24,7 @@ fill.outputAmount; fill.details.fee;             // assert on economics
 | `bridge.across(f)` | watches Across SpokePool deposits; `settle()` fills them on the destination as a funded relayer | [Across](bridges-across.md) |
 | `bridge.acrossPrefunded(f, { adapters })` | watches Across's PrefundedAdapter (the v5 intents flow); a simulated relayer pays the order you register | [Across](bridges-across.md#prefunded-orders-bridgeacrossprefunded) |
 | `bridge.relay(f)` | watches Relay's depository; a simulated solver pays the order you register | [Relay](bridges-relay.md) |
+| `bridge.cctp(f)` | watches Circle's TokenMessengers (CCTP v1 and v2); credits the mint recipient with `deal`, which is not a real mint | [CCTP](bridges-cctp.md) |
 | `bridge.custom(f, { originEvent, destinationOf, onDeposit })` | any other bridge | below |
 
 A simulator watches from the moment you create it. It notices an `evm_revert`, even one re-mined to the same height, by comparing block hashes, and it forgets the deposits the revert undid. `poll()` and `settle()` run one at a time. A deposit whose fill throws stays pending and throws again, loudly.
