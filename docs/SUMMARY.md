@@ -28,6 +28,8 @@
   - [HTTP record and replay](guides/http-replay.md)
   - [Across relayer simulator](guides/bridges-across.md)
   - [Relay solver simulator](guides/bridges-relay.md)
+  - [Circle CCTP simulator](guides/bridges-cctp.md)
+  - [LayerZero OFT simulator](guides/bridges-layerzero.md)
 - [ERC-4337 bundler](guides/erc-4337.md)
 - [Stablecoin payments](guides/payments.md)
 

@@ -6,6 +6,7 @@ import {
   AltoNotFoundError,
   altoChainType,
   altoIsDone,
+  bundler,
   containsSend,
   DEFAULT_EXECUTOR_KEY,
   DEFAULT_UTILITY_KEY,
@@ -15,7 +16,7 @@ import {
   resolveEntryPoints,
 } from "../../src/4337/index.ts";
 import { startRpcProxy } from "../../src/4337/proxy.ts";
-import { freePort } from "../../src/index.ts";
+import { type Fork, freePort } from "../../src/index.ts";
 
 describe("renderAltoFlags", () => {
   test("kebab-case flags, lists joined by commas, undefined dropped", () => {
@@ -164,5 +165,17 @@ describe("proxy helpers", () => {
       await proxy.close();
       upstream.close();
     }
+  });
+});
+
+describe("receiptLookupBlocks", () => {
+  test("is checked before anything starts", async () => {
+    const f = {} as unknown as Fork;
+    await expect(bundler(f, { receiptLookupBlocks: 0 })).rejects.toThrow(
+      /receiptLookupBlocks is 0; pass a whole number, 1 or more/,
+    );
+    await expect(bundler(f, { receiptLookupBlocks: 2.5 })).rejects.toThrow(
+      /receiptLookupBlocks is 2.5/,
+    );
   });
 });

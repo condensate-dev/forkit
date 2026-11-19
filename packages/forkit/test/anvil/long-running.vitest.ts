@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { type Address, defineChain, encodeFunctionData, parseEther } from "viem";
 import { foundry, mainnet } from "viem/chains";
 import { afterAll, beforeAll, describe, expect, test } from "vitest";
+import { mineAtSameTime } from "../../src/4337/index.ts";
 import {
   attachFork,
   erc20BalanceAbi,
@@ -171,5 +172,52 @@ describe("startRpcCache() on its own", () => {
     });
     expect(cache.url).toBe(`http://127.0.0.1:${port}`);
     await cache.close();
+  });
+});
+
+describe("mineAtSameTime, for a bundler's receipt lookup on a long-running fork", () => {
+  test("the chain gets taller and its clock does not move", async () => {
+    const f = await fork({ chain: foundry, forkUrl: upstream.url, blockNumber: 0n });
+    try {
+      await f.dealNative(alice, parseEther("1")); // some local state first
+      await f.roll(1);
+      const head = await f.client.getBlock();
+      await mineAtSameTime(f, 21);
+      expect(await f.client.getBlockNumber()).toBe(head.number + 21n);
+      for (const offset of [1n, 11n, 21n]) {
+        const block = await f.client.getBlock({ blockNumber: head.number + offset });
+        expect(block.timestamp).toBe(head.timestamp);
+        expect(block.transactions).toEqual([]);
+      }
+    } finally {
+      await f.stop();
+    }
+  });
+
+  test("the timestamp interval is removed afterwards: later blocks follow the clock again", async () => {
+    const f = await fork({ chain: foundry, forkUrl: upstream.url, blockNumber: 0n });
+    try {
+      await mineAtSameTime(f, 3);
+      const before = await f.client.getBlock();
+      // With the interval still at 0, anvil would ignore the clock and repeat the timestamp.
+      await f.client.increaseTime({ seconds: 100 });
+      await f.client.mine({ blocks: 1 });
+      const after = await f.client.getBlock();
+      expect(after.timestamp).toBeGreaterThanOrEqual(before.timestamp + 100n);
+    } finally {
+      await f.stop();
+    }
+  });
+
+  test("0 blocks does nothing; a fraction or a negative count is refused", async () => {
+    const f = await fork({ chain: foundry, forkUrl: upstream.url, blockNumber: 0n });
+    try {
+      await mineAtSameTime(f, 0);
+      expect(await f.client.getBlockNumber()).toBe(0n);
+      await expect(mineAtSameTime(f, 1.5)).rejects.toThrow(/blocks is 1.5/);
+      await expect(mineAtSameTime(f, -1)).rejects.toThrow(/blocks is -1/);
+    } finally {
+      await f.stop();
+    }
   });
 });
