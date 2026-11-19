@@ -13,6 +13,7 @@ import {
   deriveAccountRead,
   isCacheable,
   resolveCacheSettings,
+  seedRpcCache,
   startRpcCache,
   unknownBlockHash,
 } from "../../src/rpc-cache.ts";
@@ -307,5 +308,164 @@ describe("offline misses", () => {
     const { message } = new ForkCacheMissError(misses);
     expect(message.match(/eth_getStorageAt/g)).toHaveLength(20);
     expect(message).toContain("… and 3 more (FORKIT_DEBUG=1 logs every miss)");
+  });
+});
+
+describe("seedRpcCache", () => {
+  const account = "0x00000000000000000000000000000000000000aa";
+
+  /** An upstream that answers each read with the block it names, and counts the reads. */
+  async function blockEchoUpstream(): Promise<{ url: string; reads: string[]; close: () => void }> {
+    const reads: string[] = [];
+    const server = createServer((req, res) => {
+      let body = "";
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+      req.on("end", () => {
+        const { id, method, params } = JSON.parse(body) as {
+          id: number;
+          method: string;
+          params: string[];
+        };
+        reads.push(method);
+        res.writeHead(200, { "content-type": "application/json" });
+        res.end(JSON.stringify({ jsonrpc: "2.0", id, result: params[params.length - 1] }));
+      });
+    });
+    await new Promise<void>((ok) => server.listen(0, "127.0.0.1", () => ok()));
+    const { port } = server.address() as { port: number };
+    return { url: `http://127.0.0.1:${port}`, reads, close: () => server.close() };
+  }
+
+  test("fetches each state read of the newest older recording again at the new block", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "forkit-cache-seed-"));
+    const upstream = await blockEchoUpstream();
+    try {
+      const recording = await startRpcCache({
+        upstream: upstream.url,
+        chainId: 1,
+        blockNumber: 100n,
+        mode: "readwrite",
+        dir,
+      });
+      for (const [method, params] of [
+        ["eth_getStorageAt", [account, "0x1", "0x64"]],
+        ["eth_getBalance", [account, "0x64"]],
+        ["eth_call", [{ to: account, data: "0x" }, "0x64"]],
+      ] as const) {
+        await fetch(recording.url, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+        });
+      }
+      await recording.close();
+      upstream.reads.length = 0;
+
+      const stats = await seedRpcCache({
+        upstream: upstream.url,
+        chainId: 1,
+        blockNumber: 200n,
+        dir,
+      });
+      expect(stats).toMatchObject({
+        seeded: 2,
+        failed: 0,
+        from: [expect.stringContaining("100.json")],
+      });
+      // The seed does not fetch an eth_call: its answer depends on more than the state it names.
+      expect(upstream.reads.sort()).toEqual(["eth_getBalance", "eth_getStorageAt"]);
+
+      const replay = await startRpcCache({
+        upstream: upstream.url,
+        chainId: 1,
+        blockNumber: 200n,
+        mode: "offline",
+        dir,
+      });
+      const answer = await fetch(replay.url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0",
+          id: 1,
+          method: "eth_getStorageAt",
+          params: [account, "0x1", "0xc8"],
+        }),
+      }).then((r) => r.json() as Promise<{ result: string }>);
+      expect(answer.result).toBe("0xc8");
+      await replay.close();
+    } finally {
+      upstream.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("seeds nothing for a chain with no recording", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "forkit-cache-seed-"));
+    try {
+      const stats = await seedRpcCache({
+        upstream: "http://127.0.0.1:1",
+        chainId: 1,
+        blockNumber: 200n,
+        dir,
+      });
+      expect(stats).toMatchObject({ seeded: 0, failed: 0, from: [] });
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
+
+  test("carries over only the reads that the last run asked for", async () => {
+    const dir = mkdtempSync(join(tmpdir(), "forkit-cache-seed-"));
+    const upstream = await blockEchoUpstream();
+    const ask = (url: string, method: string, params: unknown[]) =>
+      fetch(url, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method, params }),
+      });
+    const other = "0x00000000000000000000000000000000000000bb";
+    try {
+      const first = await startRpcCache({
+        upstream: upstream.url,
+        chainId: 1,
+        blockNumber: 100n,
+        mode: "readwrite",
+        dir,
+      });
+      await ask(first.url, "eth_getBalance", [account, "0x64"]);
+      await ask(first.url, "eth_getBalance", [other, "0x64"]);
+      await first.close();
+
+      expect(
+        (await seedRpcCache({ upstream: upstream.url, chainId: 1, blockNumber: 200n, dir })).seeded,
+      ).toBe(2);
+      const second = await startRpcCache({
+        upstream: upstream.url,
+        chainId: 1,
+        blockNumber: 200n,
+        mode: "readwrite",
+        dir,
+      });
+      // This run asks for one of the two seeded reads only.
+      await ask(second.url, "eth_getBalance", [account, "0xc8"]);
+      await second.close();
+      rmSync(join(dir, "1", "100.json"));
+
+      upstream.reads.length = 0;
+      const stats = await seedRpcCache({
+        upstream: upstream.url,
+        chainId: 1,
+        blockNumber: 300n,
+        dir,
+      });
+      expect(stats.seeded).toBe(1);
+      expect(upstream.reads).toEqual(["eth_getBalance"]);
+    } finally {
+      upstream.close();
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 });
