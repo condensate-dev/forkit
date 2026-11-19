@@ -14,6 +14,7 @@ import {
   defaultOpen,
   diffLines,
   diffStrings,
+  findTx,
   icicle,
   indexRun,
   parseHash,
@@ -325,5 +326,23 @@ describe("the stylesheet", () => {
 
   test("nothing is loaded from the network: no url() and no @import", () => {
     expect(css).not.toMatch(/url\(|@import/);
+  });
+});
+
+describe("findTx", () => {
+  const mined = run.txs.find((t) => t.hash !== undefined);
+  if (mined === undefined) throw new Error("no mined tx in the showcase run");
+
+  test("finds a transaction by its run id", () => {
+    expect(findTx(idx, mined.id)).toBe(mined);
+  });
+
+  test("finds a transaction by its hash, in any letter case", () => {
+    expect(findTx(idx, `0x${mined.hash?.slice(2).toUpperCase()}`)).toBe(mined);
+  });
+
+  test("returns undefined for an unknown id or hash", () => {
+    expect(findTx(idx, "no-such-id")).toBeUndefined();
+    expect(findTx(idx, `0x${"0".repeat(64)}`)).toBeUndefined();
   });
 });

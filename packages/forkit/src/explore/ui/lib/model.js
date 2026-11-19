@@ -38,6 +38,17 @@ export function parseHash(hash) {
   return { parts, params };
 }
 
+/**
+ * The transaction that a tx route names: its run id, or its hash. A recorder that sees only hashes,
+ * such as an RPC proxy, links to `#/run/<id>/tx/<hash>`. With one hash on two chains, the first wins.
+ */
+export function findTx(idx, ref) {
+  const byId = idx.txs.get(ref);
+  if (byId !== undefined || !/^0x[0-9a-fA-F]{64}$/.test(ref ?? "")) return byId;
+  const lower = ref.toLowerCase();
+  return idx.run.txs.find((t) => t.hash?.toLowerCase() === lower);
+}
+
 // ---------------------------------------------------------------------------------------------
 // Index
 

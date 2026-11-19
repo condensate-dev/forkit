@@ -27,6 +27,7 @@ import {
   ancestors,
   balanceRows,
   defaultOpen,
+  findTx,
   frameName,
   framesByPath,
   icicle,
@@ -727,7 +728,7 @@ function codeDialog(idx, tx) {
 // ---------------------------------------------------------------------------------------------
 
 export function viewTx(idx, id, ctx) {
-  const tx = idx.txs.get(id);
+  const tx = findTx(idx, id);
   if (tx === undefined) return undefined;
   const test = tx.test ? idx.tests.get(tx.test) : undefined;
   const fee =
